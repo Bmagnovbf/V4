@@ -1,0 +1,11 @@
+V4-Skills/
+simulador-forecast/
+node_modules/
+.env
+.env.local
+.next/
+.test_out/
+*.pyc
+__pycache__/
+tsconfig.tsbuildinfo
+relatorio-mar26-draft.md
