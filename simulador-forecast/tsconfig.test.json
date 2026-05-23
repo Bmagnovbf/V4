@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "outDir": ".test_out",
+    "noEmit": false,
+    "target": "es2017",
+    "paths": {
+      "@/config/params": ["./src/config/params"],
+      "@/types": ["./src/types/index"]
+    },
+    "baseUrl": "."
+  },
+  "include": ["src/config/params.ts", "src/types/index.ts", "src/lib/calculator.ts"],
+  "exclude": ["node_modules"]
+}
