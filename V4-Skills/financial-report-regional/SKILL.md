@@ -1,48 +1,22 @@
 ---
-name: financial-report
+name: financial-report-regional
 description: >
-  Use this skill para gerar relatórios financeiros mensais consolidados de rede de franquias (modelo V4 Company).
-  Acione sempre que o usuário mencionar: "relatório financeiro", "relatório mensal", "DRE", "fechamento do mês",
-  "resultado das unidades", "análise por horizonte", "análise por regional", "fluxo de caixa da rede",
-  ou quando enviar planilha/CSV com dados financeiros de unidades.
-  O output é sempre um .docx com: sumário executivo consolidado, DRE resumo, análise de margens,
-  análise por horizonte (H1/H2, H3, H4, H5), análise por regional, fluxo de caixa (DFC) e conclusão.
+  Use this skill para gerar relatórios financeiros mensais de uma regional específica da rede V4 Company.
+  Acione sempre que o usuário mencionar: "relatório da regional", "relatório do regional", "fechamento da regional",
+  "resultado da regional", "relatório do [nome do diretor/regional]", "análise da regional [código]",
+  ou quando enviar planilha/CSV com dados financeiros de unidades de uma única regional.
+  O output é sempre um documento inserido no Google Docs com a análise completa da regional:
+  performance das unidades, DRE por unidade e consolidado da regional, análise por horizonte interno,
+  fluxo de caixa e recomendações ao Diretor Regional e aos franqueados.
 ---
 
-# Skill: Relatório Financeiro Mensal — Rede de Franquias
+# Skill: Relatório Financeiro Mensal — Regional
 
-## Estrutura do Relatório (ordem obrigatória)
+## Escopo e diferença em relação ao relatório consolidado
 
-```
-1. Capa / Título
-2. Consolidado Rede
-   2a. Sumário executivo (texto)
-   2b. Tabela de índices históricos (4 meses)
-   2c. Abrangência e Compliance de Dados
-   2d. Performance de Receita (composição: Aquisição / Renovação / Expansão)
-   2e. DRE Resumo — tabela consolidada (4 meses)
-   2f. Rentabilidade e Eficiência — EBITDA
-   2g. Análise de Margens (Operacional, Contribuição, EBITDA)
-   2h. Análise dos Centros de Custo (CSP, Comercial, G&A)
-3. Análise por Horizonte
-   — Tabela-resumo comparativa (todos os horizontes)
-   — Seção individual para cada horizonte: H1/H2, H3, H4, H5
-     • RPU
-     • DRE do horizonte (4 meses)
-     • Performance de Receita
-     • Rentabilidade e Eficiência (EBITDA)
-     • Centros de Custo (tabela histórica)
-     • Análise: Margens / CSP / Comercial / G&A
-4. Análise por Regional
-   — Tabela consolidada com todos os indicadores por regional
-   — Top 3 EBITDA (texto analítico)
-   — Flop 3 EBITDA (texto analítico)
-5. Fluxo de Caixa (DFC)
-   — Análise Horizontal (texto)
-   — Tabela DFC por horizonte (5 meses históricos)
-   — Análise por Horizonte (texto + cada horizonte individualmente)
-   — Conclusão geral
-```
+Este relatório cobre **uma regional específica** — o conjunto de unidades sob a liderança de um Diretor Regional (ou Multi Franqueado). Ele é complementar ao relatório consolidado da rede: enquanto o consolidado apresenta a visão macro para a Matriz, este relatório aprofunda o desempenho de cada unidade da regional e gera recomendações diretas ao Diretor e aos franqueados.
+
+**A estrutura de tópicos, sequência de seções e visibilidades específicas estão definidas na seção [Estrutura do Relatório] abaixo.**
 
 ---
 
@@ -81,13 +55,13 @@ Desvio ≥ 5 p.p. em relação ao benchmark dispara menção explícita no texto
 
 ### Lógica interpretativa por indicador
 
-Cada indicador deve ser lido em conjunto com os demais — nunca de forma isolada. A skill deve aplicar as regras abaixo ao redigir qualquer análise de horizonte, regional ou consolidado.
+Cada indicador deve ser lido em conjunto com os demais — nunca de forma isolada.
 
 #### Faturamento Líquido
 Quanto maior, melhor. Analisar sempre em conjunto com a variação vs mês anterior e vs benchmark de referência do horizonte. Crescimento de receita com melhora de margens = cenário ideal. Crescimento com piora de margens = sinal de que a estrutura de custos não acompanhou o ritmo.
 
 #### % CSP — guard-rail de qualidade
-O CSP não é apenas um custo — é o indicador proxy da qualidade da entrega ao cliente. Interpretar sempre dentro da faixa:
+O CSP não é apenas um custo — é o indicador proxy da qualidade da entrega ao cliente.
 
 | Faixa | Leitura | Ação no texto |
 |-------|---------|---------------|
@@ -141,7 +115,8 @@ Rede de franquias de marketing B2B com ambição de se tornar a maior empresa B2
 - **Investidores** = colaboradores/funcionários das unidades franqueadas. Usar sempre "investidores" no relatório, nunca "funcionários" ou "colaboradores".
 - **Hosts** = clientes das unidades franqueadas (empresas que contratam os serviços da V4).
 - **Unidades** = franquias da rede. Cada unidade pertence a um franqueado.
-- **Regional** = agrupamento de unidades sob a liderança de um Diretor Master ou Multi Franqueado.
+- **Regional** = agrupamento de unidades sob a liderança de um Diretor Regional ou Multi Franqueado.
+- **Franqueado** = sócio proprietário de uma ou mais unidades da regional. Neste relatório, o franqueado é parte da audiência — o tom deve ser informativo e transparente, sem ser condescendente.
 
 ### Horizontes de faturamento
 Cada unidade é classificada em um horizonte conforme sua Receita Líquida mensal. O horizonte define a maturidade operacional da unidade e o benchmark de referência aplicável.
@@ -170,8 +145,6 @@ O critério de enquadramento usa o valor **efetivamente recebido no caixa** (reg
 | **Potencializar** | Aceleração avançada — tiers Large e Enterprise |
 
 ### Tiers de clientes (Hosts)
-Classificação pelo faturamento anual do Host, define o modal GTM e o CSP máximo admissível:
-
 | Tier | Faturamento Anual | Modal GTM | CSP Máx. |
 |------|-------------------|-----------|----------|
 | Tiny | Até R$ 1M | Low-Touch | 30% |
@@ -180,10 +153,8 @@ Classificação pelo faturamento anual do Host, define o modal GTM e o CSP máxi
 | Large | R$ 50M – R$ 500M | High-Touch | 40% |
 | Enterprise | R$ 500M+ | High-Touch | 45% |
 
-O mix de tiers da unidade impacta diretamente o CSP médio — unidades com maior proporção de tiers Low-Touch tendem a ter CSP mais baixo.
-
 ### Canais de aquisição (Comercial)
-- **Lead Broker (Leadbroker):** plataforma de compra de leads (MQLs) da V4. Principal canal de aquisição da rede. Pode ser adquirido por MQL individual ou por **Blackbox** (antigo "pack") — lote de MQLs sortidos por tier, com quantidade mínima definida.
+- **Lead Broker (Leadbroker):** plataforma de compra de leads (MQLs) da V4. Principal canal de aquisição da rede. Pode ser adquirido por MQL individual ou por **Blackbox** (antigo "pack") — lote de MQLs sortidos por tier.
 - **Deal Broker:** canal de negociação de oportunidades em estágio mais avançado do funil.
 - **Meet Broker:** canal de agendamento de reuniões qualificadas.
 - **V4 Fund:** fundo de investimento em marketing — canal complementar de aquisição.
@@ -199,7 +170,7 @@ O mix de tiers da unidade impacta diretamente o CSP médio — unidades com maio
 | **NRR** | Net Revenue Retention | Mede o crescimento da receita a partir da base existente de Hosts, incluindo expansão e descontando churn. NRR > 100% = base crescendo; NRR < 100% = base encolhendo |
 | **GRR** | Gross Revenue Retention | Receita retida da base existente, sem contar expansão — mede só o churn puro |
 | **MQL** | Marketing Qualified Lead | Lead que atingiu critérios mínimos de qualificação para ser trabalhado pelo time comercial |
-| **Hit-rate** | Taxa de conversão MQL → Venda | Indicador de eficiência comercial. Queda no hit-rate explica compressão da Margem de Contribuição mesmo com alto investimento em broker |
+| **Hit-rate** | Taxa de conversão MQL → Venda | Indicador de eficiência comercial |
 | **CAC** | Custo de Aquisição de Cliente | Total investido em Comercial ÷ nº de novos Hosts adquiridos no período |
 | **LTV** | Lifetime Value | Valor total gerado por um Host ao longo de sua relação com a unidade |
 | **ARR** | Annual Recurring Revenue | Receita recorrente anualizada de um Host |
@@ -209,54 +180,101 @@ O mix de tiers da unidade impacta diretamente o CSP médio — unidades com maio
 | **PE&G** | Projetos, Execução e Gestão | Área técnica de entrega — o "CSP" humano da unidade |
 | **EMPS** | Estrutura, Modelo, Processos, Sistemas | Framework operacional padrão da rede V4 |
 | **CHAMP** | Consumers, Hosts, Annual Revenue, Milestone IPO, Perpetuity | Modelo estratégico que guia a ambição da companhia |
-| **Blackbox** | (antigo "pack") | Modalidade de compra no Lead Broker: lote de MQLs sortidos por tier com quantidade mínima definida — sem controle individual sobre qual tier de lead será entregue |
+| **Blackbox** | (antigo "pack") | Modalidade de compra no Lead Broker: lote de MQLs sortidos por tier com quantidade mínima definida |
 
 ### Contexto estratégico para o texto analítico
 - A V4 está em fase de **maturidade de rede e padronização** — o foco é crescimento sustentável com margens saudáveis, não crescimento a qualquer custo.
 - O **NRR é o throughput principal** da companhia — qualquer análise que toque em renovação, expansão ou churn deve ser lida sob essa lente.
-- Unidades que avançam de horizonte trazem consigo o faturamento mínimo do novo horizonte, o que **dilui o RPU médio** do horizonte de destino — fenômeno esperado e deve ser contextualizado sempre que houver queda de RPU associada a entrada de novas unidades.
 - A **qualidade da entrega ao Host** é inegociável — CSP abaixo de 30% é alerta mesmo que o EBITDA esteja alto.
+
+---
+
+## Estrutura do Relatório (ordem obrigatória)
+
+```
+Título: Relatório da Regional [Código] — [Nome] — [Mês/Ano]
+
+Abrangência e Compliance de Dados
+
+1. Análise da Regional Consolidada
+   — Tabela: todas as regionais + todos os indicadores (receita líquida, CSP,
+     Mg. Operacional, Comercial, G&A, Mg. Contribuição, EBITDA%)
+   1.1 Análise Comparativa
+       O que levou esta regional a este resultado — identificar e explicar o
+       principal indicador responsável pelo posicionamento no comparativo.
+   1.2 Pontos a Destacar
+       Positivos e negativos desta regional frente às demais, ainda no nível
+       consolidado — sem entrar por unidade.
+
+2. Análise das Margens
+   — Tabela: todas as unidades consideradas da regional + todos os indicadores,
+     ordenadas por receita líquida decrescente
+   2.1 Receita Líquida
+       Comportamento da receita total da regional (cresceu/caiu vs mês anterior)
+       + RPU da regional.
+   2.2 Margem Operacional
+       Unidades em destaque positivo e negativo, correlacionando com o CSP.
+   2.3 Margem de Contribuição
+       Unidades em destaque positivo e negativo, correlacionando com o
+       investimento comercial (broker, comissionamento).
+       ⚠️ Alerta obrigatório: identificar e nomear as unidades onde
+       Mg. Contribuição = Mg. Operacional (ausência de despesa variável de venda).
+   — Gráfico: ranking das unidades da regional por % EBITDA (melhor → pior)
+   2.4 Margem EBITDA
+       Análise do resultado final, correlacionando os centros de custo que mais
+       impactaram o EBITDA das unidades de destaque positivo e negativo.
+
+3. Fluxo de Caixa
+   — Tabela: DFC por regional — entradas, saídas, saldo — visão comparativa
+   — Mensagem introdutória: posicionamento desta regional em geração de caixa
+     frente às demais
+   — Ranking: % de geração de caixa por unidade da regional
+     (saldo DFC / receita líquida)
+   Conclusão
+       2–3 frases: síntese do ciclo + principal alavanca recomendada ao
+       Diretor Regional.
+```
 
 ---
 
 ## Passo 0 — Verificar arquivo de dados do mês
 
-Ao receber o comando de construção de um novo relatório mensal de fechamento da V4 Company, **antes de qualquer outra ação**, perguntar:
+Ao receber o comando de construção de um novo relatório mensal de regional, **antes de qualquer outra ação**, perguntar:
 
-> "Já temos o arquivo com os dados do mês de análise?"
+> "Já temos o arquivo com os dados do mês de análise para a Regional [código/nome]?"
 
-**Se sim:** prosseguir para o Passo 1.
+**Se sim:** confirmar qual regional e o período de referência, depois prosseguir para o Passo 1.
 
 **Se não:** perguntar:
 
-> "Gostaria de criar a aba do mês no documento *Relatório Financeiro Unidades 2026*?"
+> "Gostaria de criar a aba do mês no documento da regional no Google Docs?"
 
-- Se sim: acionar a skill de criação de aba no Google Docs (`gdocs_create_tab`) para o documento **Relatório Financeiro Unidades 2026**, criando a aba com o nome do mês/ano de referência. Após confirmação da criação, aguardar o usuário preencher os dados e retornar.
+- Se sim: acionar a skill `gdocs_create_tab` para o documento da regional correspondente, criando a aba com o nome do mês/ano de referência. Após confirmação da criação, aguardar o usuário inserir as tabelas e gráficos e retornar.
 - Se não: solicitar que o usuário indique de onde virão os dados antes de continuar.
 
 ---
 
 ## Passo 1 — Receber os dados do relatório
 
-O formato padrão de entrada é um **documento com tabelas e gráficos já inseridos pelo usuário** (ex.: arquivo enviado via upload ou compartilhado). A skill não coleta dados brutos — ela lê os visuais e extrai os valores necessários para construir o texto analítico.
+O formato padrão de entrada é um **documento com tabelas e gráficos já inseridos pelo usuário**. A skill não coleta dados brutos — ela lê os visuais e extrai os valores necessários para construir o texto analítico.
 
 ### Ao receber o documento:
 1. Ler o arquivo de `/mnt/user-data/uploads/`
 2. Identificar todas as tabelas e gráficos presentes, mapeando:
-   - Unidades, horizonte, regional, período de referência
-   - Receita líquida, CSP, SG&A (Comercial, Administrativo, Gerais)
-   - Entradas e saídas de caixa (DFC)
+   - Tabela comparativa de regionais (seção 1 e seção 3): todos os indicadores por regional
+   - Tabela de unidades da regional (seção 2): receita líquida, CSP, SG&A, EBITDA por unidade
+   - Tabela de DFC (seção 3): entradas, saídas, saldo — por regional comparativo e por unidade
+   - Gráfico de ranking EBITDA por unidade
    - Janela histórica disponível (confirmar com o usuário se necessário)
-3. Confirmar o período de análise e a janela histórica antes de avançar
+3. Confirmar o período de análise, a janela histórica e a lista de unidades da regional antes de avançar
 
-### Se os dados não estiverem em documento:
-Solicitar por bloco (consolidado → por horizonte → por regional → DFC), confirmando cada bloco antes de avançar.
+**Nota:** todos os dados (comparativo de regionais, unidades e DFC) chegam em um único documento Google Docs, na aba do mês de referência. As tabelas e gráficos já estão inseridos — a skill apenas lê os visuais e preenche os espaços de análise.
 
 ---
 
 ## Passo 2 — Calcular indicadores
 
-Calcular para cada nível (consolidado, por horizonte, por regional):
+Calcular para cada nível (consolidado da regional, por horizonte interno, por unidade):
 
 | Indicador | Fórmula |
 |-----------|---------|
@@ -272,8 +290,6 @@ Calcular para cada nível (consolidado, por horizonte, por regional):
 | Saldo DFC | Entradas − Saídas |
 
 ### *Linhas que compõem o Comercial Variável (Margem de Contribuição)
-
-Conforme plano de contas padrão da rede, as seguintes linhas do grupo 4.1 são consideradas variáveis:
 
 | Código | Descrição |
 |--------|-----------|
@@ -303,107 +319,76 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 
 | # | Bloco | Seções cobertas |
 |---|-------|-----------------|
-| 1 | **Consolidado** | Sumário executivo, índice histórico, Performance de Receita, DRE, Rentabilidade, Margens, Centros de Custo |
-| 2 | **Horizontes H1/H2 e H3** | Tabela-resumo comparativa + seções individuais H1/H2 e H3 |
-| 3 | **Horizontes H4 e H5** | Seções individuais H4 e H5 |
-| 4 | **Regional** | Tabela consolidada + Top 3 + Flop 3 |
-| 5 | **DFC + Conclusão** | Tabela DFC, análise por horizonte, conclusão geral |
+| 1 | **Abrangência** | Critério de inclusão/exclusão, lista de unidades consideradas |
+| 2 | **Regional Consolidada** | 1.1 Análise Comparativa + 1.2 Pontos a Destacar |
+| 3 | **Análise das Margens** | 2.1 Receita Líquida + 2.2 Mg. Operacional + 2.3 Mg. Contribuição + 2.4 Mg. EBITDA |
+| 4 | **Fluxo de Caixa + Conclusão** | Intro geração de caixa + Ranking por unidade + Conclusão |
 
-> **Nota bloco 5 (DFC):** os dados de DFC chegam após a conciliação de caixa, geralmente com dias de defasagem em relação ao fechamento do DRE. Só iniciar o bloco 5 quando o usuário confirmar que os dados de DFC estão disponíveis. Até lá, o relatório pode ser entregue com os blocos 1–4.
+> **Nota bloco 4 (DFC):** os dados de DFC chegam após a conciliação de caixa, geralmente com dias de defasagem. Só iniciar o bloco 4 quando o usuário confirmar que os dados de DFC estão disponíveis. Até lá, o relatório pode ser entregue com os blocos 1–3.
+
+### Conteúdo de cada bloco
+
+**Bloco 1 — Abrangência:**
+- Quantas unidades foram consideradas da regional e qual é o total da regional
+- Se alguma unidade foi excluída: nomear, indicar o critério (EBITDA fora da banda, ausência de conciliação, lançamentos incompletos)
+- Replicar exatamente o mesmo critério e linguagem da seção de abrangência do relatório consolidado
+
+**Bloco 2 — Regional Consolidada:**
+- **1.1 Análise Comparativa:** identificar o principal indicador que explica o posicionamento desta regional no comparativo (ex: "o EBITDA de X,X% posiciona a regional acima da média da rede, puxado principalmente pelo CSP de Y,Y% — Z p.p. abaixo do bench do H3"). Não listar todos os indicadores — focar no fator determinante.
+- **1.2 Pontos a Destacar:** 2–4 bullets objetivos, divididos entre positivos e negativos, sempre com valor e variação. Ex: "✅ Margem de contribuição de X,X% — melhor da rede no mês" / "⚠️ G&A em X,X% — acima do bench para o perfil de horizonte da regional". Mencionar o mix de horizontes da regional quando for relevante para contextualizar o resultado geral — um EBITDA abaixo da média pode ser estrutural (maioria das unidades em H1/H2, ainda em fase de maturação) ou operacional (unidades maduras com resultado fraco). Essa distinção muda completamente o diagnóstico e a recomendação.
+
+**Bloco 3 — Análise das Margens:**
+- **2.1 Receita Líquida:** valor total da regional + variação % vs mês anterior + RPU (receita ÷ nº de unidades). Se houver entrada ou saída de unidade no mês, contextualizar o impacto no RPU.
+- **2.2 Margem Operacional:** nomear as unidades de melhor e pior resultado. Correlacionar diretamente com o CSP — margem operacional alta com CSP saudável é positivo; margem operacional alta com CSP abaixo de 30% acende alerta de qualidade de entrega.
+- **2.3 Margem de Contribuição:** nomear as unidades de melhor e pior resultado. Cruzar com o investimento comercial de cada unidade. Aplicar obrigatoriamente o alerta para unidades onde Mg. Contribuição = Mg. Operacional: "A unidade [código] — [nome] apresentou Margem de Contribuição idêntica à Margem Operacional, indicando ausência de despesa variável de venda no período — sem registro de broker, comissionamento ou equivalente."
+- **2.4 Margem EBITDA:** análise do resultado final de cada unidade correlacionando com o centro de custo que mais influenciou (positivo ou negativo). Nomear as unidades que puxaram o resultado da regional para cima e para baixo.
+- **Flags de outlier (aplicar em 2.2, 2.3 e 2.4):** identificar e nomear unidades cujo resultado se distancia significativamente das demais — tanto positivo quanto negativo. Um outlier positivo pode mascarar que o restante da regional está com desempenho fraco; um outlier negativo pode subestimar o avanço real das demais unidades. Sempre contextualizar o outlier antes de apresentar a média ou o resultado consolidado da regional.
+
+**Bloco 4 — Fluxo de Caixa + Conclusão:**
+- **Intro:** posicionamento da regional no comparativo de geração de caixa (saldo DFC vs outras regionais).
+- **Ranking por unidade:** apresentar o % de geração de caixa (saldo DFC / receita líquida) de cada unidade da regional, do melhor para o pior.
+- **Conclusão:** 2–3 frases — síntese do ciclo da regional (o que foi bem, o que merece atenção) + principal alavanca recomendada ao Diretor Regional de forma específica e acionável.
 
 ### Fluxo por bloco
 
 ```
-1. Gerar o texto completo do bloco (com base nos dados e na lógica abaixo)
+1. Gerar o texto completo do bloco
 2. Exibir no chat — o usuário lê, aprova ou solicita ajustes
 3. Se ajuste: editar e re-exibir; repetir até aprovação
 4. Quando aprovado: inserir no Google Docs via batchUpdate (deleteContentRange + insertText)
 5. Confirmar inserção e avançar para o próximo bloco
 ```
 
-### Conteúdo de cada bloco
-
-**Bloco 1 — Consolidado:**
-- Performance de Receita: valor absoluto + variação % vs mês anterior, composição % Aquisição/Renovação/Expansão, destaque de produtos/linhas que impulsionaram
-- Rentabilidade — EBITDA: valor absoluto + variação % + margem % + variação p.p. + causa principal
-- Análise de Margens (a/b/c para cada margem): comportamento (valor atual, variação p.p.) + causa + ponto de atenção (se houver)
-
-**Blocos 2 e 3 — Por Horizonte:**
-- RPU com variação % — contextualizar diluição se houver entrada de novas unidades
-- Performance de Receita: valor + variação + causa
-- EBITDA: valor + margem + variação
-- Cada centro de custo: comportamento + causa, cruzando com a lógica interpretativa da seção de benchmarks
-- Flags: unidades com EBITDA negativo, anomalias, outliers que distorcem a média
-- **Bloco de recomendações ao final de cada horizonte** (ver formato abaixo)
-
-**Formato obrigatório do bloco de recomendações por horizonte:**
-
-```
-📍 Próximo ciclo — [Nome do Horizonte]
-
-O que monitorar:
-• [Indicador 1]: [por quê merece atenção e o que observar]
-• [Indicador 2]: [por quê merece atenção e o que observar]
-
-Alavanca prioritária:
-• [Ação concreta recomendada para Diretores Regionais e liderança da Matriz]
-```
-
-Diretrizes para o bloco:
-- Máximo 3 itens no "O que monitorar" — priorizar o que realmente importa
-- A "Alavanca prioritária" deve ser específica e acionável, não genérica ("monitorar o CSP" não é alavanca — "verificar a relação de projetos ativos por investidor nas unidades com CSP acima de 40%" é)
-- Tom consultivo — parceria, não auditoria
-
-**Bloco 4 — Regional — Top 3 / Flop 3 EBITDA:**
-- Multi-franquias (ex: M2, M1) **não entram** na análise Top/Flop — constam na tabela apenas como referência
-- Nomear regional + franqueado
-- Explicar o diferencial ou problema principal com indicadores específicos que justificam a posição
-- Mencionar mix de horizontes da regional quando relevante para contextualizar o resultado
-
-**Bloco 5 — DFC:**
-- Saldo consolidado + variação vs mês anterior
-- Qual horizonte impulsionou / pressionou
-- Análise individual por horizonte
-- Conclusão: síntese macro (2–3 frases) + desafios persistentes + foco estratégico recomendado
-
 ### Tom e diretrizes de escrita
 
-**Tom:** consultivo, confiante e empático. O relatório é destinado às **principais lideranças da Matriz e aos Diretores Regionais** — não às unidades individualmente. Escrever para quem toma decisões estratégicas sobre a rede, não para quem opera o dia a dia de cada franquia. Diretrizes práticas:
-- Reconheça conquistas antes de apontar problemas ("O H4 manteve a melhor eficiência operacional da rede, mesmo sob pressão do comercial.")
-- Use linguagem de parceria, não de auditoria ("observamos", "identificamos", "recomendamos atenção" — nunca "falhou" ou "errou")
+**Tom:** consultivo, profissional e informativo. O relatório é destinado às **lideranças da Matriz, ao Diretor Regional e aos sócios franqueados das unidades da regional**. O tom deve ser claro e transparente para todos os perfis — sem jargões internos inexplicados, sem analogias baratas, sem condescendência. Escrever para quem precisa entender o resultado e tomar decisão, seja ele um executivo da Matriz ou um franqueado que acompanha pela primeira vez o relatório da sua unidade.
+
+Diretrizes práticas:
+- Reconheça conquistas antes de apontar problemas
+- Use linguagem de parceria ("observamos", "identificamos", "recomendamos atenção" — nunca "falhou" ou "errou")
 - Sempre que houver queda expressiva, contextualize a causa antes de apresentar o número
-- Evitar frases genéricas como "o período apresentou resultados" — sempre incluir o valor absoluto, a variação em p.p. ou % e a causa principal
+- Evitar frases genéricas — sempre incluir o valor absoluto, a variação em p.p. ou % e a causa principal
+- Quando mencionar uma unidade individualmente, usar o formato `[Código da unidade] — [Nome do franqueado]`
 
 **Sobre a janela histórica:**
-O relatório exibe 4 meses de dados. Os dois primeiros meses de relatório consolidado da rede foram Janeiro/26 e Fevereiro/26. Indicadores anteriores (a partir de Set/25) estão disponíveis como histórico nas tabelas — usar para contextualizar tendências, mas sem tratar como relatórios completos anteriores.
+Usar a mesma janela histórica disponível no documento do usuário, seguindo o mesmo padrão do relatório consolidado (4 meses de DRE, 5 meses de DFC).
 
 ---
 
 ## Passo 4 — Acionar a skill de visualização para revisão
 
-Os gráficos e tabelas **já foram fornecidos pelo usuário** no documento de entrada. A responsabilidade desta etapa é acionar a skill `financial-viz` para **analisar, ajustar e melhorar os visuais existentes**, não para criá-los do zero.
+Os gráficos e tabelas **já foram fornecidos pelo usuário** no documento de entrada. Acionar a skill `financial-viz` para **analisar, ajustar e melhorar os visuais existentes**.
 
 ### O que passar para a skill de visualização
-
-Ao acionar a `financial-viz`, entregar:
-
 ```
-- Os gráficos e tabelas originais extraídos do documento do usuário (Passo 1)
+- Os gráficos e tabelas originais extraídos do documento (Passo 1)
 - Os dados calculados no Passo 2 (para validação de consistência)
 - O período e janela histórica confirmados
 - Eventuais inconsistências ou lacunas identificadas na leitura dos visuais
 ```
 
-### O que a skill de visualização faz
-
-- Valida se os visuais estão consistentes com os dados calculados
-- Ajusta formatação, escalas ou legendas quando necessário
-- Melhora a legibilidade visual se identificar oportunidade
-- Entrega os visuais revisados prontos para inserção no `.docx`
-
-### Após receber os assets revisados da skill de visualização
-
-Montar o `.docx` seguindo a skill `docx` (ver `/mnt/skills/public/docx/SKILL.md`), intercalando os textos analíticos (Passo 3) com os visuais revisados, na ordem definida na estrutura do relatório (Seção 1 deste documento).
+### Após receber os assets revisados
+Montar o `.docx` seguindo a skill `docx`, intercalando os textos analíticos (Passo 3) com os visuais revisados, na ordem definida na estrutura do relatório.
 
 **Formatação do documento:**
 - Fonte: Arial, corpo 11pt
@@ -411,93 +396,63 @@ Montar o `.docx` seguindo a skill `docx` (ver `/mnt/skills/public/docx/SKILL.md`
 - Título principal: 20pt, negrito, centralizado
 - Heading 1 (seções principais): 16pt, negrito
 - Heading 2 (subseções): 14pt, negrito
-- Heading 3 (análises a/b/c): 12pt, negrito
-- Rodapé: nome do relatório + data de geração + número de página
+- Heading 3 (análises): 12pt, negrito
+- Rodapé: nome do relatório + regional + data de geração + número de página
 
 ---
 
 ## Passo 5 — Validar e encerrar
 
-A entrega acontece bloco a bloco (ver Passo 3). Após todos os blocos aprovados e inseridos no Google Docs, fazer uma checagem final:
+Após todos os blocos aprovados e inseridos no Google Docs:
 
-1. Confirmar que todos os placeholders `[análise aqui]`, `[inserir valor]`, `[x%]` e `[regional N]` foram substituídos — se sobrar algum, identificar e preencher
-2. Confirmar que o bloco 5 (DFC + Conclusão) foi inserido, ou registrar explicitamente que está pendente aguardando dados de DFC
+1. Confirmar que todos os placeholders `[análise aqui]`, `[inserir valor]`, `[x%]` foram substituídos
+2. Confirmar que o bloco de DFC foi inserido, ou registrar que está pendente aguardando dados de conciliação
 3. Informar ao usuário o resumo de entrega:
-   - EBITDA consolidado + margem + variação vs mês anterior
-   - Melhor e pior horizonte em EBITDA%
-   - Saldo consolidado de caixa + variação (se DFC disponível)
+   - EBITDA consolidado da regional + margem + variação vs mês anterior
+   - Melhor e pior unidade em EBITDA%
+   - Saldo consolidado de caixa (se DFC disponível)
    - Blocos entregues vs pendentes
-
----
-
-## Arquivos de referência
-
-A pasta `references/` contém dois documentos de apoio que devem ser consultados ao construir cada relatório:
-
-| Arquivo | Propósito | Quando usar |
-|---------|-----------|-------------|
-| `references/estrutura-relatorio.md` | Template em Markdown com a estrutura completa e todos os placeholders `[análise aqui]` | Usar como esqueleto para montar o relatório — garante que nenhuma seção seja omitida e que a hierarquia de títulos esteja correta |
-| `references/modelo-referencia-fev26.md` | Relatório completo de Fevereiro/2026 com dados reais e textos analíticos redigidos | Usar como referência de tom, profundidade e forma de escrita — calibrar cada seção para que o nível de detalhe e a narrativa sejam equivalentes |
-| `references/modelo-referencia-mar26.md` | Relatório completo de Março/2026 (versão final aprovada) com dados reais, textos analíticos e correções aplicadas | Referência de tom, profundidade e lições aprendidas do ciclo mais recente |
-| `references/modelo-referencia-abr26.md` | Relatório completo de Abril/2026 (versão final aprovada) com dados reais, textos analíticos e ajustes do ciclo | Referência mais recente — priorizar para calibrar tom e profundidade, mas consultar todos os meses anteriores para entender a evolução da narrativa |
-
-**Regra de uso:**
-- Consultar **todas as referências disponíveis** antes de redigir qualquer bloco — cada ciclo concluído adiciona contexto histórico e nuances de tom que o modelo anterior não tinha. Janeiro e Fevereiro são tão importantes quanto Abril para entender a evolução da narrativa da rede.
-- Usar a `estrutura-relatorio.md` para confirmar que todas as seções e subseções estão presentes antes de finalizar cada bloco.
-- **Ciclo de aprendizado:** ao final de cada relatório aprovado, salvar o documento final como `references/modelo-referencia-[mes][ano].md`. Esse arquivo passa a ser referência obrigatória para todos os ciclos seguintes. A skill deve reconhecer automaticamente todos os arquivos `modelo-referencia-*.md` presentes na pasta `references/` e consultá-los antes de redigir.
 
 ---
 
 ## Passo 6 — Gerar resumo de highlights e criar rascunho de e-mail
 
-Após a confirmação de inserção do último bloco no Google Docs, sinalizar o encerramento do relatório e oferecer a criação do rascunho de e-mail:
+Após confirmação de encerramento, oferecer:
 
-> "Relatório de [Mês/Ano] concluído. Gostaria que eu gerasse o resumo de highlights para o corpo do e-mail de divulgação e já criasse o rascunho no Gmail?"
+> "Relatório da regional [nome] de [Mês/Ano] concluído. Gostaria que eu gerasse o resumo de highlights e já criasse o rascunho de e-mail para envio ao Diretor Regional e aos franqueados?"
 
-Se o usuário confirmar, redigir o corpo do e-mail no formato abaixo e criar o rascunho via Gmail (`mcp__claude_ai_Gmail__create_draft`), com:
+Se o usuário confirmar, redigir o corpo do e-mail e criar o rascunho via Gmail (`mcp__claude_ai_Gmail__create_draft`), com:
 - **Para:** b.magnofernandes@gmail.com (rascunho — destinatários finais adicionados pelo usuário)
-- **Assunto:** `Fechamento Financeiro da Rede — [Mês]/[Ano]`
-- **Corpo:** formato HTML, seguindo o template abaixo
+- **Assunto:** `Fechamento Financeiro — Regional [Nome/Código] — [Mês]/[Ano]`
+- **Corpo:** formato HTML
 
 ### Formato obrigatório do e-mail
 
 ```
-Boa tarde a todos,
+Boa tarde,
 
-Segue o resumo dos principais highlights do fechamento financeiro da rede referente a [Mês/Ano].
+Segue o resumo do fechamento financeiro da Regional [Nome] referente a [Mês/Ano].
 O relatório completo está disponível no link ao final deste e-mail.
 
+📊 Posição da Regional — [Headline de 1 linha]
+[1 parágrafo: EBITDA% da regional + posição no ranking de regionais
++ variação vs mês anterior + fator principal]
+
 📈 Receita — [Headline de 1 linha]
-[1 parágrafo: valor absoluto + variação % vs mês anterior + principal driver + RPU]
+[1 parágrafo: receita total + variação % vs mês anterior + RPU da regional]
 
-💰 EBITDA — [Headline de 1 linha]
-[1 parágrafo: valor absoluto + variação % + margem + variação p.p. + driver central]
-
-🏆 Destaque do mês — [Headline de 1 linha]
-[1 parágrafo: o fato mais positivo do ciclo — horizonte, regional ou métrica que se destacou]
+🏆 Unidade destaque — [Headline de 1 linha]
+[1 parágrafo: unidade(s) de melhor performance + indicador que se destacou
++ contexto resumido]
 
 ⚠️ Ponto de atenção — [Headline de 1 linha]
-[1 parágrafo: o principal risco ou alerta do ciclo — concreto e específico]
-
-🗺️ Regionais — [Headline de 1 linha]
-Top 3 EBITDA:
-- [Regional 1] (X,XX%)
-- [Regional 2] (X,XX%)
-- [Regional 3] (X,XX%)
-
-Flop 3 EBITDA:
-- [Regional 1] (X,XX%)
-- [Regional 2] (X,XX%)
-- [Regional 3] (X,XX%)
-
-[1 frase explicando o padrão dos Top 3 e dos Flop 3]
+[1 parágrafo: unidade(s) que merecem atenção + indicador + recomendação direta]
 
 🏦 Fluxo de Caixa — [Headline de 1 linha]
-[1 parágrafo: saldo consolidado + variação vs mês anterior + horizonte destaque + CPU Médio]
+[1 parágrafo: posição da regional no comparativo de caixa
++ unidade destaque positivo ou negativo]
 
-📊 Engajamento — [X unidades, Y% da rede]
-
-📄 Relatório completo: Relatório Financeiro Unidades [Ano] — [Mês/Ano]
+📄 Relatório completo: [link para o Google Docs — aba do mês]
 
 Abraço,
 Bruno Magno
@@ -507,19 +462,33 @@ Diretor Administrativo | V4 Company
 ### Diretrizes de escrita do e-mail
 
 - **Cada seção = 1 parágrafo curto** — máximo 3 frases. O e-mail é um índice, não o relatório.
-- **Não repetir números entre seções** — se o EBITDA já apareceu na seção 💰, não repeti-lo na 🏆.
-- **Headline é o gancho** — deve comunicar o veredicto em ≤ 6 palavras ("RPU recorde, receita por efeito de perímetro"; "Receita cai, EBITDA cresce").
-- **Regionais:** usar sempre o formato `Código-Franqueado (X,XX%)`. Multi-franquias excluídas.
-- **Tom:** direto e informativo — o leitor já conhece o negócio.
+- **Headline é o veredicto** — deve comunicar o resultado em ≤ 6 palavras ("EBITDA acima da média, CSP saudável"; "Receita cresce, caixa pressiona").
+- **Não repetir números entre seções** — se o EBITDA apareceu em 📊, não repetir em 🏆.
+- **Nomear as unidades** — usar sempre `[Código] — [Nome do franqueado]` para manter clareza para todos os leitores.
+- **Tom:** direto, informativo e respeitoso com todos os perfis da audiência (Matriz, Diretor Regional e franqueados).
+
+---
+
+## Arquivos de referência
+
+| Arquivo | Propósito | Quando usar |
+|---------|-----------|-------------|
+| `references/estrutura-relatorio-regional.md` | Template em Markdown com a estrutura completa e todos os placeholders `[análise aqui]` | Usar como esqueleto para montar o relatório — garante que nenhuma seção seja omitida e que a hierarquia de títulos esteja correta |
+| `references/modelo-referencia-[mes][ano].md` | Relatório completo de referência com dados reais e textos aprovados (um arquivo por ciclo concluído) | Usar como referência de tom, profundidade e forma de escrita — calibrar cada seção para que o nível de detalhe e a narrativa sejam equivalentes ao ciclo mais recente |
+
+**Regra de uso:**
+- Consultar **todas as referências disponíveis** antes de redigir qualquer bloco — cada ciclo concluído adiciona contexto histórico, nuances de tom e lições aprendidas que o modelo anterior não tinha. O primeiro ciclo é tão importante quanto o mais recente para entender a evolução da narrativa da regional.
+- Usar a `estrutura-relatorio-regional.md` para confirmar que todas as seções e placeholders estão presentes antes de finalizar cada bloco.
+- **Ciclo de aprendizado:** ao final de cada relatório aprovado, salvar o documento final como `references/modelo-referencia-[mes][ano].md`. Esse arquivo passa a ser referência obrigatória para todos os ciclos seguintes. A skill deve reconhecer automaticamente todos os arquivos `modelo-referencia-*.md` presentes na pasta `references/` e consultá-los antes de redigir.
 
 ---
 
 ## Notas e edge cases
 
-- **Horizonte sem unidades no mês:** incluir linha com zero e nota explicativa no texto
-- **Unidade com EBITDA fora da banda -50%/+50%:** mencionar na seção de Compliance que foi expurgada
-- **Dado de broker faltante em alguma unidade do H5:** incluir flag explícita no texto de análise
-- **Janela histórica incompleta:** usar o que estiver disponível, células em branco com nota
-- **Sem dados de DFC:** gerar relatório sem a seção 5 e informar o usuário
-- **Regional com EBITDA negativo:** destacar em vermelho na tabela e incluir no Flop 3 obrigatoriamente
-- **Unidades com EBITDA negativo no H5:** listar nominalmente na análise como ponto de atenção
+- **Unidade sem dados no mês:** incluir linha com zero e nota explicativa no texto; não expurgar silenciosamente
+- **Unidade com EBITDA fora da banda -50%/+50%:** mencionar na seção de abrangência que foi expurgada e por quê
+- **Regional com apenas 1 unidade em determinado horizonte:** não fazer média RPU — apenas apresentar o valor absoluto da unidade
+- **Dado de broker faltante em alguma unidade:** incluir flag explícita no texto de análise daquela unidade
+- **Janela histórica incompleta para uma unidade nova:** usar o que estiver disponível, células em branco com nota de "unidade em primeiro ciclo"
+- **Sem dados de DFC:** gerar relatório sem a seção de fluxo de caixa e informar o usuário
+- **Unidade com EBITDA negativo:** destacar na análise e, se for recorrente (2+ meses), mencionar como ponto de atenção prioritário para o Diretor Regional
