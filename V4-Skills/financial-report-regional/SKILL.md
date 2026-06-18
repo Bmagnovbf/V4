@@ -355,11 +355,23 @@ Usar essas informações como contexto para todos os blocos seguintes. Iniciar p
 - **Gráfico já no documento:** o gráfico de Ranking % Lucro Líquido (saldo / total de entradas) já está inserido no documento — **não solicitar print ou screenshot ao usuário**. Lê-lo diretamente, como qualquer outra tabela ou gráfico do documento.
 - **Intro (parágrafo antes do gráfico):** framing rápido — quantas unidades fecharam no azul vs. no vermelho + destaque do caso mais relevante (outlier positivo ou negativo que define o caráter do bloco). Ex: "X das Y unidades da regional encerram o ciclo com saldo positivo, mas o quadro é dominado por [caso]."
 - **Análise após o gráfico — princípio de agrupamento:** não analisar cada unidade individualmente. Agrupar por comportamento:
-  - Grupo positivo consistente (DFC alto próximo do EBITDA — mencionar nomes)
-  - Grupo com divergência positiva (DFC > EBITDA — hipótese: recebimentos de ciclos anteriores ou parcelamento de despesas)
-  - Grupo com divergência negativa (DFC < EBITDA — hipótese: recebíveis acumulados, antecipação de recebíveis, pagamentos à vista de contratos recorrentes)
-  - Grupo negativo em ambos (DRE e DFC negativos — diagnóstico direto, sem hipóteses)
-  - Outliers que merecem explicação individualizada: quando a divergência DFC vs. EBITDA for > 20 p.p., explicar a hipótese mais provável (produtos one-time, parcelamento estendido, antecipação de recebíveis)
+  - Grupo positivo consistente (DFC próximo do EBITDA — mencionar nomes)
+  - Grupo com divergência positiva (DFC > EBITDA — DRE positivo, DFC negativo): diagnosticar com base nas causas abaixo
+  - Grupo com divergência negativa (DFC < EBITDA — DRE negativo, DFC positivo): diagnosticar com base nas causas abaixo
+  - Grupo negativo em ambos (DRE e DFC negativos — diagnóstico direto)
+  - Outliers com divergência > 20 p.p.: explicar a hipótese mais provável com base nas causas contextualizadas abaixo
+
+**Causas de inversão DRE/DFC no contexto V4 — usar para direcionar o diagnóstico:**
+
+*DRE positivo / DFC negativo* — o resultado operacional existe, mas o caixa não se materializou:
+1. **Saber/Ter parcelado:** projetos one-time reconhecidos integralmente na competência, mas recebidos em parcelas. DRE captura a receita cheia; DFC recebe só a parcela do mês. Quanto maior a proporção de Saber/Ter na carteira, mais comum essa divergência. Solução: avaliar antecipação de recebíveis enquanto o DRE está positivo e há margem para negociar.
+2. **Inadimplência:** competência reconhece a receita, mas o pagamento não entrou. Divergência direta entre o que foi faturado e o que foi recebido.
+3. **Quitação de passivos acumulados:** meses anteriores com DRE negativo geram obrigações em aberto (fornecedores, tributos, folha atrasada). Quando o resultado melhora, o caixa gerado vai para quitar essas pendências em vez de ficar no saldo. Sinal de que a recuperação operacional ainda não se traduziu em saúde financeira real.
+
+*DRE negativo / DFC positivo* — o caixa está positivo, mas a operação está consumindo mais do que gera:
+1. **Recebíveis de exercícios anteriores:** a competência da receita era o mês anterior, mas o recebimento ocorreu neste ciclo. Fôlego de curto prazo que não altera o diagnóstico operacional.
+2. **Antecipação de recebíveis de projetos Executar:** Executar é recorrente (contratos de 6–12 meses com entrega mensal). Quando o cliente opta por pagar o compromisso total no cartão parcelado, a unidade pode antecipar esses recebíveis. Apesar de gerar respiro imediato, cria um risco bola de neve: nos meses seguintes há custo de servir mensal (CSP) sem entrada correspondente, pois o caixa do cliente já foi antecipado. Atenção redobrada quando DRE já está negativo.
+3. **Parcelamento de despesas:** despesa como broker é reconhecida integralmente na competência (impacta DRE), mas pode ser paga parcelada — caixa sai em parcelas enquanto o DRE já absorveu o custo cheio.
 - **Conclusão:** 2–3 frases — síntese do ciclo (DRE + DFC) + principal risco ou alavanca identificada + recomendação específica e acionável ao Diretor Regional.
 
 ### Fluxo por bloco
