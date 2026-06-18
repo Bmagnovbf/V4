@@ -202,8 +202,8 @@ Abrangência e Compliance de Dados
    1.1 Análise Comparativa
        O que levou esta regional a este resultado — identificar e explicar o
        principal indicador responsável pelo posicionamento no comparativo.
-   1.2 Pontos a Destacar
-       Positivos e negativos desta regional frente às demais, ainda no nível
+   1.2 Highlights Positivos e Alertas
+       ✅ Positivos e ⚠️ Alertas desta regional frente às demais, ainda no nível
        consolidado — sem entrar por unidade.
 
 2. Análise das Margens
@@ -218,7 +218,11 @@ Abrangência e Compliance de Dados
        Unidades em destaque positivo e negativo, correlacionando com o
        investimento comercial (broker, comissionamento).
        ⚠️ Alerta obrigatório: identificar e nomear as unidades onde
-       Mg. Contribuição = Mg. Operacional (ausência de despesa variável de venda).
+       Mg. Contribuição = Mg. Operacional ou diferença < 1 p.p. — significa que não
+       houve despesa variável comercial no período (broker, comissão, eventos).
+       NÃO sugerir verificação de lançamento. Interpretar como ausência de aquisição
+       ativa de clientes no ciclo e sinalizar o risco: redução de pipeline nos
+       próximos meses.
    — Gráfico: ranking das unidades da regional por % EBITDA (melhor → pior)
    2.4 Margem EBITDA
        Análise do resultado final, correlacionando os centros de custo que mais
@@ -228,8 +232,8 @@ Abrangência e Compliance de Dados
    — Tabela: DFC por regional — entradas, saídas, saldo — visão comparativa
    — Mensagem introdutória: posicionamento desta regional em geração de caixa
      frente às demais
-   — Ranking: % de geração de caixa por unidade da regional
-     (saldo DFC / receita líquida)
+   — Gráfico já inserido no documento: Ranking % Lucro Líquido por unidade
+     (saldo DFC / total de entradas) — sem valores nominais expostos
    Conclusão
        2–3 frases: síntese do ciclo + principal alavanca recomendada ao
        Diretor Regional.
@@ -263,7 +267,7 @@ O formato padrão de entrada é um **documento com tabelas e gráficos já inser
 2. Identificar todas as tabelas e gráficos presentes, mapeando:
    - Tabela comparativa de regionais (seção 1 e seção 3): todos os indicadores por regional
    - Tabela de unidades da regional (seção 2): receita líquida, CSP, SG&A, EBITDA por unidade
-   - Tabela de DFC (seção 3): entradas, saídas, saldo — por regional comparativo e por unidade
+   - DFC (seção 3): **gráfico de Ranking % Lucro Líquido por unidade já inserido no documento pelo usuário** (saldo / total de entradas). Este é o **único formato de dado de caixa disponível por unidade** — a skill não solicita valores nominais de DFC ao usuário, não tenta calcular a partir de outra fonte e não exibe valores absolutos. A visão de caixa das unidades é apresentada exclusivamente em percentual para preservar privacidade entre franqueados que leem o mesmo documento
    - Gráfico de ranking EBITDA por unidade
    - Janela histórica disponível (confirmar com o usuário se necessário)
 3. Confirmar o período de análise, a janela histórica e a lista de unidades da regional antes de avançar
@@ -288,6 +292,7 @@ Calcular para cada nível (consolidado da regional, por horizonte interno, por u
 | Variação vs mês anterior | (Valor Atual − Valor Anterior) / Valor Anterior × 100 |
 | RPU | Receita Líquida / Nº de Unidades |
 | Saldo DFC | Entradas − Saídas |
+| % Lucro Líquido DFC | Saldo DFC / Total de Entradas × 100 — **métrica exclusiva do relatório regional**; não usa Receita Líquida como denominador. Representa quanto do caixa efetivamente recebido ficou no saldo. Apresentar apenas em ranking %, sem valores nominais, para preservar privacidade entre unidades |
 
 ### *Linhas que compõem o Comercial Variável (Margem de Contribuição)
 
@@ -319,7 +324,7 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 
 | # | Bloco | Seções cobertas |
 |---|-------|-----------------|
-| 1 | **Abrangência** | Critério de inclusão/exclusão, lista de unidades consideradas |
+| 1 | **Abrangência** | Sempre redigido e inserido pelo usuário — **ler para contexto, não redigir nem inserir** |
 | 2 | **Regional Consolidada** | 1.1 Análise Comparativa + 1.2 Pontos a Destacar |
 | 3 | **Análise das Margens** | 2.1 Receita Líquida + 2.2 Mg. Operacional + 2.3 Mg. Contribuição + 2.4 Mg. EBITDA |
 | 4 | **Fluxo de Caixa + Conclusão** | Intro geração de caixa + Ranking por unidade + Conclusão |
@@ -329,25 +334,33 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 ### Conteúdo de cada bloco
 
 **Bloco 1 — Abrangência:**
-- Quantas unidades foram consideradas da regional e qual é o total da regional
-- Se alguma unidade foi excluída: nomear, indicar o critério (EBITDA fora da banda, ausência de conciliação, lançamentos incompletos)
-- Replicar exatamente o mesmo critério e linguagem da seção de abrangência do relatório consolidado
+> ⚠️ Este bloco é **sempre redigido e inserido pelo usuário** antes de acionar a skill. Não redigir, não inserir. Apenas **ler o texto já presente no documento** para extrair:
+- Quantas unidades foram consideradas da regional e qual é o total
+- Se alguma unidade foi excluída: qual e por qual critério
+Usar essas informações como contexto para todos os blocos seguintes. Iniciar pelo Bloco 2.
 
 **Bloco 2 — Regional Consolidada:**
-- **1.1 Análise Comparativa:** identificar o principal indicador que explica o posicionamento desta regional no comparativo (ex: "o EBITDA de X,X% posiciona a regional acima da média da rede, puxado principalmente pelo CSP de Y,Y% — Z p.p. abaixo do bench do H3"). Não listar todos os indicadores — focar no fator determinante.
-- **1.2 Pontos a Destacar:** 2–4 bullets objetivos, divididos entre positivos e negativos, sempre com valor e variação. Ex: "✅ Margem de contribuição de X,X% — melhor da rede no mês" / "⚠️ G&A em X,X% — acima do bench para o perfil de horizonte da regional". Mencionar o mix de horizontes da regional quando for relevante para contextualizar o resultado geral — um EBITDA abaixo da média pode ser estrutural (maioria das unidades em H1/H2, ainda em fase de maturação) ou operacional (unidades maduras com resultado fraco). Essa distinção muda completamente o diagnóstico e a recomendação.
+- **1.1 Análise Comparativa:** foco no **consolidado da regional** — identificar o principal indicador que explica o posicionamento desta regional no comparativo e o raciocínio encadeado que leva ao EBITDA. Citar uma unidade específica apenas se ela for literalmente o fator determinante do resultado regional (ex: outlier que responde por mais de 30% da receita com comportamento atípico). Não listar todos os indicadores — focar no fator determinante e nos 1–2 indicadores que mais contribuíram para o resultado. Mencionar o mix de horizontes quando for relevante: um EBITDA abaixo da média pode ser estrutural (maioria em H1/H2) ou operacional (unidades maduras com resultado fraco) — essa distinção muda completamente o diagnóstico.
+- **1.2 Highlights Positivos e Alertas:** 2–4 bullets objetivos com ✅ para positivos e ⚠️ para alertas, sempre com valor e variação. Ex: "✅ Margem de Contribuição de X,X% — melhor da rede no mês" / "⚠️ G&A em X,X% — +Y p.p. acima da média das regionais". Ainda no nível consolidado — sem entrar por unidade, salvo quando o highlight for intrinsecamente sobre uma unidade específica que define o caráter da regional.
 
 **Bloco 3 — Análise das Margens:**
+- **Princípio de agrupamento:** não analisar cada unidade individualmente. Agrupar unidades com comportamento semelhante em uma única observação (ex: "X, Y e Z apresentaram CSP acima de 40%, todas em H2, com capacity subutilizado"). Citar unidades individualmente apenas quando o comportamento for único ou relevante o suficiente para não poder ser agrupado.
 - **2.1 Receita Líquida:** valor total da regional + variação % vs mês anterior + RPU (receita ÷ nº de unidades). Se houver entrada ou saída de unidade no mês, contextualizar o impacto no RPU.
-- **2.2 Margem Operacional:** nomear as unidades de melhor e pior resultado. Correlacionar diretamente com o CSP — margem operacional alta com CSP saudável é positivo; margem operacional alta com CSP abaixo de 30% acende alerta de qualidade de entrega.
-- **2.3 Margem de Contribuição:** nomear as unidades de melhor e pior resultado. Cruzar com o investimento comercial de cada unidade. Aplicar obrigatoriamente o alerta para unidades onde Mg. Contribuição = Mg. Operacional: "A unidade [código] — [nome] apresentou Margem de Contribuição idêntica à Margem Operacional, indicando ausência de despesa variável de venda no período — sem registro de broker, comissionamento ou equivalente."
-- **2.4 Margem EBITDA:** análise do resultado final de cada unidade correlacionando com o centro de custo que mais influenciou (positivo ou negativo). Nomear as unidades que puxaram o resultado da regional para cima e para baixo.
-- **Flags de outlier (aplicar em 2.2, 2.3 e 2.4):** identificar e nomear unidades cujo resultado se distancia significativamente das demais — tanto positivo quanto negativo. Um outlier positivo pode mascarar que o restante da regional está com desempenho fraco; um outlier negativo pode subestimar o avanço real das demais unidades. Sempre contextualizar o outlier antes de apresentar a média ou o resultado consolidado da regional.
+- **2.2 Margem Operacional:** destacar os grupos de comportamento — grupo de alto desempenho (nomear), grupo de baixo desempenho (nomear). Correlacionar com o CSP — margem operacional alta com CSP saudável é positivo; CSP abaixo de 30% acende alerta de qualidade de entrega.
+- **2.3 Margem de Contribuição:** destacar os grupos. Cruzar com o investimento comercial de cada grupo. Alerta obrigatório para unidades onde Mg. Contribuição ≈ Mg. Operacional (diff < 1 p.p.): explicar que não houve despesa variável comercial no período — sem broker, comissão ou eventos — o que indica ausência de aquisição ativa de clientes e gera risco de redução de pipeline nos próximos ciclos. NÃO sugerir revisão de lançamento.
+- **2.4 Margem EBITDA:** análise do resultado final por grupo — nomear os grupos que puxaram o resultado para cima e para baixo, correlacionando com o centro de custo determinante de cada grupo.
+- **Flags de outlier (aplicar em 2.2, 2.3 e 2.4):** identificar e nomear unidades cujo resultado se distancia significativamente das demais. Um outlier positivo pode mascarar que o restante está fraco; um negativo pode subestimar o avanço real das demais. Contextualizar antes de apresentar a média consolidada.
 
 **Bloco 4 — Fluxo de Caixa + Conclusão:**
-- **Intro:** posicionamento da regional no comparativo de geração de caixa (saldo DFC vs outras regionais).
-- **Ranking por unidade:** apresentar o % de geração de caixa (saldo DFC / receita líquida) de cada unidade da regional, do melhor para o pior.
-- **Conclusão:** 2–3 frases — síntese do ciclo da regional (o que foi bem, o que merece atenção) + principal alavanca recomendada ao Diretor Regional de forma específica e acionável.
+- **Gráfico já no documento:** o gráfico de Ranking % Lucro Líquido (saldo / total de entradas) já está inserido no documento — **não solicitar print ou screenshot ao usuário**. Lê-lo diretamente, como qualquer outra tabela ou gráfico do documento.
+- **Intro (parágrafo antes do gráfico):** framing rápido — quantas unidades fecharam no azul vs. no vermelho + destaque do caso mais relevante (outlier positivo ou negativo que define o caráter do bloco). Ex: "X das Y unidades da regional encerram o ciclo com saldo positivo, mas o quadro é dominado por [caso]."
+- **Análise após o gráfico — princípio de agrupamento:** não analisar cada unidade individualmente. Agrupar por comportamento:
+  - Grupo positivo consistente (DFC alto próximo do EBITDA — mencionar nomes)
+  - Grupo com divergência positiva (DFC > EBITDA — hipótese: recebimentos de ciclos anteriores ou parcelamento de despesas)
+  - Grupo com divergência negativa (DFC < EBITDA — hipótese: recebíveis acumulados, antecipação de recebíveis, pagamentos à vista de contratos recorrentes)
+  - Grupo negativo em ambos (DRE e DFC negativos — diagnóstico direto, sem hipóteses)
+  - Outliers que merecem explicação individualizada: quando a divergência DFC vs. EBITDA for > 20 p.p., explicar a hipótese mais provável (produtos one-time, parcelamento estendido, antecipação de recebíveis)
+- **Conclusão:** 2–3 frases — síntese do ciclo (DRE + DFC) + principal risco ou alavanca identificada + recomendação específica e acionável ao Diretor Regional.
 
 ### Fluxo por bloco
 
@@ -361,7 +374,15 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 
 ### Tom e diretrizes de escrita
 
-**Tom:** consultivo, profissional e informativo. O relatório é destinado às **lideranças da Matriz, ao Diretor Regional e aos sócios franqueados das unidades da regional**. O tom deve ser claro e transparente para todos os perfis — sem jargões internos inexplicados, sem analogias baratas, sem condescendência. Escrever para quem precisa entender o resultado e tomar decisão, seja ele um executivo da Matriz ou um franqueado que acompanha pela primeira vez o relatório da sua unidade.
+**Tom:** consultivo, profissional e informativo. O relatório é destinado às **lideranças da Matriz, ao Diretor Regional e aos sócios franqueados das unidades da regional**. O tom deve ser claro e transparente para todos os perfis — sem jargões internos inexplicados, sem analogias, sem condescendência. Escrever para quem precisa entender o resultado e tomar decisão.
+
+**Tom consultivo e não-determinístico:** apresentar cenários e hipóteses, não vereditos definitivos. O relatório informa e recomenda — não condena.
+
+**Vocabulário proibido (dramático/definitivo):**
+- ❌ destruir, corroer, deteriorar, inviabilizar, impossível, colapso, crítico
+- ✅ substituir por: reduzindo, dificultando, comprimindo, dissolvendo, pressionando, limitando
+
+**Sem analogias:** não usar comparações metafóricas ("como um motor que engasga", "queimando o fundo do poço"). Fatos e números falam por si.
 
 Diretrizes práticas:
 - Reconheça conquistas antes de apontar problemas
@@ -369,6 +390,7 @@ Diretrizes práticas:
 - Sempre que houver queda expressiva, contextualize a causa antes de apresentar o número
 - Evitar frases genéricas — sempre incluir o valor absoluto, a variação em p.p. ou % e a causa principal
 - Quando mencionar uma unidade individualmente, usar o formato `[Código da unidade] — [Nome do franqueado]`
+- Não usar negritos em nomes de unidades dentro de bullets de highlights
 
 **Sobre a janela histórica:**
 Usar a mesma janela histórica disponível no documento do usuário, seguindo o mesmo padrão do relatório consolidado (4 meses de DRE, 5 meses de DFC).
@@ -480,6 +502,75 @@ Diretor Administrativo | V4 Company
 - Consultar **todas as referências disponíveis** antes de redigir qualquer bloco — cada ciclo concluído adiciona contexto histórico, nuances de tom e lições aprendidas que o modelo anterior não tinha. O primeiro ciclo é tão importante quanto o mais recente para entender a evolução da narrativa da regional.
 - Usar a `estrutura-relatorio-regional.md` para confirmar que todas as seções e placeholders estão presentes antes de finalizar cada bloco.
 - **Ciclo de aprendizado:** ao final de cada relatório aprovado, salvar o documento final como `references/modelo-referencia-[mes][ano].md`. Esse arquivo passa a ser referência obrigatória para todos os ciclos seguintes. A skill deve reconhecer automaticamente todos os arquivos `modelo-referencia-*.md` presentes na pasta `references/` e consultá-los antes de redigir.
+
+---
+
+## Operação no Google Docs — Workflow Técnico
+
+O relatório é inserido no Google Doc `1M7JHS-1iDV4achYYsZnujvF1NPK9Gf6xOI5mkFTzKYY` via API REST. Cada regional tem uma aba filha (child tab) dentro do grupo "Mai26 - DRE / DFC" (ou equivalente do mês).
+
+### Estrutura de tabs
+As abas das regionais são **child tabs** aninhadas sob a tab pai do mês. Para acessar:
+```powershell
+$doc = Invoke-RestMethod -Uri "https://docs.googleapis.com/v1/documents/$docId`?includeTabsContent=true" -Headers $headers
+$tab = $doc.tabs[0].childTabs | Where-Object { $_.tabProperties.tabId -eq $tabId }
+$content = $tab.documentTab.body.content
+```
+Nunca usar `$doc.tabs` diretamente para regionais — elas são child tabs.
+
+### Auth OAuth2 (padrão para todos os requests)
+```powershell
+$creds = Get-Content 'C:\Users\bruno.magno_v4compan\.config\mcp-gdrive\.gdrive-server-credentials.json' | ConvertFrom-Json
+$keys  = Get-Content 'C:\Users\bruno.magno_v4compan\.config\mcp-gdrive\gcp-oauth.keys.json' | ConvertFrom-Json
+$refreshBody = "client_id=$($keys.installed.client_id)&client_secret=$($keys.installed.client_secret)&refresh_token=$($creds.refresh_token)&grant_type=refresh_token"
+$token = (Invoke-RestMethod -Uri "https://oauth2.googleapis.com/token" -Method POST -Body $refreshBody -ContentType "application/x-www-form-urlencoded").access_token
+$headers = @{ 'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json; charset=utf-8' }
+```
+
+### Workflow de inserção por bloco
+
+**Ordem de construção obrigatória dentro de cada batchUpdate:** inserções e deleções sempre do índice mais alto para o mais baixo — múltiplas operações no mesmo request não deslocam os índices umas das outras se processadas em ordem reversa.
+
+**Bloco 2 — inserção simples:**
+1. Fetch do tab para mapear os índices dos placeholders `[análise aqui]` em 1.1 e 1.2
+2. batchUpdate com dois `insertText` — primeiro o de maior índice (1.2), depois o de menor (1.1)
+
+**Bloco 3 — inserção após gráfico EBITDA:**
+1. Fetch atualizado (índices mudaram após Bloco 2)
+2. Localizar o `inlineObjectElement` (gráfico de ranking EBITDA) para determinar onde inserir o texto de 2.4
+3. batchUpdate com os 4 insertText de 2.1, 2.2, 2.3, 2.4 — em ordem reversa de índice
+
+**Bloco 4 — intro antes do gráfico DFC, análise+conclusão após:**
+1. Fetch atualizado
+2. Localizar o `inlineObjectElement` do gráfico DFC para separar intro (antes) de análise (depois)
+3. batchUpdate: primeiro insert da análise+conclusão (índice após gráfico), depois insert da intro (índice antes do gráfico)
+
+**Correção de texto já inserido:**
+```powershell
+# Padrão: deleteContentRange + insertText no mesmo batchUpdate, em ordem reversa
+$body = @{
+    requests = @(
+        @{ deleteContentRange = @{ range = @{ startIndex = $highStart; endIndex = $highEnd; tabId = $tabId } } },
+        @{ insertText = @{ location = @{ index = $highStart; tabId = $tabId }; text = $newHighText } },
+        @{ deleteContentRange = @{ range = @{ startIndex = $lowStart; endIndex = $lowEnd; tabId = $tabId } } },
+        @{ insertText = @{ location = @{ index = $lowStart; tabId = $tabId }; text = $newLowText } }
+    )
+} | ConvertTo-Json -Depth 10
+```
+
+### IDs de tabs — ciclo Mai/26
+| Tab ID | Regional |
+|--------|----------|
+| `t.aovivymda13c` | MG1 - Saman |
+| `t.bd4ttpu1v2q` | MG2 - Lisboa |
+| `t.wneuztypoxr9` | MG3 - Aguiar |
+| `t.liqo7yroui2q` | NNE - Telles |
+| `t.zapja9v8vet2` | RJ - Alfradique |
+| `t.tc4hummw4ws` | RS - Peretto |
+| `t.3k6skpr4bf37` | SC - Kloh |
+| `t.x48ir2979shh` | SP1 - Camargo |
+| `t.d8fda1wsiee5` | SP2 - Joandre |
+| `t.wf5nyy8w1p8n` | SP3 - Bilinski |
 
 ---
 
