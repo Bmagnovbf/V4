@@ -156,7 +156,7 @@ export default function ParamsPage() {
 
         {/* Headcount */}
         <Section title="Headcount por Horizonte">
-          {(['H1','H2','H3'] as const).map(h => (
+          {(['H1','H2'] as const).map(h => (
             <div key={h} className="mb-2">
               <div className="text-xs font-bold mb-1" style={{ color: '#7A7A7A' }}>{h}</div>
               <Row path={`PARAMS.headcount.${h}.csp`}       value={String(p.headcount[h].csp)} />
@@ -165,6 +165,24 @@ export default function ParamsPage() {
               <Row path={`PARAMS.headcount.${h}.total`}     value={String(p.headcount[h].total)} />
             </div>
           ))}
+          {p.headcount.H3.map((b, i) => (
+            <div key={`H3-${i}`} className="mb-2">
+              <div className="text-xs font-bold mb-1" style={{ color: '#7A7A7A' }}>
+                {`H3 (até ${brl(b.ate)})`}
+              </div>
+              <Row path={`PARAMS.headcount.H3[${i}].csp`}       value={String(b.csp)} />
+              <Row path={`PARAMS.headcount.H3[${i}].comercial`} value={String(b.comercial)} />
+              <Row path={`PARAMS.headcount.H3[${i}].ga`}        value={String(b.ga)} />
+              <Row path={`PARAMS.headcount.H3[${i}].total`}     value={String(b.total)} />
+            </div>
+          ))}
+          <div className="mb-2">
+            <div className="text-xs font-bold mb-1" style={{ color: '#7A7A7A' }}>H4 (não exibido — simulador cobre H1–H3)</div>
+            <Row path="PARAMS.headcount.H4.csp"       value={String(p.headcount.H4.csp)} />
+            <Row path="PARAMS.headcount.H4.comercial" value={String(p.headcount.H4.comercial)} />
+            <Row path="PARAMS.headcount.H4.ga"        value={String(p.headcount.H4.ga)} />
+            <Row path="PARAMS.headcount.H4.total"     value={String(p.headcount.H4.total)} />
+          </div>
         </Section>
 
         {/* Piso mínimo de custos */}

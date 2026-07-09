@@ -151,10 +151,19 @@ export const PARAMS = {
   },
 
   // ─── Headcount por horizonte (equipe base — BDRs são adicionados dinamicamente) ──
+  // H1 e H2 são valores únicos por horizonte. H3 é subdividido por faixa de
+  // faturamento bruto mensal (`ate` = teto inclusivo da banda, em R$).
+  // H4 fica registrado para habilitação futura — o simulador ainda cobre só H1–H3,
+  // então este valor não é exibido enquanto H4+ retornar resultado vazio.
   headcount: {
-    H1: { csp:  4, comercial: 2, ga: 1, total:  7 },
-    H2: { csp: 10, comercial: 3, ga: 3, total: 16 },
-    H3: { csp: 25, comercial: 6, ga: 5, total: 36 },
+    H1: { csp: 3, comercial: 2, ga: 1, total:  6 },
+    H2: { csp: 8, comercial: 3, ga: 2, total: 13 },
+    H3: [
+      { ate: 200_000, csp: 11, comercial: 4, ga: 3, total: 18 },
+      { ate: 300_000, csp: 14, comercial: 5, ga: 3, total: 22 },
+      { ate: 450_000, csp: 18, comercial: 5, ga: 3, total: 26 },
+    ],
+    H4: { csp: 30, comercial: 6, ga: 5, total: 41 },
   },
 
   // ─── Ineficiência de onboarding M1–M3 ────────────────────────────────────

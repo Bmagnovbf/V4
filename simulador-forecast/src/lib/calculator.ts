@@ -24,6 +24,22 @@ export function identificaHorizonte(meta_fat_bruto: number): Horizonte {
   return 'H4+'
 }
 
+// ─── Headcount base por horizonte ─────────────────────────────────────────────
+// H1/H2 têm valor único; H3 é subdividido por faixa de faturamento bruto.
+
+export function resolveHeadcount(
+  horizonte: Exclude<Horizonte, 'H4+'>,
+  meta_fat_bruto: number,
+): HeadcountHorizonte {
+  if (horizonte === 'H3') {
+    const bandas = PARAMS.headcount.H3
+    const banda = bandas.find(b => meta_fat_bruto <= b.ate) ?? bandas[bandas.length - 1]
+    return { csp: banda.csp, comercial: banda.comercial, ga: banda.ga, total: banda.total }
+  }
+  const hc = PARAMS.headcount[horizonte]
+  return { csp: hc.csp, comercial: hc.comercial, ga: hc.ga, total: hc.total }
+}
+
 // ─── Step 2: Métricas blended por horizonte ───────────────────────────────────
 
 export function calculaBlended(
@@ -481,7 +497,7 @@ export function simular(input: SimulacaoInput): SimulacaoResult {
     nivel_final:   maisCritico(nivelCapital(capital_ratio), nivelPayback(kpis.payback_mes)),
   }
 
-  const headcount: HeadcountHorizonte = { ...PARAMS.headcount[h] }
+  const headcount: HeadcountHorizonte = resolveHeadcount(h, meta_fat_bruto)
 
   const alocacao_m12: AlocacaoM12 = {
     custo_csp:       p12.custo_csp,
