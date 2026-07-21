@@ -234,9 +234,9 @@ Abrangência e Compliance de Dados
      frente às demais
    — Gráfico já inserido no documento: Ranking % Lucro Líquido por unidade
      (saldo DFC / total de entradas) — sem valores nominais expostos
-   Conclusão
-       2–3 frases: síntese do ciclo + principal alavanca recomendada ao
-       Diretor Regional.
+
+> **Não escrever bloco de Conclusão.** Decisão padrão: a conclusão repetia o que os
+> blocos já disseram. O relatório encerra na análise do Fluxo de Caixa.
 ```
 
 ---
@@ -284,7 +284,8 @@ Calcular para cada nível (consolidado da regional, por horizonte interno, por u
 |-----------|---------|
 | % Mg. Operacional | (Receita Líquida − CSP) / Receita Líquida × 100 |
 | % Mg. Contribuição | (Lucro Bruto − Comercial Variável*) / Receita Líquida × 100 |
-| % EBITDA | EBITDA / Receita Líquida × 100 |
+| % EBITDA (média simples) | Média dos % EBITDA das unidades — é a linha que o relatório reporta |
+| % EBITDA agregado (ponderado) | EBITDA somado ÷ Receita Líquida somada × 100 — **calcular sempre** e contrastar com a média simples |
 | % CSP | CSP / Receita Líquida × 100 |
 | % Comercial | Total Despesas Comerciais (4.1) / Receita Líquida × 100 |
 | % Administrativo | Total Despesas Administrativas (4.2) / Receita Líquida × 100 |
@@ -293,6 +294,15 @@ Calcular para cada nível (consolidado da regional, por horizonte interno, por u
 | RPU | Receita Líquida / Nº de Unidades |
 | Saldo DFC | Entradas − Saídas |
 | % Lucro Líquido DFC | Saldo DFC / Total de Entradas × 100 — **métrica exclusiva do relatório regional**; não usa Receita Líquida como denominador. Representa quanto do caixa efetivamente recebido ficou no saldo. Apresentar apenas em ranking %, sem valores nominais, para preservar privacidade entre unidades |
+
+### Regra de leitura obrigatória — % EBITDA média simples × agregado ponderado
+
+O `% EBITDA` reportado na tabela da regional é a **média simples** dos percentuais das unidades e **engana sistematicamente**. Calcular sempre o **agregado ponderado pela receita** (EBITDA somado das unidades ÷ receita somada) e compará-los no Bloco 2 (1.1):
+
+- **Divergência ≥ 3 p.p. → a divergência é a manchete, não o nível.**
+- **Agregado > média simples:** as negativas costumam ser unidades pequenas; a regional é mais saudável do que a média sugere (ex.: SC-Kloh Jun/26 — média 5,19% / última posição, mas agregado 15,67%).
+- **Agregado < média simples:** as âncoras de maior porte (geralmente H4 com CSP alto) puxam para baixo; a média superestima (ex.: SP1 e SP3 Jun/26).
+- Localizar a unidade âncora (a de maior receita, quase sempre a do franqueado) e checar sua saúde é o que mais explica a diferença entre as duas leituras.
 
 ### *Linhas que compõem o Comercial Variável (Margem de Contribuição)
 
@@ -324,10 +334,10 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 
 | # | Bloco | Seções cobertas |
 |---|-------|-----------------|
-| 1 | **Abrangência** | Sempre redigido e inserido pelo usuário — **ler para contexto, não redigir nem inserir** |
+| 1 | **Abrangência** | Sempre já escrita pelo usuário no documento (texto padrão, só muda a quantidade de unidades) — **ler para contexto, nunca reescrever, regenerar nem gastar tokens com ela** |
 | 2 | **Regional Consolidada** | 1.1 Análise Comparativa + 1.2 Pontos a Destacar |
 | 3 | **Análise das Margens** | 2.1 Receita Líquida + 2.2 Mg. Operacional + 2.3 Mg. Contribuição + 2.4 Mg. EBITDA |
-| 4 | **Fluxo de Caixa + Conclusão** | Intro geração de caixa + Ranking por unidade + Conclusão |
+| 4 | **Fluxo de Caixa** | Intro geração de caixa + Ranking por unidade. **Sem bloco de Conclusão** (padrão) |
 
 > **Nota bloco 4 (DFC):** os dados de DFC chegam após a conciliação de caixa, geralmente com dias de defasagem. Só iniciar o bloco 4 quando o usuário confirmar que os dados de DFC estão disponíveis. Até lá, o relatório pode ser entregue com os blocos 1–3.
 
@@ -351,8 +361,9 @@ Usar essas informações como contexto para todos os blocos seguintes. Iniciar p
 - **2.4 Margem EBITDA:** análise do resultado final por grupo — nomear os grupos que puxaram o resultado para cima e para baixo, correlacionando com o centro de custo determinante de cada grupo.
 - **Flags de outlier (aplicar em 2.2, 2.3 e 2.4):** identificar e nomear unidades cujo resultado se distancia significativamente das demais. Um outlier positivo pode mascarar que o restante está fraco; um negativo pode subestimar o avanço real das demais. Contextualizar antes de apresentar a média consolidada.
 
-**Bloco 4 — Fluxo de Caixa + Conclusão:**
-- **Gráfico já no documento:** o gráfico de Ranking % Lucro Líquido (saldo / total de entradas) já está inserido no documento — **não solicitar print ou screenshot ao usuário**. Lê-lo diretamente, como qualquer outra tabela ou gráfico do documento.
+**Bloco 4 — Fluxo de Caixa (sem Conclusão):**
+- **Encerramento:** o relatório termina na análise do Fluxo de Caixa. **Não escrever bloco de Conclusão** — decisão padrão, pois repetia o que os blocos anteriores já disseram.
+- **Ranking de caixa:** o usuário fornece o ranking de % Lucro Líquido por unidade (saldo / total de entradas) em tabela. Cruzá-lo com o % EBITDA de cada unidade para montar os grupos abaixo.
 - **Intro (parágrafo antes do gráfico):** framing rápido — quantas unidades fecharam no azul vs. no vermelho + destaque do caso mais relevante (outlier positivo ou negativo que define o caráter do bloco). Ex: "X das Y unidades da regional encerram o ciclo com saldo positivo, mas o quadro é dominado por [caso]."
 - **Análise após o gráfico — princípio de agrupamento:** não analisar cada unidade individualmente. Agrupar por comportamento:
   - Grupo positivo consistente (DFC próximo do EBITDA — mencionar nomes)
@@ -372,7 +383,8 @@ Usar essas informações como contexto para todos os blocos seguintes. Iniciar p
 1. **Recebíveis de exercícios anteriores:** a competência da receita era o mês anterior, mas o recebimento ocorreu neste ciclo. Fôlego de curto prazo que não altera o diagnóstico operacional.
 2. **Antecipação de recebíveis de projetos Executar:** Executar é recorrente (contratos de 6–12 meses com entrega mensal). Quando o cliente opta por pagar o compromisso total no cartão parcelado, a unidade pode antecipar esses recebíveis. Apesar de gerar respiro imediato, cria um risco bola de neve: nos meses seguintes há custo de servir mensal (CSP) sem entrada correspondente, pois o caixa do cliente já foi antecipado. Atenção redobrada quando DRE já está negativo.
 3. **Parcelamento de despesas:** despesa como broker é reconhecida integralmente na competência (impacta DRE), mas pode ser paga parcelada — caixa sai em parcelas enquanto o DRE já absorveu o custo cheio.
-- **Conclusão:** 2–3 frases — síntese do ciclo (DRE + DFC) + principal risco ou alavanca identificada + recomendação específica e acionável ao Diretor Regional.
+
+> **Leitura de coerência DFC × EBITDA (aprendizado Jun/26):** quando o caixa das unidades negativas confirma o DRE (negativas nas duas visões), o problema é operacional e real. Quando há divergência ampla — resultados fortes que não viraram caixa em várias unidades —, é timing de recebimento no nível da regional, a investigar. Não é preciso escrever conclusão: essa leitura fecha o bloco.
 
 ### Fluxo por bloco
 

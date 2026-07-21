@@ -62,8 +62,4 @@ Para o fechamento deste ciclo, analisamos os dados de [quantidade de unidades] u
 
 > **Ranking:** % de geração de caixa por unidade da Regional [Nome] (saldo DFC / receita líquida)
 
----
-
-## Conclusão
-
-[análise aqui]
+[análise aqui — grupos DRE × DFC + leitura de coerência; o relatório encerra aqui, SEM bloco de Conclusão]

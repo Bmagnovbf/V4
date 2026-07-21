@@ -262,7 +262,8 @@ Calcular para cada nível (consolidado, por horizonte, por regional):
 |-----------|---------|
 | % Mg. Operacional | (Receita Líquida − CSP) / Receita Líquida × 100 |
 | % Mg. Contribuição | (Lucro Bruto − Comercial Variável*) / Receita Líquida × 100 |
-| % EBITDA | EBITDA / Receita Líquida × 100 |
+| % EBITDA (média simples) | Média dos % EBITDA das unidades — é a linha que o relatório reporta no índice |
+| % EBITDA agregado (ponderado) | EBITDA somado ÷ Receita Líquida somada × 100 — **calcular sempre** e contrastar com a média simples |
 | % CSP | CSP / Receita Líquida × 100 |
 | % Comercial | Total Despesas Comerciais (4.1) / Receita Líquida × 100 |
 | % Administrativo | Total Despesas Administrativas (4.2) / Receita Líquida × 100 |
@@ -270,6 +271,15 @@ Calcular para cada nível (consolidado, por horizonte, por regional):
 | Variação vs mês anterior | (Valor Atual − Valor Anterior) / Valor Anterior × 100 |
 | RPU | Receita Líquida / Nº de Unidades |
 | Saldo DFC | Entradas − Saídas |
+
+### Regra de leitura obrigatória — % EBITDA média simples × agregado ponderado
+
+O `% EBITDA` reportado no índice é a **média simples** dos percentuais das unidades e **engana sistematicamente**, nos dois sentidos. Calcular sempre o **agregado ponderado pela receita** (EBITDA somado ÷ receita somada) e compará-los:
+
+- **Divergência ≥ 3 p.p. → a divergência é a manchete, não o nível.** Explicar a causa no texto antes de apresentar a média.
+- **Agregado > média simples:** o resultado se concentra nas unidades de maior faturamento; a média subestima a saúde real (ex.: Jun/26 consolidado — média 13,97% vs. agregado 19,05%).
+- **Agregado < média simples:** as unidades grandes puxam para baixo; a média superestima (comum quando âncoras H4 têm CSP alto).
+- Aplica-se ao consolidado, a cada horizonte e a cada regional. Decisões tomadas só pela média simples são frequentemente erradas.
 
 ### *Linhas que compõem o Comercial Variável (Margem de Contribuição)
 
@@ -308,6 +318,8 @@ O relatório é construído **bloco a bloco**: gerar o texto do bloco → exibir
 | 3 | **Horizontes H4 e H5** | Seções individuais H4 e H5 |
 | 4 | **Regional** | Tabela consolidada + Top 3 + Flop 3 |
 | 5 | **DFC + Conclusão** | Tabela DFC, análise por horizonte, conclusão geral |
+
+> **Abrangência e Compliance de Dados:** essa seção é **sempre deixada pré-escrita pelo usuário** no documento (texto padrão, só muda a quantidade de unidades). **Ler para contexto, nunca reescrever nem regenerar** — vale para o consolidado e para as regionais.
 
 > **Nota bloco 5 (DFC):** os dados de DFC chegam após a conciliação de caixa, geralmente com dias de defasagem em relação ao fechamento do DRE. Só iniciar o bloco 5 quando o usuário confirmar que os dados de DFC estão disponíveis. Até lá, o relatório pode ser entregue com os blocos 1–4.
 
