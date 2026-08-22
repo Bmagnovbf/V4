@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Resultado — Regionais V4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root{
+    color-scheme:light;   /* faz o popup do <select>, scrollbars e caret nascerem no tema certo */
+    --vermelho:#8B0000; --vermelho-med:#C00000; --vermelho-suave:#F4CCCC;
+    --verde:#1A5C38; --verde-suave:#D9EAD3; --ambar:#D4900A; --ambar-suave:#FCE9C7;
+    --preto:#1A1A1A; --cinza-esc:#3D3D3D; --cinza-med:#7A7A7A; --cinza-cl:#B9B9B9; --cinza-claro:#F2F2F2;
+    /* superfícies (temáticas) */
+    --bg:#F2F2F2; --surface:#fff; --surface-2:#faf7f7; --border:#ededed; --border-2:#f0f0f0; --border-pill:#e2e2e2;
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --preto:#e9eaec; --cinza-esc:#c7cace; --cinza-med:#9aa0a6; --cinza-cl:#6c7278; --cinza-claro:#181b1f;
+    --bg:#141619; --surface:#1e2126; --surface-2:#262a31; --border:#2d323a; --border-2:#2a2f36; --border-pill:#343a43;
+    --verde:#3fae74; --verde-suave:#173a26; --vermelho-med:#f0565b; --vermelho-suave:#3f1519; --ambar:#e0a93a; --ambar-suave:#3d2f11;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans',Arial,Helvetica,sans-serif;color:var(--preto);background:var(--bg);display:flex;min-height:100vh}
+
+  /* ===== SIDEBAR (Direção A — premium vinho→preto) ===== */
+  aside{width:230px;flex-shrink:0;color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    background:linear-gradient(180deg,#6B1020 0%,#4A0A16 40%,#25060C 75%,#160308 100%)}
+  aside .brand{display:flex;gap:12px;align-items:center;padding:22px 20px 20px}
+  aside .brand .logo{width:38px;height:38px;background:var(--vermelho-med);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;letter-spacing:-1px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  aside .brand .tit{font-size:15px;font-weight:bold;line-height:1.1}
+  aside .brand .tit small{display:block;font-size:11px;font-weight:normal;opacity:.65;margin-top:2px}
+  aside nav{display:flex;flex-direction:column;gap:4px;padding:8px 12px}
+  aside nav button{background:none;border:0;color:rgba(255,255,255,.82);text-align:left;padding:11px 14px;font-size:14px;cursor:pointer;display:flex;gap:11px;align-items:center;border-radius:9px;transition:.15s}
+  aside nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+  aside nav button.active{background:rgba(255,255,255,.13);color:#fff;font-weight:bold;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  aside nav button .ic{width:18px;height:18px;display:inline-flex;opacity:.9}
+  aside nav button .ic svg{width:18px;height:18px}
+  aside .user{margin:0 14px 16px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:13px 14px}
+  aside .user .lbl{font-size:9.5px;letter-spacing:1px;opacity:.55}
+  aside .user .nm{font-size:13px;font-weight:bold;margin-top:3px}
+  aside .user .em{font-size:11px;opacity:.6}
+
+  /* ===== MAIN ===== */
+  main{flex:1;padding:26px 32px;max-width:1440px}
+  h1{font-size:22px;margin-bottom:3px}
+  .sub{color:var(--cinza-med);font-size:13px;margin-bottom:20px}
+
+  /* ===== FILTROS (pills + stepper) ===== */
+  .filtros{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:24px}
+  .filtros .flabel{font-size:12px;color:var(--cinza-med);font-weight:bold;display:flex;gap:5px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border-pill);border-radius:22px;padding:0 6px 0 14px;height:38px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .pill .pic{color:var(--vermelho-med);font-size:13px}
+  /* A lista aberta do select é desenhada pelo SO: sem isto ela herda o texto claro do tema escuro
+     sobre o fundo branco padrão e fica ilegível. */
+  select option{background:var(--surface);color:var(--preto)}
+  .pill select{border:0;background:none;font-size:13px;color:var(--preto);padding:0 4px;height:36px;cursor:pointer;outline:none;font-family:inherit;max-width:190px}
+  .pill input{border:0;background:none;font-size:13px;color:var(--preto);padding:0 4px;height:36px;outline:none;font-family:inherit;width:210px}
+  .stepper{display:inline-flex;align-items:center;background:var(--surface);border:1px solid var(--border-pill);border-radius:22px;height:38px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .stepper button{border:0;background:none;width:34px;height:36px;cursor:pointer;font-size:16px;color:var(--vermelho-med);font-weight:bold}
+  .stepper button:hover{background:var(--surface-2)}
+  .stepper button:disabled{color:var(--cinza-cl);cursor:default;background:none}
+  .stepper .lbl{min-width:96px;text-align:center;font-size:13px;font-weight:bold;text-transform:capitalize}
+
+  /* ===== CARDS ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:26px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;flex-direction:column}
+  .card .top{display:flex;gap:11px;align-items:flex-start}
+  .card .icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .card .icon svg{width:17px;height:17px}
+  .card .head{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+  .card .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .card .rot{font-size:11px;color:var(--cinza-med);text-transform:uppercase;letter-spacing:.5px;font-weight:bold}
+  .card .val{font-size:25px;font-weight:bold;line-height:1.05}
+  .card .val small{font-size:12px;font-weight:normal;color:var(--cinza-med);margin-left:4px}
+  .card .det{font-size:12px;color:var(--cinza-med);margin-top:5px}
+  .card .cardfoot{display:flex;justify-content:flex-end;margin-top:auto;padding-top:10px}
+  .card .delta{font-size:12px;font-weight:bold}
+  /* Margens: 7 cards numa linha, compactos */
+  #m-cards{grid-template-columns:repeat(7,1fr);gap:10px}
+  #m-cards .card{padding:13px 12px}
+  #m-cards .icon{width:30px;height:30px}
+  #m-cards .icon svg{width:15px;height:15px}
+  #m-cards .val{font-size:21px}
+  #m-cards .rot{font-size:10px}
+
+  /* ===== GRÁFICOS ===== */
+  .graficos{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
+  .grafico{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .grafico h3{font-size:13px;margin-bottom:12px;color:var(--cinza-esc)}
+  .grafico.full{grid-column:1/-1}
+  .grafico .wrap{position:relative;height:230px}
+  /* Ranking Top 5 EBITDA */
+  #rk-ebitda{display:flex;flex-direction:column}
+  .rkrow{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--border-2)}
+  .rkrow:last-child{border-bottom:0}
+  .rkrow.first{background:var(--ambar-suave);border-radius:9px;padding:9px 8px;border-bottom:0}
+  .rkpos{width:28px;text-align:center;font-weight:bold;color:var(--cinza-med);font-size:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+  .rkpos svg{width:20px;height:20px;color:var(--ambar)}
+  .rkname{flex:1;font-weight:bold;font-size:13px;color:var(--preto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rkval{font-weight:bold;font-size:15px;flex-shrink:0}
+  .rkempty{color:var(--cinza-med);font-size:13px;padding:16px 4px}
+
+  /* ===== TABELAS ===== */
+  table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:13px}
+  th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--border-2)}
+  th{background:#2A0810;color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:bold}
+  th.c,td.c{text-align:center}
+  tbody tr:hover{background:var(--surface-2)}
+  .crit{display:inline-flex;flex-direction:column;align-items:center;gap:2px;line-height:1}
+  .crit .cd{width:11px;height:11px;border-radius:50%}
+  .crit .cv{font-size:10.5px;color:var(--cinza-cl)}
+  .statuspill{display:inline-block;padding:4px 12px;border-radius:14px;font-size:11.5px;font-weight:bold}
+  .sc{display:inline-flex;flex-direction:column;line-height:1.15}
+  .pillscore{display:inline-block;min-width:36px;text-align:center;padding:3px 7px;border-radius:7px;font-weight:bold;color:#fff}
+  /* Termômetro: célula suave (bolinha + score + valor) */
+  .tcell{display:inline-flex;align-items:center;gap:7px}
+  .tcell .cd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .tcell .tv{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+  .tcell .tv b{font-size:14px;color:var(--preto)}
+  .tcell .tv small{font-size:10.5px;color:var(--cinza-cl)}
+  .scorepill{display:inline-block;min-width:48px;text-align:center;padding:5px 13px;border-radius:13px;font-weight:bold;font-size:13.5px}
+  /* Cabeçalhos ordenáveis + filtro */
+  th[data-k]{cursor:pointer;user-select:none;white-space:nowrap}
+  th[data-k]:hover{background:#3d0f19}
+  th.sorted::after{content:'▾';margin-left:5px;font-size:9px}
+  th.sorted[data-dir="asc"]::after{content:'▴'}
+  .hth-sel{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:5px;font-size:10px;padding:2px 3px;margin-left:5px;cursor:pointer}
+  .hth-sel option{color:#1A1A1A}
+
+  section{display:none} section.active{display:block}
+  /* banner + modal de dados */
+  .banner{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 14px;margin-bottom:18px;font-size:12.5px;color:var(--cinza-esc);display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .banner .bacts button{background:var(--vermelho-med);color:#fff;border:0;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer}
+  .banner .bsub{display:block;margin-top:3px;font-size:11.5px}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;align-items:center;justify-content:center}
+  .modal .mbox{background:var(--surface);border-radius:14px;padding:22px;width:min(660px,92vw)}
+  .modal h3{font-size:16px;margin-bottom:6px}
+  .modal p{font-size:12px;color:var(--cinza-med);margin-bottom:12px}
+  .modal textarea{width:100%;height:220px;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface-2);color:var(--preto);font-family:monospace;font-size:11px;resize:vertical}
+  .mbtns{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+  .mbtns button{border:0;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer}
+  #csvcancel{background:var(--surface-2);color:var(--cinza-esc)} #csvload{background:var(--verde);color:#fff}
+  /* botão de tema (sidebar) */
+  .themebtn{margin:auto 14px 6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85);border-radius:9px;padding:9px 12px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:9px;font-family:inherit;transition:.15s}
+  .themebtn:hover{background:rgba(255,255,255,.13);color:#fff}
+  .themebtn .tic{width:16px;height:16px;display:inline-flex}
+  .themebtn .tic svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <div class="logo">V4</div>
+    <div class="tit">Painel Regionais<small>Resultado Financeiro</small></div>
+  </div>
+  <nav>
+    <button data-sec="home" class="active"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg></span> Home</button>
+    <button data-sec="engajamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18.5 20a6 6 0 0 0-3-5.2"/></svg></span> Engajamento</button>
+    <button data-sec="margens"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> Margens</button>
+    <button data-sec="termometro"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0z"/><line x1="12" y1="15" x2="12" y2="9"/></svg></span> Termômetro</button>
+  </nav>
+  <button id="theme-toggle" class="themebtn"></button>
+  <!-- Quem está logado: preenchido pelo Apps Script (Session.getActiveUser). Nasce oculto — fora do Web App
+       não há usuário para mostrar, e nome fixo aqui já foi placeholder confundido com dado real. -->
+  <div class="user" id="user-box" hidden>
+    <div class="lbl">LOGADO COMO</div>
+    <div class="nm" id="user-nome"></div>
+    <div class="em" id="user-email"></div>
+  </div>
+</aside>
+
+<main>
+  <div id="banner" class="banner"></div>
+  <!-- HOME (comparativo entre grupos) -->
+  <section id="home" class="active">
+    <h1>Visão Geral da Rede</h1>
+    <div class="sub">Comparativo de engajamento entre regionais e multifranquias</div>
+    <div class="filtros">
+      <span class="flabel">⧩ Filtros</span>
+      <div class="stepper" id="hm-step"><button data-d="-1">‹</button><span class="lbl" id="hm-mesLbl"></span><button data-d="1">›</button></div>
+    </div>
+    <div class="cards" id="hm-cards"></div>
+    <table id="hm-tab"><thead><tr>
+      <th data-k="grupo">Grupo</th>
+      <th class="c" data-k="qtd">Qtd. Unidades</th>
+      <th class="c" data-k="eng">Engajadas</th>
+      <th class="c" data-k="deseng">Desengajadas</th>
+      <th class="c" data-k="tx">Tx. Engaj.</th>
+      <th class="c" data-k="rpu" title="Receita média das unidades com STATUS &quot;sim&quot; — mesma régua da aba Margens. Unidades &quot;sim, com ressalva&quot; contam como engajadas, mas ficam fora do RPU por não serem comparáveis.">RPU</th>
+      <th class="c">H1</th><th class="c">H2</th><th class="c">H3</th><th class="c">H4</th><th class="c">H5</th>
+      <th class="c" data-k="score">Score</th>
+      <th class="c" data-k="alerta">Un. Alerta</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- ENGAJAMENTO (diagnóstico por unidade) -->
+  <section id="engajamento">
+    <h1>Engajamento das Unidades</h1>
+    <div class="sub">Diagnóstico de engajamento por unidade da regional</div>
+    <div class="filtros">
+      <span class="flabel">⧩ Filtros</span>
+      <div class="stepper" id="h-step"><button data-d="-1">‹</button><span class="lbl" id="h-mesLbl"></span><button data-d="1">›</button></div>
+      <div class="pill"><span class="pic">◉</span><select id="h-reg"></select></div>
+    </div>
+    <div class="cards" id="h-cards"></div>
+    <table id="h-tab"><thead><tr>
+      <th data-k="nome">Unidade</th><th data-k="reg">Regional</th>
+      <th class="c" data-k="ebitda">EBITDA</th><th class="c" data-k="diasConc">Concil.</th><th class="c" data-k="dedu">Deduções</th>
+      <th class="c" data-k="custo">Custos</th><th class="c" data-k="desp">Despesas</th><th class="c" data-k="coord">Coord.</th>
+      <th class="c" data-k="sk">Status <select id="h-fstatus" class="hth-sel"><option value="all">Todos</option><option value="eng">Engajado</option><option value="parcial">Parcial</option><option value="des">Desengajado</option></select></th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- MARGENS -->
+  <section id="margens">
+    <h1>Margens e Centros de Custo</h1>
+    <div class="sub" id="m-sub">Estrutura de resultado e custos por unidade/regional</div>
+    <div class="filtros">
+      <span class="flabel">⧩ Filtros</span>
+      <div class="stepper" id="m-step"><button data-d="-1">‹</button><span class="lbl" id="m-mesLbl"></span><button data-d="1">›</button></div>
+      <div class="pill"><span class="pic">◉</span><select id="m-reg"></select></div>
+      <div class="pill"><span class="pic">▤</span><select id="m-hor"><option value="__all">Todos horizontes</option><option>H1</option><option>H2</option><option>H3</option><option>H4</option><option>H5</option></select></div>
+      <div class="pill"><span class="pic">▪</span><input id="m-uni" list="m-uni-dl" placeholder="Todas as unidades" autocomplete="off"><datalist id="m-uni-dl"></datalist></div>
+    </div>
+    <div class="cards" id="m-cards"></div>
+    <div class="graficos">
+      <div class="grafico"><h3>Crescimento — Receita Líquida</h3><div class="wrap"><canvas id="g-cresc"></canvas></div></div>
+      <div class="grafico"><h3>Geração de Caixa</h3><div class="wrap"><canvas id="g-caixa"></canvas></div></div>
+      <div class="grafico"><h3>Análise horizontal das margens</h3><div class="wrap"><canvas id="g-margens"></canvas></div></div>
+      <div class="grafico"><h3>Centros de custo (CSP / Comercial / G&amp;A)</h3><div class="wrap"><canvas id="g-custos"></canvas></div></div>
+      <div class="grafico"><h3>RPU — Receita por Unidade <small style="font-weight:normal;color:var(--cinza-med)">· colunas = RPU (R$) · linha = nº de unidades no cálculo</small></h3><div class="wrap"><canvas id="g-rpu"></canvas></div></div>
+      <div class="grafico"><h3>Carga de Tributos</h3><div class="wrap"><canvas id="g-trib"></canvas></div></div>
+      <div class="grafico"><h3>Top 5 EBITDA <small style="font-weight:normal;color:var(--cinza-med)">· mês, regional e horizonte</small></h3><div id="rk-ebitda"></div></div>
+      <div class="grafico"><h3>Top 5 Lucratividade <small style="font-weight:normal;color:var(--cinza-med)">· saldo ÷ entrada · mês, regional e horizonte</small></h3><div id="rk-lucr"></div></div>
+    </div>
+  </section>
+
+  <!-- TERMÔMETRO -->
+  <section id="termometro">
+    <h1>Termômetro Financeiro</h1>
+    <div class="sub" id="t-sub">Score de saúde por indicador (Abril/2026 em diante)</div>
+    <div class="filtros">
+      <span class="flabel">⧩ Filtros</span>
+      <div class="stepper" id="t-step"><button data-d="-1">‹</button><span class="lbl" id="t-mesLbl"></span><button data-d="1">›</button></div>
+      <div class="pill"><span class="pic">◉</span><select id="t-reg"></select></div>
+    </div>
+    <div class="cards" id="t-cards"></div>
+    <table id="t-tab"><thead><tr>
+      <th data-k="nome">Unidade</th><th data-k="reg">Reg.</th>
+      <th class="c" data-k="scE">EBITDA</th><th class="c" data-k="scMc">Mg. Contrib.</th><th class="c" data-k="scIn">Inadimpl.</th>
+      <th class="c" data-k="scPr">Produtiv.</th><th class="c" data-k="scTx">Crescim.</th><th class="c" data-k="scGc">Ger. Caixa</th><th class="c" data-k="scoreMes">Score Mês</th><th class="c" data-k="scoreAno">Score Ano (YTD)</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+</main>
+
+<div id="modal" class="modal"><div class="mbox">
+  <h3>Colar CSV da base consolidada</h3>
+  <p>Exporte a planilha (Arquivo → Fazer download → CSV) ou copie o intervalo com o cabeçalho e cole abaixo.</p>
+  <textarea id="csvin" placeholder="ID_TEMPO,Mês,RAZÃO SOCIAL,REGIONAL,HORIZONTE,STATUS,..."></textarea>
+  <div class="mbtns"><button id="csvcancel">Cancelar</button><button id="csvload">Carregar dados</button></div>
+</div></div>
+
+<script>
+/* ================= CONFIG ================= */
+/* GRAF_MIN: piso das séries dos gráficos de Margens — 2025 fica de fora (dados sem confiabilidade auditada) */
+const CFG={ALERTA:35,CARE:70,MES_MIN:202603,GRAF_MIN:202601,SHEET_ID:"1xI8E5g_IaykvI6pZhzSKAUfDOX_vbQVij70qyUO6OEI",GID:"511003944"};
+const TCOR={safe:'var(--verde)',care:'var(--ambar)',alerta:'var(--vermelho-med)',null:'var(--cinza-esc)'};
+const TTINT={safe:'var(--verde-suave)',care:'var(--ambar-suave)',alerta:'var(--vermelho-suave)',null:'var(--cinza-claro)'};
+
+const $=id=>document.getElementById(id);
+if(window.Chart)Chart.defaults.font.family="'IBM Plex Sans',Arial,Helvetica,sans-serif";
+/* ================= ÍCONES (linha, monocromáticos, currentColor) ================= */
+const _svg=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const ICONS={
+  users:_svg('<circle cx="9" cy="8" r="3"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5.5a3 3 0 0 1 0 5"/><path d="M18.5 20a6 6 0 0 0-3-5.2"/>'),
+  wallet:_svg('<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1.2"/>'),
+  clock:_svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),
+  bar:_svg('<line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/><line x1="3" y1="20" x2="21" y2="20"/>'),
+  gauge:_svg('<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 14l4-3.5"/>'),
+  alert:_svg('<path d="M12 4L3 20h18z"/><path d="M12 10v4"/><path d="M12 17h.01"/>'),
+  userx:_svg('<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><line x1="16.5" y1="9" x2="22" y2="9"/>'),
+  usercheck:_svg('<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 12l2 2 4-4"/>'),
+  eye:_svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'),
+  crown:_svg('<path d="M4 19h16"/><path d="M3 7l4.5 4L12 5l4.5 6L21 7l-1.8 10H4.8z"/>'),
+  trending:_svg('<path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/>'),
+  percent:_svg('<line x1="19" y1="5" x2="5" y2="19"/><circle cx="7.5" cy="7.5" r="2"/><circle cx="16.5" cy="16.5" r="2"/>'),
+  landmark:_svg('<path d="M3 21h18"/><path d="M5 21V10"/><path d="M9 21V10"/><path d="M15 21V10"/><path d="M19 21V10"/><path d="M12 3l8 5H4z"/>'),
+  layers:_svg('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'),
+  megaphone:_svg('<path d="M3 11v3l11 5V6z"/><path d="M14 8.5a3.5 3.5 0 0 1 0 7"/>'),
+  folder:_svg('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+  activity:_svg('<path d="M3 12h4l3 8 4-16 3 8h4"/>'),
+  cash:_svg('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M5.5 9v6M18.5 9v6"/>')
+};
+/* ================= HELPERS ================= */
+const isEng=s=>String(s).trim().toLowerCase().startsWith('sim');
+/* 'eng' = STATUS "sim" puro · 'parcial' = "sim, com ressalva" (tolera vírgula ausente e o typo "resalva") · 'des' = resto */
+const statusKind=s=>{const t=String(s).trim().toLowerCase();return t.startsWith('sim,')||/res+alv/.test(t)?'parcial':(t.startsWith('sim')?'eng':'des');};
+const hPref=h=>{const s=String(h);if(/incubad/i.test(s))return'H1';const m=s.match(/^H([0-5])/);return m?(m[1]==='0'?'H1':'H'+m[1]):null;};
+const isDeslig=h=>/deslig/i.test(String(h));
+const scoreClass=s=>s==null?null:(s<CFG.ALERTA?'alerta':(s<=CFG.CARE?'care':'safe'));
+const fmtR=n=>n==null?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fmtR0=n=>n==null?'—':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const fmtP=n=>n==null?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const fmtN=(n,d=2)=>n==null?'—':n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const media=a=>{const v=a.filter(x=>x!=null);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};
+const soma=a=>{const v=a.filter(x=>x!=null);return v.length?v.reduce((x,y)=>x+y,0):null;};
+/* Recorta os meses iniciais sem dado em NENHUMA das séries (ex.: CAIXA e TRIBUTOS só existem a partir de Mar26) */
+function recorta(labels,...series){let i=0;while(i<labels.length&&series.every(s=>s[i]==null))i++;
+  return{labels:labels.slice(i),series:series.map(s=>s.slice(i))};}
+
+/* critérios de engajamento (Home) → retornam temperatura */
+const critEbitda=v=>v==null?'alerta':(Math.abs(v)<=35?'safe':(Math.abs(v)<=50?'care':'alerta'));
+const critConcil=v=>v==null?'alerta':(v<8?'safe':(v<9?'care':'alerta'));
+const critZero=v=>(v!=null&&v!==0)?'safe':'alerta';
+/* temperatura dos cards (defaults ajustáveis) */
+const tEng=v=>v==null?null:(v>=75?'safe':(v>=50?'care':'alerta'));
+const tInad=v=>v==null?null:(v<4?'safe':(v<8?'care':'alerta'));
+const tEbitda=v=>v==null?null:(v>10?'safe':(v>=0?'care':'alerta'));   // mesma régua da Lucratividade: <0 · 0–10 · >10
+const tConcil=v=>v==null?null:(v<9?'safe':(v<=15?'care':'alerta'));
+/* Margem Operacional: <40 vermelho · 40–65 âmbar · 65–85 verde · >85 âmbar (subdimensionamento) */
+const tMgOper=v=>v==null?null:(v<40?'alerta':(v<65?'care':(v<=85?'safe':'care')));
+/* Margem de Contribuição: <30 vermelho · 30–45 âmbar · ≥45 verde · =Mg.Operacional → âmbar (sem investimento em variável comercial) */
+const tMgContrib=(mc,mo)=>mc==null?null:((mo!=null&&Math.abs(mc-mo)<0.05)?'care':(mc<30?'alerta':(mc<45?'care':'safe')));
+const tTrib=v=>v==null?null:(v<7?'safe':(v<11?'care':'alerta'));
+const tRPU=v=>v==null?null:(v<150000?'alerta':(v<250000?'care':'safe'));
+const tProdut=v=>v==null?null:(v<1?'alerta':(v<2?'care':'safe'));
+const tCaixa=v=>v==null?null:(v<0?'alerta':'safe');
+/* Lucratividade % = saldo (entrada − saída) ÷ entrada. Régua confirmada: <0 vermelho · 0–10 âmbar · >10 verde */
+const tLucr=v=>v==null?null:(v>10?'safe':(v>=0?'care':'alerta'));
+const tCresc=v=>v==null?null:(v<0?'alerta':(v<=6?'care':'safe'));
+
+/* ================= AMOSTRA (Fev/Mar/Abr 2026) ================= */
+function r(idt,mes,razao,reg,hor,status,ebitda,mgOper,mgContrib,csp,comercial,admin,gerais,tributos,
+           dedu,custo,desp,coord,receita,diasConc,produt,tkOld,scE,scMc,scIn,scPr,scTx,scGc,scoreMes,classMes){
+  const txCresc=scTx==null?null:+(scTx*0.20).toFixed(1);
+  const inadimpl=scIn==null?null:+(10-scIn/100*7).toFixed(1);
+  const gerCaixa=scGc==null?null:Math.round(1+scGc/100*199999); // amostra: valor coerente c/ score (piso R$1 → meta R$200k)
+  const scoreAno=scoreMes==null?null:+(scoreMes*0.98).toFixed(3); // amostra: YTD ~ próximo do mês (real vem da coluna SCORE ANO)
+  const lucr=(receita&&gerCaixa!=null)?+(gerCaixa/receita*100).toFixed(2):null; // amostra: derivada (real vem da coluna LUCRATIVIDADE)
+  return{idt,mes,razao,nome:razao,reg,hor:hPref(hor),status,eng:isEng(status),sk:statusKind(status),deslig:isDeslig(hor),
+    ebitda,mgOper,mgContrib,csp,comercial,admin,gerais,tributos,dedu,custo,desp,coord,receita,diasConc,
+    produt,txCresc,inadimpl,lucr,gerCaixa,scE,scMc,scIn,scPr,scTx,scGc,scoreMes,scoreAno,classMes,
+    // colunas da base real sem equivalente na amostra — declaradas p/ o objeto ter a mesma forma nas duas origens
+    broker:null,gastosPess:null,cxOper:null,cxFin:null,cxLiq:null,saldoCx:null,classAno:null};
+}
+const DATA=[
+ r(202604,'Abr26','ARAUJO ASSESSORIA','RJ - Alfradique','H2','sim',50.16,74.51,66.38,25.49,16.34,5.98,2.03,5.0,-16533,-33200,-31723,5,130256,5,10.512,4058.33,100,100,100,100,100,38,96.9,1),
+ r(202604,'Abr26','VINICIUS GARCIA','RJ - Alfradique','H2','sim',35.59,53.59,40.17,46.41,15.12,1.53,1.35,6.0,-14150,-47620,-18466,3,102602,1,8.129,3144.18,100,34,100,100,100,26,79.77,24),
+ r(202604,'Abr26','LAB OLGA MKT DIGITAL','RS - Peretto','H2','sim',55.87,79.52,78.58,20.48,8.49,10.86,4.30,4.3,-16391,-19600,-22635,2,95703,2,2.691,2959.64,100,100,100,66,0,18,80.86,21),
+ r(202604,'Abr26','LIMA SOARES','NNE - Telles','H2','sim',51.52,76.40,76.40,23.60,0.0,17.73,7.16,7.16,-12051,-23903,-25201,2,101282,2,6.230,3060.77,100,100,100,100,76,22,93.71,4),
+ r(202604,'Abr26','SANTOS GONCALVES','RS - Peretto','H2','sim',29.14,75.71,73.01,24.29,15.75,16.40,14.43,14.43,-15651,-10500,-20131,2,43225,5,2.139,2063.70,100,100,75,43,61,0,77.57,29),
+ r(202604,'Abr26','DAVI ASSESSORIA','RS - Peretto','H3','sim',32.27,72.93,71.73,27.07,10.98,20.09,9.60,9.6,-13767,-29887,-44886,2,110400,2,2.062,3294.53,100,100,100,40,0,32,77.60,28),
+ r(202604,'Abr26','GHR GROWTH','NNE - Telles','H3','sim',32.37,79.70,46.78,20.30,37.83,9.40,0.11,0.11,-5453,-35250,-82189,3,173639,2,3.337,3832.31,100,56,100,93,100,53,85.63,14),
+ r(202604,'Abr26','CPL ASSESSORIA','SC - Kloh','H3','sim',36.12,67.69,65.07,32.31,10.86,15.43,5.28,5.28,-29060,-74580,-72864,4,230803,4,2.091,3000.84,100,100,100,41,100,20,87.20,11),
+ r(202604,'Abr26','GODOY CARVALHO','MG3 - Aguiar','H3','sim',43.86,77.81,71.02,22.19,16.82,15.23,1.91,1.91,-46728,-80172,-122714,2,361364,2,2.359,3509.66,100,100,50,52,100,40,79.89,23),
+ r(202604,'Abr26','COSTA SILVA FARIA','MG1 - Saman','H3','sim',24.22,73.14,53.23,26.86,27.90,17.69,3.33,3.33,-15648,-78061,-142182,2,290624,2,2.473,5367.14,100,77,100,57,100,100,87.94,9),
+ r(202604,'Abr26','BGRA ASSESSORIA','PR - Kuri','H3','sim',32.27,78.54,52.58,21.46,33.29,8.85,4.14,4.14,-33500,-45611,-98366,2,212573,2,3.437,5345.29,100,75,50,97,100,100,83.42,16),
+ r(202604,'Abr26','CARLOS ALMEIDA','MG3 - Aguiar','H3','sim',39.95,59.78,59.27,40.22,10.68,5.47,3.67,3.67,-35073,-45547,-22449,2,113233,2,2.035,3364.09,100,98,50,39,51,35,72.07,35),
+ r(202604,'Abr26','BATISTA MARKETING','SP3 - Bilinski','H3','sim',33.91,60.77,60.77,39.23,6.94,16.08,3.84,3.84,-67765,-70150,-48040,2,178822,2,1.922,4058.33,100,100,100,34,100,62,88.25,8),
+ r(202604,'Abr26','SBS ASSESSORIA','MG1 - Saman','H2','sim',12.89,45.96,44.41,54.04,18.74,12.43,1.90,1.9,-5795,-28370,-17362,3,52500,3,1.546,3711.97,52,48,100,19,55,48,55.57,61),
+ r(202604,'Abr26','ALVES & CO','SP2 - Joandre','H3','sim',-6.75,62.49,62.49,37.51,21.27,44.53,3.44,3.44,-15906,-19750,-36453,7,52647,7,1.435,2367.44,0,100,100,14,7,0,47.80,75),
+ r(202604,'Abr26','MENEZES ASSESSORIA','MG2 - Lisboa','H3','sim',4.33,48.95,48.46,51.05,9.79,33.10,1.73,1.73,-12711,-51333,-44872,2,100561,2,1.598,4172.25,0,62,100,21,70,67,48.84,72),
+ r(202604,'Abr26','BFG ASSESSORIA','RJ - Alfradique','H2','sim, com ressalva',-56.70,3.90,-29.59,96.10,42.50,11.48,6.62,6.62,-63214,-80389,-50692,12,83651,12,0.927,3125.05,0,0,100,0,0,25,21.25,109),
+ r(202604,'Abr26','FARIA TAVARES','MG2 - Lisboa','H2','sim, com ressalva',20.75,71.36,56.76,23.62,34.92,6.53,14.19,14.19,-14011,-8960,-21106,2,63802,5,2.20,3900.00,83,87,100,50,100,0,66.10,50),
+ r(202604,'Abr26','PROTTI SARTORI','SP2 - Joandre','H2','não',0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,-6322,-830,0,0,15,null,null),
+ r(202604,'Abr26','JESUS ASSESSORIA','SC - Kloh','H3','sim',6.91,37.79,28.53,62.21,17.56,5.65,7.67,7.67,-24513,-121665,-60389,7,195574,7,1.266,3209.28,28,0,0,7,0,28,9.37,129),
+ /* multis (representadas por 1 unidade cada) */
+ r(202604,'Abr26','NUNES HOLDING','M2 - Nunes','H2','sim',33.40,71.20,61.50,28.80,14.10,7.90,3.10,4.2,-11200,-31000,-24800,3,118500,3,3.05,0,92,82,88,71,80,58,82.10,15),
+ r(202604,'Abr26','COLLI INVESTIMENTOS','M1 - Colli','H1','não',0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,-5000,-1200,0,0,20,null,null),
+ /* trend Fev/Mar (só p/ gráficos de Margens) */
+ r(202603,'Mar26','ARAUJO ASSESSORIA','RJ - Alfradique','H2','sim',38.19,66.12,57.43,33.88,16.03,9.07,2.83,3.0,null,null,null,null,108975,null,null,null),
+ r(202602,'Fev26','ARAUJO ASSESSORIA','RJ - Alfradique','H2','sim',38.41,64.47,58.46,35.53,14.33,9.38,2.34,2.34,null,null,null,null,114226,null,null,null),
+ r(202603,'Mar26','GHR GROWTH','NNE - Telles','H3','sim',22.11,72.49,48.46,27.51,26.24,24.00,0.15,0.15,null,null,null,null,125465,null,null,null),
+ r(202602,'Fev26','GHR GROWTH','NNE - Telles','H3','sim',12.54,60.04,39.74,39.96,23.92,23.40,0.18,0.18,null,null,null,null,99811,null,null,null),
+ r(202603,'Mar26','CPL ASSESSORIA','SC - Kloh','H3','sim',14.16,63.55,42.81,36.45,29.04,14.88,5.47,5.47,null,null,null,null,185510,null,null,null),
+ r(202602,'Fev26','CPL ASSESSORIA','SC - Kloh','H3','sim',15.69,66.31,62.16,33.69,19.87,23.95,6.80,6.8,null,null,null,null,189813,null,null,null),
+ r(202603,'Mar26','COSTA SILVA FARIA','MG1 - Saman','H3','sim',-31.77,60.59,24.73,39.41,56.87,31.20,4.29,1.0,null,null,null,null,198163,null,null,null),
+ r(202602,'Fev26','COSTA SILVA FARIA','MG1 - Saman','H3','sim',20.02,63.62,55.85,36.38,22.06,18.01,3.53,3.53,null,null,null,null,257011,null,null,null),
+];
+
+/* ================= ESTADO DERIVADO (recomputável p/ dados ao vivo) ================= */
+let BASE=[],RAW=[],mesesAll=[],mesesTermo=[],regionais=[],atualIdts=new Set(),hmIdt,hIdt,mIdt,tIdt;
+const uniq=a=>[...new Set(a)].sort();
+const mesLbl=idt=>{const d=BASE.find(x=>x.idt===idt);return d?d.mes:'';};
+/* score só vale mês fechado+auditado: ≥ MES_MIN e não o período "Atual" (em aberto) */
+const hasScore=idt=>idt!=null&&idt>=CFG.MES_MIN&&!atualIdts.has(idt);
+/* Escopo EXCLUSIVO do Termômetro (score): TODAS as unidades ativas do mês/regional — "sim", "sim, com ressalva"
+   E "não". Só o score olha a rede inteira; Home, Engajamento e Margens seguem com seus escopos próprios.
+   Desligado / M&A continua fora (já removido em rebuild()). */
+const escopo=(idt,reg)=>BASE.filter(d=>d.idt===idt&&(reg==='__all'||d.reg===reg));
+const ativas=(idt,reg)=>BASE.filter(d=>d.idt===idt&&(reg==='__all'||d.reg===reg));
+const mesAnt=idt=>{const i=mesesAll.indexOf(idt);return i>0?mesesAll[i-1]:null;};
+function fillReg(sel){const cur=sel.value;sel.innerHTML='<option value="__all">Todas as regionais</option>'+regionais.map(r=>`<option>${r}</option>`).join('');if(cur&&[...sel.options].some(o=>o.value===cur))sel.value=cur;}
+function rebuild(rows){
+  RAW=rows;                                   // linhas como vieram do CSV — permite reconciliar com a planilha
+  BASE=rows.filter(d=>!d.deslig&&d.reg&&d.nome);
+  mesesAll=uniq(BASE.map(d=>d.idt));
+  atualIdts=new Set(BASE.filter(d=>/atual/i.test(String(d.mes))).map(d=>d.idt));
+  mesesTermo=uniq(BASE.filter(d=>hasScore(d.idt)).map(d=>d.idt));
+  regionais=uniq(BASE.map(d=>d.reg));
+  fillReg($('h-reg'));fillReg($('m-reg'));fillReg($('t-reg'));
+  if(!mesesAll.includes(hmIdt))hmIdt=mesesAll.at(-1);
+  if(!mesesAll.includes(hIdt))hIdt=mesesAll.at(-1);
+  if(!mesesAll.includes(mIdt))mIdt=mesesAll.at(-1);
+  if(!mesesTermo.includes(tIdt))tIdt=mesesTermo.at(-1);
+  diagMeses();
+}
+/* Diagnóstico de carga: por que um mês aparece sem score? Mostra rótulo, se é período "Atual",
+   se passa na regra de score (§4.4) e quantas linhas trouxeram SCORE MÊS / scores parciais preenchidos. */
+function diagMeses(){
+  console.table(mesesAll.map(mi=>{const s=BASE.filter(d=>d.idt===mi);
+    const preench=f=>s.filter(f).length;
+    return{'ID_TEMPO':mi,'Mês':s[0]?.mes,'linhas':s.length,
+      'é "Atual"':atualIdts.has(mi)?'sim':'',
+      'mês válido p/ score':hasScore(mi)?'sim':'NÃO',
+      'c/ SCORE MÊS':preench(d=>d.scoreMes!=null),
+      'c/ EBITDA score':preench(d=>d.scE!=null),
+      'c/ SCORE ANO':preench(d=>d.scoreAno!=null)};}));
+}
+/* ordenação/filtro das tabelas */
+let hmSort={key:'tx',dir:-1},hSort={key:'receita',dir:-1},tSort={key:'scoreMes',dir:-1},hStatus='all';
+const SKO={eng:0,parcial:1,des:2};
+function sortRows(rows,st){const k=st.key;return[...rows].sort((a,b)=>{
+  let x=k==='sk'?SKO[a.sk]:a[k],y=k==='sk'?SKO[b.sk]:b[k];
+  if(x==null)x=st.dir>0?Infinity:-Infinity; if(y==null)y=st.dir>0?Infinity:-Infinity;
+  if(typeof x==='string')return st.dir*x.localeCompare(y,'pt');
+  return st.dir*(x-y);});}
+function markSort(tid,st){document.querySelectorAll('#'+tid+' thead th[data-k]').forEach(th=>{
+  const on=th.dataset.k===st.key;th.classList.toggle('sorted',on);
+  if(on)th.dataset.dir=st.dir>0?'asc':'desc';else th.removeAttribute('data-dir');});}
+function bindSort(tid,st,render){document.querySelectorAll('#'+tid+' thead th[data-k]').forEach(th=>{
+  th.onclick=e=>{if(e.target.closest('select'))return;const k=th.dataset.k;
+    if(st.key===k)st.dir*=-1;else{st.key=k;st.dir=1;}render();};});}
+
+function stepper(prefix,getM,getIdt,setIdt,render){
+  const box=$(prefix+'-step');
+  const updfn=()=>{const M=getM();$(prefix+'-mesLbl').textContent=mesLbl(getIdt());
+    box.querySelector('[data-d="-1"]').disabled=M.indexOf(getIdt())<=0;
+    box.querySelector('[data-d="1"]').disabled=M.indexOf(getIdt())>=M.length-1;};
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{const M=getM();
+    let i=M.indexOf(getIdt())+ +b.dataset.d; if(i<0||i>=M.length)return; setIdt(M[i]);updfn();render();});
+  box._upd=updfn;updfn();
+}
+
+/* ================= CARD ================= */
+function card({icon,label,value,temp,sub,delta}){
+  const c=TCOR[temp],tint=TTINT[temp];
+  const ic=icon?`<div class="icon" style="background:${tint};color:${c}">${ICONS[icon]||icon}</div>`:'';
+  const dt=sub?`<div class="det">${sub}</div>`:'';
+  const ft=delta?`<div class="cardfoot"><span class="delta" style="color:${delta.up?'var(--verde)':'var(--vermelho-med)'}">${delta.up?'▲':'▼'} ${delta.txt}</span></div>`:'';
+  return `<div class="card"><div class="top">${ic}<div>
+      <div class="head"><span class="dot" style="background:${c}"></span><span class="rot">${label}</span></div>
+      <div class="val" style="color:${c}">${value}</div>${dt}</div></div>${ft}</div>`;
+}
+
+/* legenda de variação vs. mês anterior. opts:{invert,pp,abs,unit}
+   pp=diferença em pontos percentuais · abs=diferença absoluta (unit=sufixo, ex.' dias') · senão % relativo · invert=queda é o que é bom */
+function legMoM(cur,prev,opts){
+  opts=opts||{};
+  if(cur==null||prev==null||(!opts.pp&&!opts.abs&&prev===0))return 'sem base p/ comparar';
+  const d=(opts.pp||opts.abs)?(cur-prev):(cur-prev)/Math.abs(prev)*100;
+  const bom=opts.invert?d<=0:d>=0,cor=d===0?'var(--cinza-med)':bom?'var(--verde)':'var(--vermelho-med)',arw=d>0?'▲':d<0?'▼':'—';
+  const suf=opts.unit||(opts.pp?' p.p.':'%');
+  return `<span style="color:${cor};font-weight:bold">${arw} ${fmtN(Math.abs(d),1)}${suf}</span> vs. mês anterior`;
+}
+/* legenda de variação em contagem inteira. invert=true → aumento é ruim (vermelho) */
+function legCount(cur,prev,invert){
+  if(prev==null)return 'sem mês anterior para comparar';
+  const dd=cur-prev; if(dd===0)return 'sem variação vs. mês anterior';
+  const bom=invert?dd<0:dd>0,cor=bom?'var(--verde)':'var(--vermelho-med)';
+  return `<span style="color:${cor};font-weight:bold">${dd>0?'▲':'▼'} ${Math.abs(dd)}</span> ${dd>0?'a mais':'a menos'} que o mês anterior`;
+}
+/* ================= HOME (comparativo entre grupos) ================= */
+function renderHome(){
+  const idt=hmIdt,at=BASE.filter(d=>d.idt===idt),eng=at.filter(d=>d.eng);
+  const temScore=hasScore(idt);
+  // RPU usa a MESMA régua da aba Margens: só STATUS "sim" (sk==='eng'), fora o "sim, com ressalva".
+  // Motivo: o RPU só é comparável entre unidades cujos números de fato entraram na análise financeira. A
+  // ressalva não indica falta de engajamento — apenas que aquela unidade não é comparável com a rede.
+  // Esta é a ÚNICA exceção da tela: Taxa de Engajamento, Desengajadas, Score e Alerta seguem inalterados.
+  const engRPU=at.filter(d=>d.sk==='eng');
+  const rpu=media(engRPU.map(d=>d.receita));
+  const taxa=at.length?eng.length/at.length*100:null;
+  // Score e Alerta seguem a régua do Termômetro (§4.3): TODAS as ativas, inclusive desengajadas. A Taxa de
+  // Engajamento continua sobre as engajadas em sentido amplo (d.eng, que inclui "sim, com ressalva").
+  const scMed=temScore?media(at.map(d=>d.scoreMes)):null;
+  const alr=temScore?at.filter(d=>d.scoreMes!=null&&d.scoreMes<CFG.ALERTA).length:null;
+  const deseng=at.length-eng.length;
+  // mês anterior (mesmo escopo global da rede)
+  const pIdt=mesAnt(hmIdt),atP=pIdt!=null?BASE.filter(d=>d.idt===pIdt):null,engP=atP?atP.filter(d=>d.eng):null;
+  const rpuP=atP?media(atP.filter(d=>d.sk==='eng').map(d=>d.receita)):null;  // mesma régua do RPU atual
+  const taxaP=atP&&atP.length?engP.length/atP.length*100:null;
+  const desP=atP?atP.length-engP.length:null;
+  $('hm-cards').innerHTML=
+    card({icon:'wallet',label:'RPU (Receita Média)',value:fmtR0(rpu),temp:tRPU(rpu),sub:legMoM(rpu,rpuP)})+
+    card({icon:'users',label:'Taxa de Engajamento',value:fmtP(taxa),temp:tEng(taxa),sub:legMoM(taxa,taxaP,{pp:true})})+
+    card({icon:'userx',label:'Unidades Desengajadas',value:deseng,temp:deseng>0?'alerta':'safe',sub:legCount(deseng,desP,true)})+
+    card({icon:'gauge',label:'Score Médio',value:temScore?fmtN(scMed,3)+'<small>pts</small>':'—',temp:scoreClass(scMed),sub:temScore?'média da rede · todas as unidades':'sem score neste mês'})+
+    card({icon:'alert',label:'Unidades em Alerta',value:temScore?alr:'—',temp:temScore?(alr>0?'alerta':'safe'):null,sub:'score &lt; 35'});
+  // agrega por grupo (REGIONAL); Desligadas já excluídas em rebuild()
+  const groups={};
+  at.forEach(d=>{(groups[d.reg]=groups[d.reg]||[]).push(d);});
+  let rows=Object.entries(groups).map(([grupo,arr])=>{
+    const qtd=arr.length,engArr=arr.filter(d=>d.eng),engN=engArr.length,H=n=>arr.filter(d=>d.hor==='H'+n).length;
+    return{grupo,qtd,eng:engN,deseng:qtd-engN,tx:qtd?engN/qtd*100:null,
+      rpu:media(arr.filter(d=>d.sk==='eng').map(d=>d.receita)),         // RPU: só STATUS "sim" (régua da aba Margens)
+      score:media(arr.map(d=>d.scoreMes)),                              // Score/Alerta: todas as ativas do grupo
+      alerta:temScore?arr.filter(d=>d.scoreMes!=null&&d.scoreMes<CFG.ALERTA).length:null,
+      h1:H(1),h2:H(2),h3:H(3),h4:H(4),h5:H(5)};
+  });
+  rows=sortRows(rows,hmSort);markSort('hm-tab',hmSort);
+  $('hm-tab').querySelector('tbody').innerHTML=rows.map(r=>`<tr>
+    <td><b>${r.grupo}</b></td>
+    <td class="c">${r.qtd}</td>
+    <td class="c">${r.eng}</td>
+    <td class="c">${r.deseng}</td>
+    <td class="c"><b style="color:${TCOR[tEng(r.tx)]}">${fmtP(r.tx)}</b></td>
+    <td class="c"><b style="color:${TCOR[tRPU(r.rpu)]}">${fmtR0(r.rpu)}</b></td>
+    <td class="c">${r.h1||'—'}</td><td class="c">${r.h2||'—'}</td><td class="c">${r.h3||'—'}</td><td class="c">${r.h4||'—'}</td><td class="c">${r.h5||'—'}</td>
+    <td class="c"><b style="color:${TCOR[scoreClass(r.score)]}">${fmtN(r.score,3)}</b></td>
+    <td class="c">${r.alerta==null?'—':(r.alerta>0?`<b style="color:var(--vermelho-med)">${r.alerta}</b>`:'0')}</td>
+  </tr>`).join('');
+}
+
+/* ================= ENGAJAMENTO (por unidade) ================= */
+function renderEngaj(){
+  const reg=$('h-reg').value,at=ativas(hIdt,reg),eng=at.filter(d=>d.eng);
+  const taxa=at.length?eng.length/at.length*100:null;
+  const engN=at.filter(d=>d.sk==='eng').length,revN=at.filter(d=>d.sk==='parcial').length,deseng=at.filter(d=>d.sk==='des').length;
+  const diasM=media(at.map(d=>d.diasConc)); // média exclui null = unidades que "nunca conciliaram"
+  // mês anterior (mesmo escopo/regional) para as comparações
+  const pIdt=mesAnt(hIdt),atP=pIdt!=null?ativas(pIdt,reg):null;
+  const taxaP=atP&&atP.length?atP.filter(d=>d.eng).length/atP.length*100:null;
+  const engNP=atP?atP.filter(d=>d.sk==='eng').length:null,revNP=atP?atP.filter(d=>d.sk==='parcial').length:null,desNP=atP?atP.filter(d=>d.sk==='des').length:null;
+  const diasP=atP?media(atP.map(d=>d.diasConc)):null;
+  $('h-cards').innerHTML=
+    card({icon:'users',label:'Taxa de Engajamento',value:fmtP(taxa),temp:tEng(taxa),sub:legMoM(taxa,taxaP,{pp:true})})+
+    card({icon:'usercheck',label:'Unidades Engajadas',value:engN,temp:'safe',sub:legCount(engN,engNP,false)})+
+    card({icon:'eye',label:'Unidades em Revisão',value:revN,temp:'care',sub:legCount(revN,revNP,true)})+
+    card({icon:'userx',label:'Unidades Desengajadas',value:deseng,temp:deseng>0?'alerta':'safe',sub:legCount(deseng,desNP,true)})+
+    card({icon:'clock',label:'Dias s/ Conciliação',value:diasM==null?'—':`${fmtN(diasM,1)} <small>dias</small>`,temp:tConcil(diasM),sub:legMoM(diasM,diasP,{invert:true,abs:true,unit:' dias'})});
+  // tabela critérios
+  const crit=(temp,val)=>`<td class="c"><span class="crit"><span class="cd" style="background:${TCOR[temp]}"></span><span class="cv">${val}</span></span></td>`;
+  const spill={eng:['Engajado','safe'],parcial:['Parcial','care'],des:['Desengajado','alerta']};
+  let rows=hStatus==='all'?at.slice():at.filter(d=>d.sk===hStatus);
+  rows=sortRows(rows,hSort);markSort('h-tab',hSort);
+  const tb=$('h-tab').querySelector('tbody');tb.innerHTML='';
+  rows.forEach(d=>{
+    const[lbl,tp]=spill[d.sk];
+    tb.innerHTML+=`<tr><td><b>${d.nome}</b></td><td>${d.reg}</td>
+      ${crit(critEbitda(d.ebitda),fmtP(d.ebitda))}
+      ${crit(critConcil(d.diasConc),d.diasConc==null?'—':d.diasConc+'d')}
+      ${crit(critZero(d.dedu),fmtR0(d.dedu==null?null:Math.abs(d.dedu)))}
+      ${crit(critZero(d.custo),fmtR0(d.custo==null?null:Math.abs(d.custo)))}
+      ${crit(critZero(d.desp),fmtR0(d.desp==null?null:Math.abs(d.desp)))}
+      ${crit(critZero(d.coord),fmtR0(d.coord==null?null:Math.abs(d.coord)))}
+      <td class="c"><span class="statuspill" style="background:${TTINT[tp]};color:${TCOR[tp]}">${lbl}</span></td></tr>`;
+  });
+}
+
+/* ================= MARGENS ================= */
+let chM,chC,chG,chK,chT,chR;
+function renderMargens(){
+  const reg=$('m-reg').value,hor=$('m-hor').value;
+  const inScope=d=>(reg==='__all'||d.reg===reg)&&(hor==='__all'||d.hor===hor);
+  const unis=uniq(BASE.filter(d=>d.idt===mIdt&&d.sk==='eng'&&inScope(d)).map(d=>d.nome));
+  $('m-uni-dl').innerHTML=unis.map(u=>`<option value="${u}">`).join('');
+  const uniQ=$('m-uni').value.trim(),uniU=uniQ.toUpperCase(),matchUni=r=>uniQ===''||r.toUpperCase().includes(uniU);
+  // Escopo da tela (cards, 5 gráficos e Top 5): SOMENTE STATUS "sim" — exclui "sim, com ressalva" e "não"
+  const noMes=BASE.filter(d=>d.idt===mIdt&&inScope(d)&&matchUni(d.nome));
+  const esc=noMes.filter(d=>d.sk==='eng');
+  const nPar=noMes.filter(d=>d.sk==='parcial').length,nDes=noMes.filter(d=>d.sk==='des').length;
+  $('m-sub').innerHTML=`Estrutura de resultado e custos · escopo: <b>${esc.length}</b> unidade(s) com STATUS "sim"`
+    +(nPar||nDes?` — fora do cálculo: ${nPar} em revisão · ${nDes} desengajada(s)`:'');
+  const pIdt=mesAnt(mIdt),prev=pIdt?BASE.filter(d=>d.idt===pIdt&&d.sk==='eng'&&inScope(d)&&matchUni(d.nome)):null;
+  const ga=d=>(d.admin||0)+(d.gerais||0),ind=(a,f)=>media(a.map(f));
+  const moVal=ind(esc,d=>d.mgOper); // p/ regra da Mg. Contribuição = Mg. Operacional
+  const defs=[['Mg. Operacional','trending',d=>d.mgOper,tMgOper],['Mg. Contribuição','bar',d=>d.mgContrib,v=>tMgContrib(v,moVal)],
+    ['Mg. EBITDA','percent',d=>d.ebitda,tEbitda],['Tributos','landmark',d=>d.tributos,tTrib],
+    ['CSP','layers',d=>d.csp,null],['Comercial','megaphone',d=>d.comercial,null],['G&A','folder',ga,null]];
+  $('m-cards').innerHTML=defs.map(([lb,ic,f,tf])=>{
+    const v=ind(esc,f);let delta=null;
+    if(prev&&prev.length){const pv=ind(prev,f);if(v!=null&&pv!=null){const dd=v-pv;delta={up:dd>=0,txt:fmtN(Math.abs(dd),1)+' p.p.'};}}
+    return card({icon:ic,label:lb,value:fmtP(v),temp:tf?tf(v):null,delta});
+  }).join('');
+  // Gráficos começam em Jan/26 (CFG.GRAF_MIN): os dados de 2025 não têm confiabilidade auditada
+  const mesesG=mesesAll.filter(mi=>mi>=CFG.GRAF_MIN),mesesGraf=mesesG.length?mesesG:mesesAll;
+  // agg = media() para indicadores em % · soma() para valores nominais em R$ (ex.: Geração de Caixa)
+  const serie=(f,agg=media)=>mesesGraf.map(mi=>{const s=BASE.filter(d=>d.idt===mi&&d.sk==='eng'&&inScope(d)&&matchUni(d.nome));return agg(s.map(f));});
+  const labels=mesesGraf.map(mesLbl);
+  // Diagnóstico: composição do escopo mês a mês (auditoria contra a planilha)
+  console.table(mesesGraf.map(mi=>{const s=BASE.filter(d=>d.idt===mi&&inScope(d)&&matchUni(d.nome));
+    return{mes:mesLbl(mi),'STATUS sim':s.filter(d=>d.sk==='eng').length,'em revisão (fora)':s.filter(d=>d.sk==='parcial').length,'desengajadas (fora)':s.filter(d=>d.sk==='des').length};}));
+  // Gráficos: de Jan/26 até o último mês da base (não interagem com o filtro de mês; respeitam Regional/Horizonte/Unidade)
+  // Além do piso de Jan/26, cada gráfico recorta os meses iniciais sem dado próprio (CAIXA e TRIBUTOS começam depois)
+  const recS=serie(d=>d.receita,soma);                            // R$ nominal → SOMA das unidades "sim"
+  const G1=recorta(labels,recS);
+  chG=buildGrowth(chG,'g-cresc',G1.labels,G1.series[0],'Fat. Líquido (soma)');
+  const G2=recorta(labels,serie(d=>d.gerCaixa,soma));            // R$ nominal → SOMA das unidades "sim"
+  chK=buildGrowth(chK,'g-caixa',G2.labels,G2.series[0],'Geração de Caixa (soma)');
+  const G3=recorta(labels,serie(d=>d.mgOper),serie(d=>d.mgContrib),serie(d=>d.ebitda));
+  chM=buildLines(chM,'g-margens',G3.labels,[{label:'Mg. Operacional',data:G3.series[0],color:'#C00000'},{label:'Mg. Contribuição',data:G3.series[1],color:'#D4900A'},{label:'Mg. EBITDA',data:G3.series[2],color:'#1A5C38'}]);
+  const G4=recorta(labels,serie(d=>d.csp),serie(d=>d.comercial),serie(ga));
+  chC=buildLines(chC,'g-custos',G4.labels,[{label:'CSP',data:G4.series[0],color:'#C00000'},{label:'Comercial',data:G4.series[1],color:'#D4900A'},{label:'G&A',data:G4.series[2],color:'#7A7A7A'}]);
+  const G5=recorta(labels,serie(d=>d.tributos));
+  if(chT)chT.destroy();chT=buildTrib('g-trib',G5.labels,G5.series[0]);
+  // RPU = Σ RECEITA LIQ ÷ nº de unidades "sim" COM receita no mês (mesmo n plotado na linha → gráfico autoexplicativo)
+  const nUni=mesesGraf.map(mi=>BASE.filter(d=>d.idt===mi&&d.sk==='eng'&&inScope(d)&&matchUni(d.nome)&&d.receita!=null).length||null);
+  const rpu=recS.map((v,i)=>(v!=null&&nUni[i])?v/nUni[i]:null);
+  const G6=recorta(labels,rpu,nUni);
+  chR=buildRPU(chR,'g-rpu',G6.labels,G6.series[0],G6.series[1]);
+  renderRank('rk-ebitda','ebitda',tEbitda,'EBITDA',inScope);
+  renderRank('rk-lucr','lucr',tLucr,'lucratividade',inScope);
+}
+
+/* ================= TERMÔMETRO ================= */
+function renderTermo(){
+  const reg=$('t-reg').value,esc=escopo(tIdt,reg);
+  // O score é a única leitura da rede inteira: engajadas, com ressalva e desengajadas entram juntas
+  const nE=esc.filter(d=>d.sk==='eng').length,nP=esc.filter(d=>d.sk==='parcial').length,nD=esc.filter(d=>d.sk==='des').length;
+  $('t-sub').innerHTML=`Score de saúde por indicador (Abril/2026 em diante) · <b>${esc.length}</b> unidade(s) no cálculo`
+    +` — ${nE} engajada(s) · ${nP} com ressalva · ${nD} desengajada(s)`;
+  const moT=media(esc.map(d=>d.mgOper)); // p/ regra Mg.Contribuição = Mg.Operacional
+  // cards coloridos pelo VALOR do indicador; a pill de Score (coluna) segue a faixa oficial
+  const cd=[['Margem EBITDA','percent',d=>d.ebitda,d=>d.scE,fmtP,tEbitda],
+    ['Mg. Contribuição','bar',d=>d.mgContrib,d=>d.scMc,fmtP,v=>tMgContrib(v,moT)],
+    ['Inadimplência','clock',d=>d.inadimpl,d=>d.scIn,fmtP,tInad],
+    ['Produtividade','activity',d=>d.produt,d=>d.scPr,v=>fmtN(v,2),tProdut],
+    ['Taxa de Crescimento','trending',d=>d.txCresc,d=>d.scTx,fmtP,tCresc],
+    ['Ger. de Caixa','cash',d=>d.gerCaixa,d=>d.scGc,fmtR0,tCaixa]];
+  // Destaque no SCORE (pontuação, faixa oficial <35/35–70/>70); o valor do indicador vem abaixo, em menor evidência
+  $('t-cards').innerHTML=cd.map(([lb,ic,fv,fs,fmt,tv])=>{const val=media(esc.map(fv)),sc=media(esc.map(fs));
+    return card({icon:ic,label:lb,value:fmtN(sc,3)+'<small>pts</small>',temp:scoreClass(sc),
+      sub:`Média da rede: <b style="color:${TCOR[tv(val)]}">${fmt(val)}</b>`});}).join('');
+  const tcell=(sc,v,fmt)=>`<td class="c"><span class="tcell"><span class="cd" style="background:${TCOR[scoreClass(sc)]}"></span><span class="tv"><b>${sc??'—'}</b><small>${fmt(v)}</small></span></span></td>`;
+  let rows=sortRows(esc,tSort);markSort('t-tab',tSort);
+  const tb=$('t-tab').querySelector('tbody');tb.innerHTML='';
+  rows.forEach(d=>{const cl=scoreClass(d.scoreMes);
+    tb.innerHTML+=`<tr><td><b>${d.nome}</b></td><td>${d.reg.split(' - ')[0]}</td>
+      ${tcell(d.scE,d.ebitda,fmtP)}${tcell(d.scMc,d.mgContrib,fmtP)}${tcell(d.scIn,d.inadimpl,fmtP)}
+      ${tcell(d.scPr,d.produt,v=>fmtN(v,2))}${tcell(d.scTx,d.txCresc,fmtP)}${tcell(d.scGc,d.gerCaixa,fmtR0)}
+      <td class="c"><span class="scorepill" style="background:${TTINT[cl]};color:${TCOR[cl]}">${fmtN(d.scoreMes,3)}</span></td>
+      <td class="c">${fmtN(d.scoreAno,3)}</td></tr>`;
+  });
+}
+
+/* ================= CHART helpers ================= */
+function ds(label,data,color,fill){return{label,data,borderColor:color,backgroundColor:fill?color:color+'33',borderWidth:2,tension:.3,fill:!!fill};}
+/* Colunas de volume (R$) · rótulo em cima = variação MoM. Reusado por Receita Líquida e Geração de Caixa */
+function buildGrowth(ch,id,labels,rec,dsLabel){
+  if(ch)ch.destroy();
+  // Denominador em MÓDULO: saindo de um mês negativo, crescer (ex.: -2k → +4k) tem que dar variação POSITIVA
+  const g=rec.map((v,i)=>(i>0&&rec[i-1]&&v!=null&&rec[i-1]!=null)?(v-rec[i-1])/Math.abs(rec[i-1])*100:null);
+  const plug={id:'grow-'+id,afterDatasetsDraw(c){const ctx=c.ctx,m=c.getDatasetMeta(0);ctx.save();ctx.font="bold 10px 'IBM Plex Sans',Arial";ctx.textAlign='center';
+    m.data.forEach((b,i)=>{if(g[i]==null)return;ctx.fillStyle=g[i]>=0?'#1A5C38':'#C00000';ctx.fillText((g[i]>=0?'▲ ':'▼ ')+Math.abs(g[i]).toFixed(1)+'%',b.x,b.y-6);});ctx.restore();}};
+  const eixoR$=v=>'R$'+(Math.abs(v)>=1e6?(v/1e6).toFixed(1)+'M':(v/1000).toFixed(0)+'k');
+  return new Chart($(id),{type:'bar',data:{labels,datasets:[{label:dsLabel,data:rec,
+      backgroundColor:rec.map(v=>v!=null&&v<0?'#C00000':'#1A5C38'),borderRadius:4,maxBarThickness:48}]},   // total negativo → coluna vermelha
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>dsLabel+': '+fmtR0(c.parsed.y)}}},
+      scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10},callback:eixoR$}}}},plugins:[plug]});
+}
+/* RPU: colunas (R$/unidade, eixo esq.) + linha do nº de unidades no cálculo (eixo dir.) — a linha dá o contexto do denominador */
+function buildRPU(ch,id,labels,rpu,nun){
+  if(ch)ch.destroy();
+  const eixoR$=v=>'R$'+(Math.abs(v)>=1e6?(v/1e6).toFixed(1)+'M':(v/1000).toFixed(0)+'k');
+  const plug={id:'rpu-'+id,afterDatasetsDraw(c){const ctx=c.ctx;ctx.save();ctx.font="bold 10px 'IBM Plex Sans',Arial";ctx.textAlign='center';
+    c.getDatasetMeta(0).data.forEach((b,i)=>{if(rpu[i]==null)return;ctx.fillStyle='#1A5C38';ctx.fillText(eixoR$(rpu[i]),b.x,b.y-6);});
+    c.getDatasetMeta(1).data.forEach((p,i)=>{if(nun[i]==null)return;ctx.fillStyle='#D4900A';ctx.fillText(nun[i]+' un.',p.x,p.y-9);});ctx.restore();}};
+  return new Chart($(id),{type:'bar',data:{labels,datasets:[
+      {label:'RPU (R$ por unidade)',data:rpu,backgroundColor:rpu.map(v=>v!=null&&v<0?'#C00000':'#1A5C38'),borderRadius:4,maxBarThickness:56,yAxisID:'y',order:2},
+      {type:'line',label:'Unidades no cálculo',data:nun,borderColor:'#D4900A',backgroundColor:'#D4900A',borderWidth:2,tension:.3,pointRadius:3,yAxisID:'y2',order:1}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},
+      plugins:{legend:{labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{label:c=>c.datasetIndex===0?'RPU: '+fmtR0(c.parsed.y):'Unidades no cálculo: '+c.parsed.y}}},
+      scales:{x:{ticks:{font:{size:10}}},
+        y:{position:'left',ticks:{font:{size:10},callback:eixoR$}},
+        y2:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{font:{size:10},precision:0,callback:v=>v+' un.'}}}},plugins:[plug]});
+}
+/* Linhas com data-label do valor (%) em cada ponto de cada série. Reusado por Margens e Centros de Custo */
+function buildLines(ch,id,labels,dsets){
+  if(ch)ch.destroy();
+  const plug={id:'ll-'+id,afterDatasetsDraw(c){const ctx=c.ctx;ctx.save();ctx.font="bold 9px 'IBM Plex Sans',Arial";ctx.textAlign='center';
+    c.data.datasets.forEach((dset,di)=>{const m=c.getDatasetMeta(di);m.data.forEach((pt,i)=>{const v=dset.data[i];if(v==null)return;ctx.fillStyle=dset.borderColor;ctx.fillText(fmtN(v,1)+'%',pt.x,pt.y-7);});});ctx.restore();}};
+  return new Chart($(id),{type:'line',data:{labels,datasets:dsets.map(d=>ds(d.label,d.data,d.color))},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}},plugins:[plug]});
+}
+/* Rankings Top 5 (EBITDA e Lucratividade) — reagem a Mês + Regional + Horizonte (inScope). Não usam o filtro de
+   Unidade: um Top 5 restrito a uma unidade buscada não é ranking. Escopo de status segue a tela: só STATUS "sim". */
+function renderRank(elId,campo,tf,rotulo,inScope=()=>true){
+  const top=BASE.filter(d=>d.idt===mIdt&&d.sk==='eng'&&d[campo]!=null&&inScope(d)).sort((a,b)=>b[campo]-a[campo]).slice(0,5);
+  $(elId).innerHTML=top.length?top.map((d,i)=>`<div class="rkrow${i===0?' first':''}">
+    <span class="rkpos">${i===0?ICONS.crown:(i+1)+'º'}</span>
+    <span class="rkname">${d.nome}</span>
+    <span class="rkval" style="color:${TCOR[tf(d[campo])]}">${fmtP(d[campo])}</span>
+  </div>`).join(''):`<div class="rkempty">Sem dados de ${rotulo} para os filtros selecionados.</div>`;
+}
+/* Tributos: linha com o valor exato rotulado em cada mês */
+function buildTrib(id,labels,tr){
+  const plug={id:'trib',afterDatasetsDraw(c){const ctx=c.ctx,m=c.getDatasetMeta(0);ctx.save();ctx.font="bold 10px 'IBM Plex Sans',Arial";ctx.textAlign='center';ctx.fillStyle='#C00000';
+    m.data.forEach((p,i)=>{if(tr[i]==null)return;ctx.fillText(tr[i].toFixed(1)+'%',p.x,p.y-9);});ctx.restore();}};
+  return new Chart($(id),{type:'line',data:{labels,datasets:[ds('Tributos %',tr,'#C00000')]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}},plugins:[plug]});
+}
+
+/* ================= NAV + eventos ================= */
+document.querySelectorAll('aside nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('aside nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('main section').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');$(b.dataset.sec).classList.add('active');
+  const sec=b.dataset.sec;
+  if(sec==='home')renderHome();else if(sec==='engajamento')renderEngaj();else if(sec==='margens')renderMargens();else if(sec==='termometro')renderTermo();
+});
+function renderCurrent(){const s=document.querySelector('main section.active').id;
+  if(s==='home')renderHome();else if(s==='engajamento')renderEngaj();else if(s==='margens')renderMargens();else renderTermo();}
+
+/* ================= TEMA (claro/escuro) ================= */
+const IC_MOON=_svg('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>');
+const IC_SUN=_svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>');
+function setTheme(t,save){const dark=t==='dark';
+  document.documentElement.setAttribute('data-theme',t);
+  if(save!==false)try{localStorage.setItem('painel-theme',t);}catch(e){}
+  const btn=$('theme-toggle');if(btn)btn.innerHTML=`<span class="tic">${dark?IC_SUN:IC_MOON}</span><span>${dark?'Tema claro':'Tema escuro'}</span>`;
+  if(window.Chart){Chart.defaults.color=dark?'#c2c6cc':'#666';Chart.defaults.borderColor=dark?'rgba(255,255,255,.09)':'rgba(0,0,0,.08)';}
+  if(BASE.length)renderCurrent();
+}
+$('theme-toggle').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+setTheme((()=>{try{return localStorage.getItem('painel-theme');}catch(e){}})()||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),false);
+$('h-reg').onchange=renderEngaj;$('m-reg').onchange=renderMargens;$('m-hor').onchange=renderMargens;$('m-uni').onchange=renderMargens;$('m-uni').oninput=renderMargens;$('t-reg').onchange=renderTermo;
+$('h-fstatus').onchange=e=>{hStatus=e.target.value;renderEngaj();};
+bindSort('hm-tab',hmSort,renderHome);bindSort('h-tab',hSort,renderEngaj);bindSort('t-tab',tSort,renderTermo);
+stepper('hm',()=>mesesAll,()=>hmIdt,v=>hmIdt=v,renderHome);
+stepper('h',()=>mesesAll,()=>hIdt,v=>hIdt=v,renderEngaj);
+stepper('m',()=>mesesAll,()=>mIdt,v=>mIdt=v,renderMargens);
+stepper('t',()=>mesesTermo,()=>tIdt,v=>tIdt=v,renderTermo);
+
+/* ================= CARREGAMENTO DE DADOS (amostra / ao vivo / CSV) ================= */
+const isVazio=v=>{const s=String(v==null?'':v).trim();return s===''||s==='#N/A'||s==='-';};
+const parseNum=v=>{if(isVazio(v))return null;const n=parseFloat(String(v).replace(/\./g,'').replace(',','.'));return isNaN(n)?null:n;};
+const toInt=v=>{if(isVazio(v))return null;const n=parseInt(String(v).replace(/\D/g,''),10);return isNaN(n)?null:n;};
+/* SPEC §3 — Percentual: remove %, ','→'.', parseFloat ("62,98%"→62.98) */
+const parsePct=v=>{if(isVazio(v))return null;const n=parseFloat(String(v).replace(/%/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;};
+/* SPEC §3 — Moeda: remove R$/espaços/'.' milhar, ','→'.' ("-R$ 1.976,62"→-1976.62) */
+const parseMoney=v=>{if(isVazio(v))return null;const n=parseFloat(String(v).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return isNaN(n)?null:n;};
+function parseCSV(t,D){const rows=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+  else if(c==='"')q=true;else if(c===D){row.push(f);f='';}else if(c==='\n'){row.push(f);rows.push(row);row=[];f='';}else if(c!=='\r')f+=c;}
+  if(f.length||row.length){row.push(f);rows.push(row);}return rows;}
+const norm=s=>String(s==null?'':s).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');
+function loadCSV(txt){
+  const T=txt.replace(/\r/g,'');
+  const D=(T.split('\t').length>T.split(',').length)?'\t':',';       // TAB (copiado do Sheets) ou vírgula (CSV)
+  return mapRows(parseCSV(T,D),D==='\t'?'TAB':'vírgula');
+}
+/* mapRows: matriz (linhas × colunas de TEXTO) → objetos do painel.
+   Duas origens caem aqui com o mesmo tratamento: o CSV colado (via loadCSV) e o Apps Script publicado, que
+   manda getDisplayValues() — os valores chegam formatados igual ao CSV ("R$ 1.976,62", "62,98%"), então os
+   mesmos parsers valem para os dois. Um único ponto de mapeamento = uma única régua de leitura. */
+/* Colunas que o painel realmente consome. Como o casamento é por NOME, um título renomeado na planilha não
+   dá erro: aquela coluna simplesmente vem vazia. Com 40+ colunas isso passa despercebido — daí a conferência
+   explícita do cabeçalho a cada carga, que alimenta o aviso do banner. Colunas extras seguem ignoradas. */
+const COLS_USADAS=['ID_TEMPO','Mês','RAZÃO SOCIAL','NOME FRANQUIA','REGIONAL','HORIZONTE','STATUS',
+  'EBITDA (%)','MG OPERACIONAL','MG CONTRIBUIÇÃO','CSP','COMERCIAL','ADMIN','GERAIS','TRIBUTOS',
+  'DEDUCOES','CUSTOS','DESPESAS','BROKER','GASTOS PESSOAIS','COORDENADORES','RECEITA LIQ','DIAS CONC',
+  'PRODUTIVIDADE','TX CRESCIMENTO','LUCRATIVIDADE','INADIMPLÊNCIA',
+  'CAIXA ATIV OPERACIONAL','CAIXA ATIV FINANCEIRAS','CAIXA LUCRO LÍQUIDO','SALDO CAIXA','CAIXA',
+  'EBITDA score','MG Contribuição score','Inadimplência score','Produtividade score','Tx Crescimento score','CAIXA score',
+  'SCORE MÊS','CLASS. MÊS','SCORE ANO','CLASS. ANO'];
+let COLS_FALTANDO=[];
+function mapRows(rows,origem){
+  const hi=rows.findIndex(r=>r.some(c=>['RAZAO SOCIAL','ID_TEMPO','IDTEMPO'].includes(norm(c)))); // acha o cabeçalho em qualquer linha
+  if(hi<0){console.warn('mapRows: cabeçalho (RAZÃO SOCIAL / ID_TEMPO) não encontrado');return[];}
+  const idx={};rows[hi].forEach((h,i)=>{const n=norm(h);if(!(n in idx))idx[n]=i;});
+  COLS_FALTANDO=COLS_USADAS.filter(c=>!(norm(c) in idx));
+  if(COLS_FALTANDO.length)console.warn('mapRows: colunas esperadas ausentes na base →',COLS_FALTANDO);
+  const G=(r,name)=>{const i=idx[norm(name)];return i==null?null:String(r[i]==null?'':r[i]).trim();};
+  const out=rows.slice(hi+1).map(r=>{const razao=G(r,'RAZÃO SOCIAL'),nf=G(r,'Nome Franquia'),nome=(nf&&nf!=='#N/A')?nf:razao;if(!nome||nome==='#N/A')return null;const hor=G(r,'HORIZONTE'),st=G(r,'STATUS');
+    // Tributos: a coluna TRIBUTOS já vem em % (ex.: "7,00%"). Fallback: TRIBUTOS(R$)/RECEITA BRUTA, caso um dia volte a ser monetário
+    const tributos=parsePct(G(r,'TRIBUTOS'))??(()=>{const rb=parseMoney(G(r,'RECEITA BRUTA')),tr=parseMoney(G(r,'TRIBUTOS'));return rb>0&&tr!=null?tr/rb*100:null;})();
+    return{idt:toInt(G(r,'ID_TEMPO')),mes:G(r,'Mês'),razao,nome,reg:G(r,'REGIONAL'),hor:hPref(hor),status:st,eng:isEng(st),sk:statusKind(st),deslig:isDeslig(hor),
+      ebitda:parsePct(G(r,'EBITDA (%)')),mgOper:parsePct(G(r,'MG OPERACIONAL')),mgContrib:parsePct(G(r,'MG CONTRIBUIÇÃO')),csp:parsePct(G(r,'CSP')),comercial:parsePct(G(r,'COMERCIAL')),admin:parsePct(G(r,'ADMIN')),gerais:parsePct(G(r,'GERAIS')),tributos,
+      dedu:parseMoney(G(r,'DEDUCOES')),custo:parseMoney(G(r,'CUSTOS')),desp:parseMoney(G(r,'DESPESAS')),coord:parseMoney(G(r,'COORDENADORES')),receita:parseMoney(G(r,'RECEITA LIQ')),diasConc:parseNum(G(r,'DIAS CONC')),
+      broker:parseMoney(G(r,'BROKER')),gastosPess:parseMoney(G(r,'GASTOS PESSOAIS')),
+      produt:parseNum(G(r,'PRODUTIVIDADE')),txCresc:parsePct(G(r,'TX CRESCIMENTO')),inadimpl:parsePct(G(r,'INADIMPLÊNCIA')),
+      lucr:parsePct(G(r,'LUCRATIVIDADE')),gerCaixa:parseMoney(G(r,'CAIXA')),   // LUCRATIVIDADE já vem em % (saldo ÷ entrada)
+      // Visão de caixa desmembrada (ago/2026): operacional + financeiro = líquido; saldo é a posição resultante.
+      // Lidas e disponíveis em BASE; ainda não exibidas — a apresentação no painel está por definir (SPEC §5.5).
+      cxOper:parseMoney(G(r,'CAIXA ATIV OPERACIONAL')),cxFin:parseMoney(G(r,'CAIXA ATIV FINANCEIRAS')),
+      cxLiq:parseMoney(G(r,'CAIXA LUCRO LÍQUIDO')),saldoCx:parseMoney(G(r,'SALDO CAIXA')),
+      scE:parseNum(G(r,'EBITDA score')),scMc:parseNum(G(r,'MG Contribuição score')),scIn:parseNum(G(r,'Inadimplência score')),scPr:parseNum(G(r,'Produtividade score')),scTx:parseNum(G(r,'Tx Crescimento score')),scGc:parseNum(G(r,'CAIXA score')),scoreMes:parseNum(G(r,'SCORE MÊS')),scoreAno:parseNum(G(r,'SCORE ANO')),classMes:parseNum(G(r,'CLASS. MÊS')),classAno:parseNum(G(r,'CLASS. ANO'))};
+  }).filter(Boolean);
+  const preench=k=>out.filter(d=>d[k]!=null).length;   // quantas linhas trouxeram valor — pega coluna renomeada/vazia
+  console.log('mapRows →',{origem:origem||'matriz',linhaCabecalho:hi,linhasLidas:out.length,colunas:Object.keys(idx).length,
+    faltando:COLS_FALTANDO.length?COLS_FALTANDO:'nenhuma',
+    caixa:{operacional:preench('cxOper'),financeiro:preench('cxFin'),liquido:preench('cxLiq'),saldo:preench('saldoCx'),'CAIXA (ger.)':preench('gerCaixa')}});
+  return out;
+}
+function refreshSteppers(){['hm','h','m','t'].forEach(p=>{const s=$(p+'-step');if(s._upd)s._upd();});}
+
+/* ===== Última atualização =====
+   O CSV colado vale SÓ para a sessão — nada é gravado no navegador (dado de rede não fica em máquina de
+   usuário); ali a hora da colagem é o melhor proxy disponível. Publicado, o carimbo vem da PLANILHA: o
+   Apps Script devolve `atualizadoEm` (getLastUpdated do arquivo), então o painel diz quando o dado mudou,
+   não quando a tela abriu — sem isso o alerta de base defasada nunca dispararia. */
+const fmtDT=ts=>{const d=new Date(ts);const p=n=>String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+/* "há N ..." em linguagem natural — é o que dá noção de base velha num relance */
+function haQuanto(ts){const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1)return'agora mesmo';if(m<60)return`há ${m} min`;
+  const h=Math.floor(m/60);if(h<24)return`há ${h}h`;
+  const d=Math.floor(h/24);return d===1?'há 1 dia':`há ${d} dias`;}
+
+/* ts = quando o DADO foi atualizado, não quando a tela carregou. Sem default: origem que não sabe passa
+   null e o banner omite o carimbo — carimbo errado é pior que carimbo nenhum. */
+function applyRows(rows,label,ts){rebuild(rows);refreshSteppers();renderCurrent();setBanner(label,BASE.length,ts);}
+function setBanner(label,n,ts){
+  const ult=mesesAll.length?mesLbl(mesesAll.at(-1)):null;                    // vigência do dado: até que mês a base vai
+  let carimbo='';
+  if(ts){const dias=(Date.now()-ts)/864e5;
+    // fechamento é mensal: passou de ~35 dias sem atualizar, a base provavelmente está defasada
+    const cor=dias>35?'var(--vermelho-med)':dias>21?'#D4900A':'var(--cinza-med)';
+    carimbo=`<span class="bsub" style="color:${cor}">🕒 Atualizado em <b>${fmtDT(ts)}</b> · ${haQuanto(ts)}</span>`;}
+  // Coluna esperada e ausente = indicador vazio sem erro visível. Avisa aqui em vez de deixar o número sumir calado.
+  const falta=COLS_FALTANDO.length?`<span class="bsub" style="color:#D4900A">⚠️ ${COLS_FALTANDO.length} coluna(s) esperada(s) não encontrada(s) na base: <b>${COLS_FALTANDO.join(' · ')}</b> — os indicadores dependentes ficam vazios</span>`:'';
+  // Publicado e lendo a planilha ao vivo, colar CSV não tem função — e um botão de importar dados à vista
+  // de toda a rede convida a confusão. Ele reaparece se a leitura ao vivo falhar (amostra), que é quando
+  // volta a ser a saída, e no arquivo local, onde é a única.
+  const podeColar=!emAppsScript()||label==='amostra';
+  $('banner').innerHTML=(label==='amostra'
+    ?'<span>⚠️ Exibindo <b>dados de amostra</b> — conecte a base para dados reais.</span>'
+    :`<span>✅ Fonte: <b>${label}</b> · ${n} linhas carregadas${ult?` · dados até <b>${ult}</b>`:''}${carimbo}${falta}</span>`)
+    +(podeColar?'<span class="bacts"><button id="b-csv">Colar CSV</button></span>':'');
+  if(podeColar)$('b-csv').onclick=()=>$('modal').style.display='flex';}
+$('csvcancel').onclick=()=>$('modal').style.display='none';
+$('csvload').onclick=()=>{const rows=loadCSV($('csvin').value);
+  if(!rows.length){alert('Não consegui ler os dados. Verifique se colou incluindo a linha de cabeçalho (com ID_TEMPO e RAZÃO SOCIAL). Abra o console (F12) para ver o diagnóstico.');return;}
+  applyRows(rows,'CSV colado',Date.now());$('modal').style.display='none';};
+
+/* Publicado como Web App do Apps Script: o servidor lê a planilha com a permissão do dono (resolve o 401) e
+   o acesso já vem barrado no login do Workspace. Fora dali (arquivo local), `google` não existe e nada muda. */
+const emAppsScript=()=>typeof google!=='undefined'&&google.script&&google.script.run;
+/* Só faz sentido publicado: o Apps Script sabe quem abriu, o arquivo local não. */
+function preencherUsuario(u){
+  if(!u||!u.email)return;                       // sem e-mail (outro domínio) o bloco fica oculto mesmo
+  $('user-nome').textContent=u.nome||u.email;
+  $('user-email').textContent=u.email;
+  $('user-box').hidden=false;
+}
+function bootAppsScript(){
+  $('banner').innerHTML='<span>⏳ Carregando dados da planilha…</span>';
+  // chamada leve e separada da base: a barra lateral preenche na hora, sem esperar as 3 mil linhas
+  google.script.run.withSuccessHandler(preencherUsuario)
+    .withFailureHandler(e=>console.warn('getUsuario_painel falhou:',e)).getUsuario_painel();
+  google.script.run
+    .withSuccessHandler(p=>{
+      // Payload atual: {vals, atualizadoEm}. Matriz pura = implantação antiga ainda no ar — segue sem carimbo.
+      const m=Array.isArray(p)?p:(p&&p.vals)||[], ts=Array.isArray(p)?null:(p&&p.atualizadoEm)||null;
+      const rows=mapRows(m,'Apps Script');
+      if(rows.length)applyRows(rows,'Google Sheets (ao vivo)',ts);
+      else{rebuild(DATA);refreshSteppers();renderHome();setBanner('amostra');}})
+    .withFailureHandler(e=>{console.error('Apps Script getDados falhou:',e);
+      rebuild(DATA);refreshSteppers();renderHome();setBanner('amostra');})
+    .getDados_painel();   // sufixo _painel: o projeto Apps Script é o das macros da planilha, escopo global compartilhado
+}
+async function boot(){
+  if(emAppsScript())return bootAppsScript();
+  if(CFG.SHEET_ID){try{
+    // As duas barras do protocolo vêm por escape (\u002F), NUNCA literais: o Apps Script passa um removedor
+    // de comentários no JS embutido e ele não distingue "//" dentro de string de "//" de comentário — apaga
+    // o resto da linha, a crase não fecha, o arquivo inteiro vira string e nada roda. Quebrou a 1ª
+    // publicação (22/08/2026) e o sintoma foi mudo: página renderizada, zero JavaScript. Ver SPEC §10.2.
+    const url='https:\u002F\u002Fdocs.google.com/spreadsheets/d/'+CFG.SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+(CFG.GID||0);
+    const rows=loadCSV(await(await fetch(url)).text());
+    if(rows.length){applyRows(rows,'Google Sheets (ao vivo)',Date.now());return;}
+  }catch(e){console.warn('Sheets ao vivo indisponível, usando amostra:',e);}}
+  rebuild(DATA);refreshSteppers();renderHome();setBanner('amostra');
+}
+boot();
+</script>
+</body>
+</html>
