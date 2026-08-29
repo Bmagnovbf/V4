@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-red-primary:  #8B0000;
+  --color-red-medium:   #C00000;
+  --color-red-soft:     #F4CCCC;
+  --color-green-primary:#1A5C38;
+  --color-green-soft:   #D9EAD3;
+  --color-amber:        #D4900A;
+  --color-black:        #1A1A1A;
+  --color-gray-dark:    #3D3D3D;
+  --color-gray-mid:     #7A7A7A;
+  --color-gray-light:   #F2F2F2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #F2F2F2;
+  color: #1A1A1A;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}

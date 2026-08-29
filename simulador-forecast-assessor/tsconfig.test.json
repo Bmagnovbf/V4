@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "outDir": ".test_out",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+    "noEmit": false,
+    "incremental": false
+  },
+  "include": ["src/lib/calculator.ts", "src/config/params.ts", "src/types/index.ts"]
+}
