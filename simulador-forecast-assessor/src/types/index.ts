@@ -23,7 +23,9 @@ export type ViabilidadeNivel = 'verde' | 'amarelo' | 'vermelho'
 export interface SimulacaoInput {
   /** Meta de renda líquida mensal (pró-labore) no mês 12. */
   meta_renda_liquida: number
-  /** Reserva de capital de giro para atravessar os primeiros meses. */
+  /** Quanto ele precisa retirar por mês enquanto não atinge o objetivo. */
+  retirada_minima: number
+  /** Reserva de capital de giro para cobrir a retirada até a renda alcançá-la. */
   reserva_capital: number
   /** Perfil: 0 = 100% operacional, 1 = 100% comercial. */
   pct_comercial: number
@@ -64,6 +66,8 @@ export interface PLMensal extends Carteira {
   overhead: number
   /** Pró-labore do mês. */
   renda_liquida: number
+  /** Quanto falta da renda para bancar a retirada mínima (0 quando cobre). */
+  deficit_retirada: number
   /** Parcela da entrada, quando parcelada (não entra na renda líquida). */
   parcela_entrada: number
   fluxo_caixa: number
@@ -78,9 +82,13 @@ export interface KPIs {
   projetos_ativos_m12: number
   breakeven_mes: number | null
   payback_mes: number | null
-  /** Pior caixa acumulado — quanto de reserva o ramp-up exige. */
+  /** Pior caixa acumulado, já contando a entrada — base do payback. */
   pior_caixa: number
   investimento_total: number
+  /** Soma do que falta para bancar a retirada mínima. NÃO inclui a entrada. */
+  deficit_retirada_total: number
+  /** Primeiro mês em que a renda líquida cobre a retirada mínima. */
+  mes_autossuficiencia: number | null
 }
 
 export interface Termometro {

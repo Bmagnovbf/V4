@@ -185,6 +185,10 @@ function projetar(input: SimulacaoInput): PLMensal[] {
 
     const renda_liquida = receita_liquida - csp_saber - csp_executar - overhead
 
+    // O quanto a renda do mês fica abaixo do que ele precisa retirar para viver.
+    // Independe da entrada — capital de giro e investimento são coisas distintas.
+    const deficit_retirada = Math.max(0, input.retirada_minima - renda_liquida)
+
     const parcela_entrada =
       input.forma_pagamento === 'parcelado' && mes <= PARAMS.entrada.parcelas
         ? PARAMS.entrada.parcela_valor
@@ -200,7 +204,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
       receita_originacao, receita_recebida,
       impostos, receita_liquida,
       csp_saber, csp_executar, overhead,
-      renda_liquida, parcela_entrada,
+      renda_liquida, deficit_retirada, parcela_entrada,
       fluxo_caixa, caixa_acumulado: caixa,
     })
   }
@@ -221,6 +225,9 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     ? PARAMS.entrada.a_vista
     : PARAMS.entrada.parcela_valor * PARAMS.entrada.parcelas
 
+  const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
+  const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
+
   return {
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,
@@ -231,6 +238,8 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     payback_mes: projecao.find(l => l.caixa_acumulado >= 0)?.mes ?? null,
     pior_caixa,
     investimento_total,
+    deficit_retirada_total,
+    mes_autossuficiencia,
   }
 }
 
@@ -248,7 +257,10 @@ function nivelMenor(v: number | null, verde: number, amarelo: number): Viabilida
 const PRIORIDADE: Record<ViabilidadeNivel, number> = { verde: 0, amarelo: 1, vermelho: 2 }
 
 function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
-  const exigido = Math.max(0, -kpis.pior_caixa)
+  // A reserva cobre o buraco de RETIRADA, não a entrada. A entrada é
+  // investimento e já é medida pelo payback — somar as duas contaria o mesmo
+  // dinheiro em dois eixos do termômetro.
+  const exigido = kpis.deficit_retirada_total
   const reserva_ratio = exigido > 0 ? input.reserva_capital / exigido : Infinity
   const reserva_nivel = nivelMaior(
     reserva_ratio,

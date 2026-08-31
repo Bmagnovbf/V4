@@ -6,7 +6,9 @@ import {
 import type { PLMensal } from '@/types'
 import { fmt } from '@/lib/format'
 
-export function GraficoRenda({ projecao, meta }: { projecao: PLMensal[]; meta: number }) {
+export function GraficoRenda({
+  projecao, meta, retirada,
+}: { projecao: PLMensal[]; meta: number; retirada: number }) {
   const data = projecao.map(l => ({
     mes: `M${l.mes}`,
     'Renda líquida': Math.round(l.renda_liquida),
@@ -29,6 +31,10 @@ export function GraficoRenda({ projecao, meta }: { projecao: PLMensal[]; meta: n
             <ReferenceLine y={0} stroke="#3D3D3D" />
             <ReferenceLine y={meta} stroke="#D4900A" strokeDasharray="4 4"
               label={{ value: 'meta', position: 'insideTopRight', fill: '#D4900A', fontSize: 11 }} />
+            {retirada > 0 && (
+              <ReferenceLine y={retirada} stroke="#8B0000" strokeDasharray="2 3"
+                label={{ value: 'retirada mínima', position: 'insideBottomRight', fill: '#8B0000', fontSize: 11 }} />
+            )}
             <Bar dataKey="Renda líquida" fill="#1A5C38" />
             <Line type="monotone" dataKey="Caixa acumulado" stroke="#8B0000" strokeWidth={2} dot={false} />
           </ComposedChart>

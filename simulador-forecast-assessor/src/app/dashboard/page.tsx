@@ -45,7 +45,8 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-sm" style={{ color: '#3D3D3D' }}>
-              Meta de renda: <strong>{fmt(input.meta_renda_liquida)}/mês</strong> ·
+              Meta <strong>{fmt(input.meta_renda_liquida)}/mês</strong> ·
+              retirada mínima <strong>{fmt(input.retirada_minima)}/mês</strong> ·
               Dedicação <strong>{input.dedicacao}</strong> ·
               Entrada <strong>{input.forma_pagamento === 'a_vista' ? 'à vista' : 'parcelada'}</strong>
             </p>
@@ -59,11 +60,11 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <TermometroViabilidade termometro={termometro} payback={kpis.payback_mes} />
+        <TermometroViabilidade termometro={termometro} payback={kpis.payback_mes} mesAutossuficiencia={kpis.mes_autossuficiencia} />
         <KPICards kpis={kpis} />
         <CardsFontes m12={m12} mix={mix_m12} />
         <GraficoReceita projecao={projecao} />
-        <GraficoRenda projecao={projecao} meta={input.meta_renda_liquida} />
+        <GraficoRenda projecao={projecao} meta={input.meta_renda_liquida} retirada={input.retirada_minima} />
         <TabelaDRE projecao={projecao} />
 
         <p className="text-center text-xs pb-6" style={{ color: '#7A7A7A' }}>

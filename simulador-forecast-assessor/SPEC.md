@@ -222,6 +222,7 @@ com candidatos reais (§ 10, bloco B).
 ```ts
 interface SimulacaoInput {
   meta_renda_liquida: number    // R$ 5.000 – 45.000
+  retirada_minima:    number    // R$ 0 – 30.000
   reserva_capital:    number    // R$ 0 – 60.000
   pct_comercial:      number    // 0 – 1  (0 = 100% operacional)
   dedicacao:          'integral' | 'parcial'
@@ -236,6 +237,10 @@ matriz) fica em `params.ts` e não é editável na tela.
 `meta_renda_liquida` **não entra em nenhum cálculo** — é usada só no termômetro
 e como linha de referência no gráfico de renda. O motor não faz engenharia
 reversa a partir dela.
+
+`retirada_minima` é *quanto ele precisa retirar por mês enquanto não atinge o
+objetivo*. Também não altera a projeção — mede o buraco entre o que ele precisa
+e o que a operação entrega (§ 4.6).
 
 ### 4.2 Os dois tetos
 
@@ -355,7 +360,41 @@ Nota sobre a Fonte 3: entra em `receita_recebida` e portanto **é tributada** no
 Simples, mas **não gera CSP** — ele não entrega. É a fonte de maior margem
 unitária e menor valor absoluto.
 
-### 4.6 Caixa
+### 4.6 Déficit de retirada — o buraco de capital de giro
+
+O DRE não tem linha de custo de vida, então o risco real do Assessor fica
+invisível nas linhas de resultado: ele não **perde** dinheiro (breakeven em M1),
+ele ganha **quase nada** nos primeiros meses.
+
+```
+deficit_retirada(m)    = max(0, retirada_minima − renda_liquida(m))
+deficit_retirada_total = Σ deficit_retirada(m)
+mes_autossuficiencia   = primeiro m com deficit_retirada(m) = 0
+```
+
+**A entrada não entra nessa conta.** Capital de giro e investimento são coisas
+distintas: a entrada é medida pelo payback, e somar as duas contaria o mesmo
+dinheiro em dois eixos do termômetro. O que o candidato vê é a separação:
+
+```
+capital_total = investimento_total + deficit_retirada_total
+```
+
+Exemplo (35% comercial, retirada de R$ 8.000):
+
+| Mês | Renda líquida | Falta para a retirada |
+|---|---|---|
+| M1 | R$ 364 | R$ 7.636 |
+| M2 | R$ 410 | R$ 7.590 |
+| M3 | R$ 1.819 | R$ 6.181 |
+| M4 | R$ 4.573 | R$ 3.427 |
+| M5 | R$ 7.003 | R$ 997 |
+| M6 | R$ 8.745 | — |
+
+Reserva necessária: **R$ 25.831**. Autossuficiência: **M6**. Capital total:
+R$ 45.831 (R$ 20.000 de entrada + R$ 25.831 de giro).
+
+### 4.7 Caixa
 
 ```
 parcela_entrada(m) = 1.700   se forma_pagamento = 'parcelado' e m ≤ 12
@@ -368,7 +407,7 @@ caixa_acumulado(0) = −20.000   se forma_pagamento = 'a_vista'
 caixa_acumulado(m) = caixa_acumulado(m−1) + fluxo_caixa(m)
 ```
 
-### 4.7 KPIs
+### 4.8 KPIs
 
 ```
 renda_liquida_m12     = renda_liquida(12)
@@ -386,13 +425,12 @@ investimento_total    = 20.000 (à vista) | 20.400 (12 × 1.700)
 `pior_caixa` é o número que importa para o candidato: é quanto de reserva o
 ramp-up realmente exige.
 
-### 4.8 Termômetro
+### 4.9 Termômetro
 
 Três eixos, sempre prevalecendo o **mais crítico**.
 
 ```
-exigido        = max(0, −pior_caixa)
-reserva_ratio  = reserva_capital ÷ exigido        (∞ se exigido = 0)
+reserva_ratio  = reserva_capital ÷ deficit_retirada_total   (∞ se o total = 0)
 meta_ratio     = renda_liquida_m12 ÷ meta_renda_liquida
 
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
@@ -404,10 +442,14 @@ nivel_final    = o pior dos três
 
 **Por que estes três eixos e não margem.** No DRE o breakeven operacional é M1 e
 o payback M6 — o negócio fecha desde o primeiro mês. O risco do Assessor não é
-margem, é **fôlego**: atravessar M1–M4 com renda de R$ 900 a R$ 3.000/mês. O
-termômetro mede isso.
+margem, é **fôlego**: atravessar os primeiros meses com renda muito abaixo do
+que ele precisa retirar. O termômetro mede isso.
 
-### 4.9 Mix de fontes no M12
+Os três eixos medem coisas independentes, sem contar o mesmo dinheiro duas
+vezes: **reserva** olha o capital de giro, **payback** olha o investimento de
+entrada, **meta** olha a ambição declarada.
+
+### 4.10 Mix de fontes no M12
 
 Share de cada fonte sobre a receita recebida do M12, para os cards e o gráfico
 de área:
@@ -424,11 +466,12 @@ originacao   =  receita_originacao                              ÷ receita_receb
 
 ### 5.1 Tela de input (`/`)
 
-Cinco campos, em ordem:
+Seis campos, em ordem:
 
 | Campo | Controle | Faixa | Default |
 |---|---|---|---|
 | Meta de renda líquida no M12 | input + slider | R$ 5.000 – 45.000 | R$ 25.000 |
+| Retirada mínima mensal | input + slider | R$ 0 – 30.000 | R$ 8.000 |
 | Seu perfil | slider único | 0 – 100% comercial, passo 5 | 35% |
 | Dedicação | chips | integral / parcial | integral |
 | Entrada na rede | chips | à vista / 12x | à vista |
@@ -450,7 +493,7 @@ Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
 2. **Termômetro** — nível final + os três eixos abertos
-3. **KPI cards** — renda no M12, líquido ano 1, payback, projetos no M12
+3. **KPI cards** — renda no M12, líquido ano 1, projetos no M12, payback da entrada, reserva necessária, capital total
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada

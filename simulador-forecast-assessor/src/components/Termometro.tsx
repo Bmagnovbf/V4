@@ -19,8 +19,8 @@ function Item({ titulo, valor, nivel }: { titulo: string; valor: string; nivel: 
 }
 
 export function TermometroViabilidade({
-  termometro, payback,
-}: { termometro: Termometro; payback: number | null }) {
+  termometro, payback, mesAutossuficiencia,
+}: { termometro: Termometro; payback: number | null; mesAutossuficiencia: number | null }) {
   const c = CORES[termometro.nivel_final]
   const ratio = termometro.reserva_ratio
   return (
@@ -31,8 +31,12 @@ export function TermometroViabilidade({
       <p className="text-2xl font-bold mt-1" style={{ color: c.fg }}>{c.label}</p>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Item
-          titulo="Reserva vs. exigido pelo ramp-up"
-          valor={Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : 'sem déficit'}
+          titulo="Reserva vs. retirada mínima"
+          valor={
+            Number.isFinite(ratio)
+              ? `${ratio.toFixed(1)}×`
+              : mesAutossuficiencia === 1 ? 'renda cobre desde M1' : 'renda cobre'
+          }
           nivel={termometro.reserva_nivel}
         />
         <Item

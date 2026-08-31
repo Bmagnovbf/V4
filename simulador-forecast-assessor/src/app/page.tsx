@@ -8,6 +8,7 @@ import { PARAMS } from '@/config/params'
 import type { Dedicacao, FormaPagamento } from '@/types'
 
 const MIN_RENDA = 5_000,  MAX_RENDA = 45_000, STEP_RENDA = 1_000
+const MIN_RET   = 0,      MAX_RET   = 30_000, STEP_RET   = 500
 const MIN_RES   = 0,      MAX_RES   = 60_000, STEP_RES   = 2_500
 
 function parseBRL(raw: string): number { return Number(raw.replace(/\D/g, '')) }
@@ -96,6 +97,7 @@ export default function InputPage() {
   const router = useRouter()
 
   const [renda, setRenda] = useState(25_000)
+  const [retirada, setRetirada] = useState(8_000)
   const [reserva, setReserva] = useState(25_000)
   const [pctComercial, setPctComercial] = useState(35)
   const [dedicacao, setDedicacao] = useState<Dedicacao>('integral')
@@ -104,6 +106,7 @@ export default function InputPage() {
   function handleSimular() {
     const resultado = simular({
       meta_renda_liquida: renda,
+      retirada_minima: retirada,
       reserva_capital: reserva,
       pct_comercial: pctComercial / 100,
       dedicacao,
@@ -133,6 +136,13 @@ export default function InputPage() {
             hint="Pró-labore mensal, já descontados impostos, CSP e ferramentas"
             value={renda} setValue={setRenda}
             min={MIN_RENDA} max={MAX_RENDA} step={STEP_RENDA}
+          />
+
+          <CampoValor
+            label="Retirada Mínima Mensal"
+            hint="Quanto você precisa retirar por mês para se manter enquanto não atinge o objetivo"
+            value={retirada} setValue={setRetirada}
+            min={MIN_RET} max={MAX_RET} step={STEP_RET}
           />
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />
@@ -190,7 +200,7 @@ export default function InputPage() {
 
           <CampoValor
             label="Reserva de Capital de Giro"
-            hint="Quanto você tem para se sustentar enquanto a carteira sobe — a renda é baixa nos primeiros meses"
+            hint="Quanto você tem guardado para cobrir a retirada mínima até a renda alcançá-la (não inclui a entrada na rede)"
             value={reserva} setValue={setReserva}
             min={MIN_RES} max={MAX_RES} step={STEP_RES}
           />

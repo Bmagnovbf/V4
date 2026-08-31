@@ -57,6 +57,7 @@ let falhas = 0
 for (const cenario of Object.values(DRE)) {
   const r = simular({
     meta_renda_liquida: 25_000,
+    retirada_minima:     8_000,
     reserva_capital:    30_000,
     pct_comercial:      cenario.pct_comercial,
     dedicacao:          'integral',
@@ -105,7 +106,7 @@ console.log(`
 console.log('\n── Fonte 3 (transbordo de originação)')
 for (const pct of [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]) {
   const r = simular({
-    meta_renda_liquida: 25_000, reserva_capital: 30_000,
+    meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
     pct_comercial: pct, dedicacao: 'integral', forma_pagamento: 'a_vista',
   })
   const m12 = r.projecao[11]

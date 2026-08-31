@@ -159,10 +159,11 @@ Só vira input o que o candidato sabe sobre si mesmo. Benchmark da rede
 | Input | Formato | O que altera |
 |---|---|---|
 | Meta de renda líquida no M12 | slider R$ 5–45K | Termômetro: renda projetada vs. meta |
+| Retirada mínima mensal | slider R$ 0–30K | Quanto ele precisa retirar enquanto não atinge o objetivo — define a reserva necessária |
 | Perfil operacional × comercial | slider 0–100% | Mix entre as 3 fontes — a alavanca central |
 | Dedicação | integral / parcial | Teto de projetos ativos (15 ou 8) |
 | Entrada na rede | à vista / 12x | Curva de caixa e payback |
-| Reserva de capital de giro | slider R$ 0–60K | Termômetro: fôlego para atravessar M1–M4 |
+| Reserva de capital de giro | slider R$ 0–60K | Termômetro: cobre a retirada até a renda alcançá-la |
 
 ---
 
