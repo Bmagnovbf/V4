@@ -86,7 +86,7 @@ for (const cenario of Object.values(DRE)) {
   checa('Receita ano 1',    cenario.receita_recebida_ano1, r.kpis.receita_recebida_ano1)
   checa('Líquido ano 1',    cenario.renda_liquida_ano1,    r.kpis.renda_liquida_ano1)
   checa('Líquido médio/mês',cenario.renda_media_mes,       r.kpis.renda_media_mes)
-  checa('Líquido no M12',   cenario.renda_liquida_m12,     r.kpis.renda_liquida_m12)
+  checa('Líquido em regime',cenario.renda_liquida_m12,     r.kpis.renda_regime)
   checa('Ativos no M12',    cenario.projetos_ativos_m12,   r.kpis.projetos_ativos_m12, 'qtd')
   checa('Payback (mês)',    cenario.payback_mes,           r.kpis.payback_mes ?? 99,    'mes')
   checa('Breakeven (mês)',  cenario.breakeven_mes,         r.kpis.breakeven_mes ?? 99,  'mes')
@@ -95,6 +95,39 @@ for (const cenario of Object.values(DRE)) {
   console.log(`  mix M12: alocação ${(mix.alocacao * 100).toFixed(0)}% · ` +
               `self ${(mix.self_sourced * 100).toFixed(0)}% · ` +
               `originação ${(mix.originacao * 100).toFixed(0)}%`)
+}
+
+// ─── Invariante: contrato não existe em decimal ──────────────────────────────
+console.log('\n── Contratos inteiros')
+{
+  const CAMPOS = [
+    'saber_novos_matriz', 'saber_novos_self', 'executar_novos_matriz',
+    'executar_novos_self', 'saber_originados', 'executar_originados',
+    'executar_ativos_matriz', 'executar_ativos_self', 'total_ativos',
+  ]
+  let violacoes = 0
+  for (const net of ['baixo', 'medio', 'alto']) {
+    for (const ded of ['integral', 'parcial']) {
+      for (let pc = 0; pc <= 1.0001; pc += 0.05) {
+        const r = simular({
+          meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
+          pct_comercial: pc, dedicacao: ded, network_level: net,
+        })
+        for (const l of r.projecao) {
+          for (const c of CAMPOS) {
+            if (!Number.isInteger(l[c]) || l[c] < 0) {
+              if (violacoes < 5) {
+                console.log(`  ✗ ${net}/${ded}/${(pc*100).toFixed(0)}% M${l.mes} · ${c} = ${l[c]}`)
+              }
+              violacoes++
+            }
+          }
+        }
+      }
+    }
+  }
+  if (violacoes === 0) console.log('  ✓ 126 combinações × 12 meses — nenhum contrato fracionário')
+  else { console.log(`  ✗ ${violacoes} violações`); falhas++ }
 }
 
 // ─── Efeito da rede sobre o mix das fontes ───────────────────────────────────
@@ -107,7 +140,7 @@ for (const n of ['baixo', 'medio', 'alto']) {
   console.log(
     `  rede ${n.padEnd(6)} → self ${(r.mix_m12.self_sourced * 100).toFixed(0).padStart(3)}% · ` +
     `matriz ${(r.mix_m12.alocacao * 100).toFixed(0).padStart(3)}% · ` +
-    `renda M12 R$ ${brl(r.projecao[11].renda_liquida).padStart(6)} · ` +
+    `renda regime R$ ${brl(r.kpis.renda_regime).padStart(6)} · ` +
     `líq ano 1 R$ ${brl(r.kpis.renda_liquida_ano1).padStart(7)}`
   )
 }
@@ -122,10 +155,10 @@ for (const pct of [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]) {
   const m12 = r.projecao[11]
   console.log(
     `  ${(pct * 100).toString().padStart(3)}% comercial → ` +
-    `cap ${(Math.round(m12.total_ativos * 10) / 10).toString().padStart(4)} ativos · ` +
+    `${String(m12.total_ativos).padStart(2)} ativos · ` +
     `Fonte 3 R$ ${brl(m12.receita_originacao).padStart(6)} ` +
     `(${(r.mix_m12.originacao * 100).toFixed(0).padStart(3)}%) · ` +
-    `renda M12 R$ ${brl(m12.renda_liquida).padStart(6)} · ` +
+    `renda regime R$ ${brl(r.kpis.renda_regime).padStart(6)} · ` +
     `líq ano 1 R$ ${brl(r.kpis.renda_liquida_ano1).padStart(7)}`
   )
 }

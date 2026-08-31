@@ -22,7 +22,7 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card label="Renda no M12"       value={fmt(kpis.renda_liquida_m12)}  hint="pró-labore mensal em regime" />
+      <Card label="Renda em regime"    value={fmt(kpis.renda_regime)}  hint="pró-labore mensal, média dos M10–M12" />
       <Card label="Líquido ano 1"      value={fmt(kpis.renda_liquida_ano1)} hint={`média de ${fmt(kpis.renda_media_mes)}/mês`} />
       <Card label="Projetos no M12"    value={fmtInt(kpis.projetos_ativos_m12)} hint="ativos simultâneos" />
       <Card label="Payback da entrada" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : '—'} hint={`entrada de ${fmt(kpis.investimento_total)}`} />

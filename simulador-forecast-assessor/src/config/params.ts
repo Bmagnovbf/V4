@@ -81,6 +81,9 @@ export const PARAMS = {
     matriz_pace: [0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2] as readonly number[],  // ✅
     // Mix de produto nos contratos novos. Base do DRE: 34 Saber / 15 Executar.
     mix_produto: { saber: 0.70, executar: 0.30 },  // ✅ ≈ 69/31 na planilha
+    // Premissa da planilha: "os 5 primeiros Saber, o 6º Executar". Faz sentido
+    // operacional — um Executar isolado no início não cobre o próprio CSP.
+    primeiros_saber: 5,  // ✅
   },
 
   // ─── Rede de relacionamento do Assessor ──────────────────────────────────

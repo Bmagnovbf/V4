@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.1 | Agosto/2026**
+**V4 Company | Versão 1.2 | Agosto/2026**
 **Status: motor implementado, cenário Base da planilha reproduzido em +0,1%**
 
 ---
@@ -171,6 +171,7 @@ estar operando, não de operar um projeto específico.
 | `carteira.cap_ativos_parcial` | 8 projetos | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.mix_produto` | 70% Saber / 30% Executar | ✅ |
+| `carteira.primeiros_saber` | 5 | ✅ |
 | `carteira.matriz_pace` | `1 1 1 2 2 2 2 2 2 2 2 2` | ✅ |
 
 `matriz_pace[m]` é quanto a **matriz atribui** ao Assessor no mês *m* — o
@@ -178,6 +179,11 @@ compromisso da rede, independente do perfil, da rede dele e da forma de
 pagamento. Sobe de 1 para 2 no M4, quando ele já provou entrega. Soma 21 no ano.
 
 Tudo que cresce além disso vem da originação própria.
+
+`primeiros_saber` implementa a premissa da planilha — *"os 5 primeiros Saber, o
+6º Executar"*. Tem lastro operacional: um Executar isolado no início não cobre o
+próprio CSP (recebe R$ 1.225/mês e custa R$ 1.000/mês, contra R$ 1.000 de
+overhead fixo), então abrir a carteira com ele produziria meses negativos.
 
 `mix_produto` vem da mesma fonte: 34 Saber / 15 Executar no ano do cenário Base
 ≈ 69/31, arredondado para 70/30.
@@ -331,8 +337,32 @@ executar_novos_self    = orig_operada   × 0,30
 executar_originados    = orig_transbordo × 0,30
 ```
 
-Contratos são tratados como **fracionários**. É uma projeção, não uma agenda —
-arredondar produziria degraus artificiais na curva.
+### Contratos são inteiros
+
+Cliente não existe em decimal. Todo campo de contagem — novos, ativos,
+repassados — é inteiro em qualquer combinação de inputs, e o teste verifica isso
+em 126 combinações × 12 meses.
+
+O arredondamento usa um **acumulador de resto**: a fração de um mês fica
+guardada para o seguinte, de modo que o total do ano seja preservado. Uma
+originação de 0,4 contrato/mês vira `0, 1, 0, 0, 1` em vez de doze zeros.
+
+```
+resto  += valor
+inteiro = max(0, round(resto))
+resto  -= inteiro
+```
+
+Arredonda em vez de truncar para não atrasar o primeiro contrato: com 70% de mix
+de Saber, o cliente inicial da matriz deve nascer Saber (0,7 → 1), como na
+planilha, e não Executar.
+
+**Consequência a conhecer:** com poucos contratos, a renda mensal fica
+serrilhada — um Saber self-sourced vale R$ 9.600 e cai inteiro num mês só. Por
+isso o KPI de renda e o eixo de meta do termômetro usam a **média dos M10–M12**
+(`renda_regime`), não o M12 isolado. Sem isso, um candidato de rede baixa podia
+exibir renda de M12 maior que um de rede média, só porque o último Saber caiu no
+mês certo.
 
 ### 4.4 Base ativa de Executar (cohorts)
 
@@ -431,6 +461,7 @@ caixa_acumulado(m) = caixa_acumulado(m−1) + fluxo_caixa(m)
 ### 4.8 KPIs
 
 ```
+renda_regime          = média de renda_liquida(m)   m de 10 a 12
 renda_liquida_m12     = renda_liquida(12)
 renda_liquida_ano1    = Σ renda_liquida(m)              m de 1 a 12
 renda_media_mes       = renda_liquida_ano1 ÷ 12
@@ -452,7 +483,7 @@ Três eixos, sempre prevalecendo o **mais crítico**.
 
 ```
 reserva_ratio  = reserva_capital ÷ deficit_retirada_total   (∞ se o total = 0)
-meta_ratio     = renda_liquida_m12 ÷ meta_renda_liquida
+meta_ratio     = renda_regime ÷ meta_renda_liquida
 
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
 payback_nivel  = verde se ≤ M6    · amarelo se ≤ M9    · senão vermelho
@@ -514,7 +545,7 @@ Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
 2. **Termômetro** — nível final + os três eixos abertos
-3. **KPI cards** — renda no M12, líquido ano 1, projetos no M12, payback da entrada, reserva necessária, capital total
+3. **KPI cards** — renda em regime, líquido ano 1, projetos no M12, payback da entrada, reserva necessária, capital total
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -581,10 +612,10 @@ combinação que, sob as premissas do motor, reproduz aquele resultado.
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
-| Receita ano 1 | R$ 292.875 | R$ 279.986 | −4,4% |
-| Líquido ano 1 | R$ 149.303 | R$ 152.774 | +2,3% |
-| Líquido no M12 | R$ 28.846 | R$ 30.663 | +6,3% |
-| Projetos ativos M12 | 15 | 13,0 | −13,5% |
+| Receita ano 1 | R$ 292.875 | R$ 275.300 | −6,0% |
+| Líquido ano 1 | R$ 149.303 | R$ 154.782 | +3,7% |
+| Líquido em regime | R$ 28.846 | R$ 31.222 | +8,2% |
+| Projetos ativos M12 | 15 | 13 | −13,3% |
 | Payback | M6 | M6 | — |
 | Breakeven | M1 | M1 | — |
 
@@ -592,10 +623,10 @@ combinação que, sob as premissas do motor, reproduz aquele resultado.
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
-| Receita ano 1 | R$ 367.925 | R$ 343.581 | −6,6% |
-| Líquido ano 1 | R$ 207.350 | R$ 199.942 | −3,6% |
-| Líquido no M12 | R$ 31.777 | R$ 35.246 | +10,9% |
-| Projetos ativos M12 | 15 | 13,6 | −9,1% |
+| Receita ano 1 | R$ 367.925 | R$ 343.200 | −6,7% |
+| Líquido ano 1 | R$ 207.350 | R$ 204.608 | −1,3% |
+| Líquido em regime | R$ 31.777 | R$ 33.636 | +5,9% |
+| Projetos ativos M12 | 15 | 14 | −6,7% |
 | Payback | M5 | M6 | +1 |
 | Breakeven | M1 | M1 | — |
 
@@ -610,26 +641,26 @@ que é a métrica de decisão, fecha dentro de 4%.
 
 ### Efeito da rede (35% comercial)
 
-| Rede | Self | Matriz | Renda M12 | Líquido ano 1 |
+| Rede | Self | Matriz | Renda em regime | Líquido ano 1 |
 |---|---|---|---|---|
-| Baixa | 59% | 41% | R$ 11.010 | R$ 60.297 |
-| Média | 74% | 26% | R$ 20.836 | R$ 106.536 |
-| Alta | 81% | 19% | R$ 30.663 | R$ 152.774 |
+| Baixa | 74% | 26% | R$ 11.312 | R$ 64.218 |
+| Média | 68% | 32% | R$ 17.960 | R$ 104.106 |
+| Alta | 83% | 17% | R$ 28.748 | R$ 154.782 |
 
-A rede alta chega ao **81% self / 19% matriz** — a proporção que o produto
+A rede alta chega ao **83% self / 17% matriz** — a proporção que o produto
 persegue, já que a Fonte 2 paga 80% contra os 30–35% da alocação.
 
 ### Curva de perfil (rede média)
 
-| Perfil | Ativos M12 | Fonte 3 | Renda M12 | Líquido ano 1 |
+| Perfil | Ativos M12 | Fonte 3 | Renda em regime | Líquido ano 1 |
 |---|---|---|---|---|
-| 20% comercial | 8,0 | – | R$ 12.413 | R$ 66.902 |
-| 40% comercial | 11,1 | – | R$ 23.644 | R$ 119.747 |
-| 50% comercial | 12,6 | – | R$ 29.259 | R$ 146.169 |
-| 60% comercial | 10,9 | 17% | R$ 26.498 | R$ 155.882 |
-| 70% comercial | 8,2 | 36% | R$ 23.983 | R$ 143.998 |
-| 80% comercial | 5,5 | 60% | R$ 20.961 | R$ 120.909 |
-| 100% comercial | 5,0 | 72% | R$ 24.353 | R$ 126.576 |
+| 20% comercial | 9 | – | R$ 11.856 | R$ 75.006 |
+| 40% comercial | 11 | – | R$ 19.592 | R$ 118.158 |
+| 50% comercial | 13 | – | R$ 26.240 | R$ 147.258 |
+| 60% comercial | 11 | 18% | R$ 23.468 | R$ 157.256 |
+| 70% comercial | 8 | 48% | R$ 20.680 | R$ 146.350 |
+| 80% comercial | 5 | 68% | R$ 17.686 | R$ 124.054 |
+| 100% comercial | 5 | 74% | R$ 21.027 | R$ 126.658 |
 
 ---
 
@@ -660,6 +691,7 @@ mudar.
 - [x] Cenário Base da planilha reproduzido dentro de 15%
 - [x] Cenário Upside reproduzido dentro de 15% (rede alta)
 - [x] Fonte 3 = zero nos perfis até ~55% comercial
+- [x] Contratos inteiros em 126 combinações × 12 meses
 - [x] Nenhum número de negócio hard-coded fora de `params.ts`
 - [x] Todo parâmetro visível em `/params` com tag de procedência
 - [x] Projeto da franquia intocado
@@ -726,6 +758,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.2 — Agosto/2026. Mudanças v1.1 → v1.2:*
+- *Contratos passam a ser inteiros, com acumulador de resto para preservar o total do ano*
+- *Entra `primeiros_saber = 5`, premissa da planilha que evita abrir a carteira com um Executar que não cobre o próprio CSP*
+- *KPI de renda e eixo de meta do termômetro passam a usar a média dos M10–M12, porque o M12 isolado ficou serrilhado com contratos inteiros*
 
 *SPEC v1.1 — Agosto/2026. Mudanças v1.0 → v1.1:*
 - *Forma de pagamento deixa de ser input: a matriz atribui clientes no mesmo pace de qualquer jeito*

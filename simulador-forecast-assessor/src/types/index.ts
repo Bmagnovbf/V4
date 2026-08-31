@@ -74,6 +74,14 @@ export interface PLMensal extends Carteira {
 }
 
 export interface KPIs {
+  /**
+   * Renda em regime — média dos 3 últimos meses.
+   *
+   * O M12 isolado não serve como indicador: com contratos inteiros, um Saber
+   * de R$ 9.600 caindo ou não naquele mês muda o número em quase 50%. A média
+   * dos M10–M12 alisa esse serrilhado sem esconder a tendência.
+   */
+  renda_regime: number
   renda_liquida_m12: number
   renda_liquida_ano1: number
   renda_media_mes: number

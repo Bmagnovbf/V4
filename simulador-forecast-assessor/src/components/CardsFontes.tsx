@@ -1,7 +1,7 @@
 'use client'
 
 import type { PLMensal, MixFontesM12 } from '@/types'
-import { fmt, fmtPct } from '@/lib/format'
+import { fmt, fmtPct, fmtInt } from '@/lib/format'
 
 function Card({
   titulo, subtitulo, split, receita, share, detalhe,
@@ -26,7 +26,7 @@ function Card({
 }
 
 export function CardsFontes({ m12, mix }: { m12: PLMensal; mix: MixFontesM12 }) {
-  const n = (v: number) => `${Math.round(v * 10) / 10}`
+  const n = fmtInt
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <Card
@@ -44,7 +44,7 @@ export function CardsFontes({ m12, mix }: { m12: PLMensal; mix: MixFontesM12 }) 
         receita={m12.receita_originacao} share={mix.originacao}
         detalhe={
           m12.receita_originacao > 0
-            ? `${n(m12.saber_originados + m12.executar_originados)} contratos repassados`
+            ? `${n(m12.saber_originados + m12.executar_originados)} contrato(s) repassado(s)`
             : 'sua originação cabe na carteira'
         }
       />

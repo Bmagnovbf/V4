@@ -30,6 +30,25 @@ const MESES = 12
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
+ * Converte um fluxo fracionário em contratos inteiros, guardando o resto para
+ * os meses seguintes. Cliente não existe em decimal: 0,4 contrato/mês vira
+ * 0, 1, 0, 0, 1 — e o total do ano é preservado.
+ *
+ * Arredonda em vez de truncar para não atrasar o primeiro contrato: com 70% de
+ * mix de Saber, o cliente inicial da matriz deve nascer Saber (0,7 → 1), como
+ * na planilha, e não Executar.
+ */
+function criarAcumulador() {
+  let resto = 0
+  return (valor: number): number => {
+    resto += valor
+    const inteiro = Math.max(0, Math.round(resto))
+    resto -= inteiro
+    return inteiro
+  }
+}
+
+/**
  * Capacidade de operar projetos simultâneos.
  *
  * Depende da dedicação (integral/parcial) e do quanto do perfil é operacional.
@@ -43,7 +62,7 @@ function capAtivos(input: SimulacaoInput): number {
     : PARAMS.carteira.cap_ativos_parcial
   const pct_operacional = 1 - input.pct_comercial
   const fator = Math.min(1, pct_operacional / PARAMS.carteira.pct_operacional_ref)
-  return base * fator
+  return Math.round(base * fator)
 }
 
 /** Evita divisão por zero na ocupação quando o perfil é 100% comercial. */
@@ -85,20 +104,32 @@ function overheadDoMes(mes: number): number {
 
 function montarCarteira(input: SimulacaoInput): Carteira[] {
   const cap = capAtivos(input)
-  const { saber, executar } = PARAMS.carteira.mix_produto
+  const { saber } = PARAMS.carteira.mix_produto
   const linhas: Carteira[] = []
 
   // Histórico de Executar novos, para calcular os ativos com churn de 6 meses.
   const execNovosMatriz: number[] = [0]
   const execNovosSelf: number[] = [0]
 
+  // Contratos são inteiros. Cada acumulador guarda a fração de um mês para o
+  // seguinte, para que o total do ano não se perca no arredondamento.
+  const accOriginacao  = criarAcumulador()
+  const accSaberMatriz = criarAcumulador()
+  const accSaberSelf   = criarAcumulador()
+  const accSaberOrig   = criarAcumulador()
+
+  // Os primeiros contratos entram como Saber (premissa da planilha): um
+  // Executar isolado no início não cobre o próprio CSP.
+  let contratosAteAgora = 0
+
   for (let mes = 1; mes <= MESES; mes++) {
     // 1) A matriz atribui seu pace, independente do perfil. É o compromisso da
     //    rede — o Assessor não recusa cliente alocado.
     const daMatriz = PARAMS.carteira.matriz_pace[mes] ?? 0
 
-    // 2) O que ele consegue originar por conta própria neste mês.
-    const origPotencial = originacaoMaxMes(input) * shapeComercial(mes)
+    // 2) O que ele consegue originar por conta própria neste mês, em contratos
+    //    inteiros (a fração fica guardada para os meses seguintes).
+    const origPotencial = accOriginacao(originacaoMaxMes(input) * shapeComercial(mes))
 
     // 3) Espaço que sobra na carteira depois dos ativos vigentes e do que a
     //    matriz acabou de atribuir. O que couber ele opera (Fonte 2); o que
@@ -113,10 +144,23 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
     const origOperada = Math.min(origPotencial, capacidadeLivre)
     const origTransbordo = origPotencial - origOperada
 
-    const saber_novos_matriz     = daMatriz * saber
-    const saber_novos_self       = origOperada * saber
-    const executar_novos_matriz  = daMatriz * executar
-    const executar_novos_self    = origOperada * executar
+    // 4) Reparte cada bloco entre Saber e Executar. Enquanto a carteira não
+    //    passa dos primeiros contratos, tudo é Saber. Depois, o Saber acumula
+    //    a fração do mix e o Executar leva o resto, para a soma bater.
+    const repartir = (bloco: number, acc: (v: number) => number): number => {
+      const faltamSaber = Math.max(0, PARAMS.carteira.primeiros_saber - contratosAteAgora)
+      const forcados = Math.min(bloco, faltamSaber)
+      contratosAteAgora += bloco
+      if (forcados >= bloco) return bloco
+      return forcados + Math.min(bloco - forcados, acc((bloco - forcados) * saber))
+    }
+
+    const saber_novos_matriz    = repartir(daMatriz,       accSaberMatriz)
+    const saber_novos_self      = repartir(origOperada,    accSaberSelf)
+    const saber_originados      = repartir(origTransbordo, accSaberOrig)
+    const executar_novos_matriz = daMatriz       - saber_novos_matriz
+    const executar_novos_self   = origOperada    - saber_novos_self
+    const executar_originados   = origTransbordo - saber_originados
 
     execNovosMatriz[mes] = executar_novos_matriz
     execNovosSelf[mes]   = executar_novos_self
@@ -138,8 +182,8 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
       saber_novos_matriz, saber_novos_self,
       executar_novos_matriz, executar_novos_self,
       executar_ativos_matriz, executar_ativos_self,
-      saber_originados:    origTransbordo * saber,
-      executar_originados: origTransbordo * executar,
+      saber_originados,
+      executar_originados,
       total_ativos,
       ocupacao: ocupacao(total_ativos, cap),
     })
@@ -229,10 +273,15 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
 
   const investimento_total = PARAMS.entrada.a_vista
 
+  const MESES_REGIME = 3
+  const regime = projecao.slice(-MESES_REGIME)
+  const renda_regime = regime.reduce((s, l) => s + l.renda_liquida, 0) / MESES_REGIME
+
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
 
   return {
+    renda_regime,
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,
     renda_media_mes: renda_liquida_ano1 / MESES,
@@ -278,8 +327,10 @@ function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
     PARAMS.termometro.payback_meses.amarelo,
   )
 
+  // Compara a meta com a renda em REGIME, não com o M12 isolado — senão o
+  // veredito do termômetro depende de em qual mês caiu o último Saber.
   const meta_ratio = input.meta_renda_liquida > 0
-    ? kpis.renda_liquida_m12 / input.meta_renda_liquida
+    ? kpis.renda_regime / input.meta_renda_liquida
     : 0
   const meta_nivel = nivelMaior(
     meta_ratio,
