@@ -344,25 +344,39 @@ repassados — é inteiro em qualquer combinação de inputs, e o teste verifica
 em 126 combinações × 12 meses.
 
 O arredondamento usa um **acumulador de resto**: a fração de um mês fica
-guardada para o seguinte, de modo que o total do ano seja preservado. Uma
-originação de 0,4 contrato/mês vira `0, 1, 0, 0, 1` em vez de doze zeros.
+guardada para o seguinte, de modo que nada se perca. Uma originação de 0,4
+contrato/mês vira `0, 0, 1, 0, 0, 1` em vez de doze zeros.
 
 ```
 resto  += valor
-inteiro = max(0, round(resto))
+inteiro = floor(resto)
 resto  -= inteiro
 ```
 
-Arredonda em vez de truncar para não atrasar o primeiro contrato: com 70% de mix
-de Saber, o cliente inicial da matriz deve nascer Saber (0,7 → 1), como na
-planilha, e não Executar.
+**Trunca, não arredonda.** Arredondar deixa o resto ir a negativo e a série passa
+a oscilar — com um fluxo que só cresce, produz quedas que não existem no fluxo
+real:
 
-**Consequência a conhecer:** com poucos contratos, a renda mensal fica
-serrilhada — um Saber self-sourced vale R$ 9.600 e cai inteiro num mês só. Por
-isso o KPI de renda e o eixo de meta do termômetro usam a **média dos M10–M12**
-(`renda_regime`), não o M12 isolado. Sem isso, um candidato de rede baixa podia
-exibir renda de M12 maior que um de rede média, só porque o último Saber caiu no
-mês certo.
+| | M5 | M6 | M7 | M8 | M9 | M10 | M11 | M12 |
+|---|---|---|---|---|---|---|---|---|
+| fluxo real | 0,9 | 1,3 | 1,8 | 2,2 | 2,7 | 3,1 | 3,5 | 4,0 |
+| `round` | 1 | 2 | **1** | 3 | **2** | 3 | 4 | 4 |
+| `floor` | 1 | 1 | 2 | 2 | 3 | 3 | 3 | 4 |
+
+Com `floor` a aquisição nunca recua. O primeiro contrato não fica preso pelo
+truncamento porque `primeiros_saber` já força os primeiros a nascerem Saber.
+
+**Consequência a conhecer:** mesmo com a aquisição monotônica, a renda mensal
+oscila. A causa remanescente é legítima e vale explicar na call — é o mix 70/30.
+Um Saber paga R$ 9.600 (self) ou R$ 3.600 (matriz) de uma vez, no mês em que
+entra; um Executar paga R$ 2.800 ou R$ 1.225 por mês, ao longo de 6 meses. Um
+mês em que entram mais Executar que Saber rende menos no curto prazo e mais
+depois.
+
+Por isso o KPI de renda e o eixo de meta do termômetro usam a **média dos
+M10–M12** (`renda_regime`), não o M12 isolado. Sem isso, um candidato de rede
+baixa podia exibir renda de M12 maior que um de rede média, só porque o último
+Saber caiu no mês certo.
 
 ### 4.4 Base ativa de Executar (cohorts)
 
@@ -612,20 +626,20 @@ combinação que, sob as premissas do motor, reproduz aquele resultado.
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
-| Receita ano 1 | R$ 292.875 | R$ 275.300 | −6,0% |
-| Líquido ano 1 | R$ 149.303 | R$ 154.782 | +3,7% |
-| Líquido em regime | R$ 28.846 | R$ 31.222 | +8,2% |
+| Receita ano 1 | R$ 292.875 | R$ 270.950 | −7,5% |
+| Líquido ano 1 | R$ 149.303 | R$ 149.193 | **−0,1%** |
+| Líquido em regime | R$ 28.846 | R$ 25.696 | −10,9% |
 | Projetos ativos M12 | 15 | 13 | −13,3% |
-| Payback | M6 | M6 | — |
+| Payback | M6 | M7 | +1 |
 | Breakeven | M1 | M1 | — |
 
 ### Cenário Upside — 50% comercial, rede alta
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
-| Receita ano 1 | R$ 367.925 | R$ 343.200 | −6,7% |
-| Líquido ano 1 | R$ 207.350 | R$ 204.608 | −1,3% |
-| Líquido em regime | R$ 31.777 | R$ 33.636 | +5,9% |
+| Receita ano 1 | R$ 367.925 | R$ 336.250 | −8,6% |
+| Líquido ano 1 | R$ 207.350 | R$ 198.075 | −4,5% |
+| Líquido em regime | R$ 31.777 | R$ 33.378 | +5,0% |
 | Projetos ativos M12 | 15 | 14 | −6,7% |
 | Payback | M5 | M6 | +1 |
 | Breakeven | M1 | M1 | — |
@@ -760,7 +774,7 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 ---
 
 *SPEC v1.2 — Agosto/2026. Mudanças v1.1 → v1.2:*
-- *Contratos passam a ser inteiros, com acumulador de resto para preservar o total do ano*
+- *Contratos passam a ser inteiros, com acumulador de resto que trunca (não arredonda), para que a aquisição nunca recue*
 - *Entra `primeiros_saber = 5`, premissa da planilha que evita abrir a carteira com um Executar que não cobre o próprio CSP*
 - *KPI de renda e eixo de meta do termômetro passam a usar a média dos M10–M12, porque o M12 isolado ficou serrilhado com contratos inteiros*
 

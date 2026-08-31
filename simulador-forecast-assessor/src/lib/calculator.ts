@@ -32,17 +32,21 @@ const MESES = 12
 /**
  * Converte um fluxo fracionário em contratos inteiros, guardando o resto para
  * os meses seguintes. Cliente não existe em decimal: 0,4 contrato/mês vira
- * 0, 1, 0, 0, 1 — e o total do ano é preservado.
+ * 0, 0, 1, 0, 0, 1 — e nada se perde no caminho.
  *
- * Arredonda em vez de truncar para não atrasar o primeiro contrato: com 70% de
- * mix de Saber, o cliente inicial da matriz deve nascer Saber (0,7 → 1), como
- * na planilha, e não Executar.
+ * Trunca em vez de arredondar. Arredondar deixaria o resto ir a negativo e a
+ * série passaria a oscilar: com um fluxo que só cresce (0,9 · 1,3 · 1,8 · 2,2),
+ * `round` emite 1, 2, 1, 3 — uma queda no M7 que não existe no fluxo real.
+ * Truncando, a série nunca recua: 1, 1, 2, 2.
+ *
+ * O primeiro contrato não fica preso pelo truncamento porque
+ * `carteira.primeiros_saber` já força os primeiros a nascerem Saber.
  */
 function criarAcumulador() {
   let resto = 0
   return (valor: number): number => {
     resto += valor
-    const inteiro = Math.max(0, Math.round(resto))
+    const inteiro = Math.floor(resto + 1e-9)
     resto -= inteiro
     return inteiro
   }
