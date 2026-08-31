@@ -8,7 +8,7 @@ import { PARAMS } from '@/config/params'
 import type { Dedicacao, FormaPagamento } from '@/types'
 
 const MIN_RENDA = 5_000,  MAX_RENDA = 45_000, STEP_RENDA = 1_000
-const MIN_RET   = 0,      MAX_RET   = 30_000, STEP_RET   = 500
+const MIN_RET   = 2_000,  MAX_RET   = 15_000, STEP_RET   = 500
 const MIN_RES   = 0,      MAX_RES   = 60_000, STEP_RES   = 2_500
 
 function parseBRL(raw: string): number { return Number(raw.replace(/\D/g, '')) }
