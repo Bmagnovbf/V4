@@ -222,8 +222,8 @@ com candidatos reais (§ 10, bloco B).
 ```ts
 interface SimulacaoInput {
   meta_renda_liquida: number    // R$ 5.000 – 45.000
-  retirada_minima:    number    // R$ 0 – 30.000
-  reserva_capital:    number    // R$ 0 – 60.000
+  retirada_minima:    number    // R$ 2.000 – 15.000
+  reserva_capital:    number    // R$ 0 – 150.000
   pct_comercial:      number    // 0 – 1  (0 = 100% operacional)
   dedicacao:          'integral' | 'parcial'
   forma_pagamento:    'a_vista' | 'parcelado'
@@ -471,11 +471,11 @@ Seis campos, em ordem:
 | Campo | Controle | Faixa | Default |
 |---|---|---|---|
 | Meta de renda líquida no M12 | input + slider | R$ 5.000 – 45.000 | R$ 25.000 |
-| Retirada mínima mensal | input + slider | R$ 0 – 30.000 | R$ 8.000 |
+| Retirada mínima mensal | input + slider | R$ 2.000 – 15.000 | R$ 8.000 |
 | Seu perfil | slider único | 0 – 100% comercial, passo 5 | 35% |
 | Dedicação | chips | integral / parcial | integral |
 | Entrada na rede | chips | à vista / 12x | à vista |
-| Reserva de capital de giro | input + slider | R$ 0 – 60.000 | R$ 25.000 |
+| Reserva de capital de giro | input + slider | R$ 0 – 150.000 | R$ 25.000 |
 
 O slider de perfil mostra os dois lados ao mesmo tempo ("70% operacional · 30%
 comercial") e traz abaixo a explicação de qual fonte cada extremo alimenta. É o
