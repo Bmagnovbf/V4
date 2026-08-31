@@ -75,6 +75,10 @@ export const PARAMS = {
     // seguem com capacidade cheia. Um perfil 70/30 comercial cai para ~8
     // projetos, e o que ele originar acima disso vira Fonte 3.
     pct_operacional_ref: 0.55,   // 🔴
+    // A matriz PARA de atribuir quando a carteira atinge o cap. O Assessor
+    // pode continuar vendendo por conta própria e romper o limite — até esta
+    // tolerância, assumindo o risco de qualidade. Acima dela, repassa (Fonte 3).
+    tolerancia_self: 1.2,        // 🔴 15 → opera até 18 por conta própria
     // Pace de atribuição da matriz — clientes que a rede entrega ao Assessor
     // para operar (Fonte 1). Independe da forma de pagamento e do perfil: é o
     // compromisso da rede. Sobe de 1 para 2 quando ele já provou entrega.

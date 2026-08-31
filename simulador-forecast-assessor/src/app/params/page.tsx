@@ -89,6 +89,8 @@ export default function ParamsPage() {
           <Row tag="✅" path="carteira.cap_ativos_integral" value={`${p.carteira.cap_ativos_integral} projetos`} />
           <Row tag="🔴" path="carteira.cap_ativos_parcial"  value={`${p.carteira.cap_ativos_parcial} projetos`} />
           <Row tag="🔴" path="carteira.pct_operacional_ref" value={`${pct(p.carteira.pct_operacional_ref)} — abaixo disso a capacidade cai`} />
+          <Row tag="🔴" path="carteira.tolerancia_self"      value={`${p.carteira.tolerancia_self}× — a matriz trava no cap; ele rompe até aqui`} />
+          <Row tag="✅" path="carteira.primeiros_saber"      value={`${p.carteira.primeiros_saber} primeiros contratos`} />
           <Row tag="✅" path="carteira.mix_produto"         value={`${pct(p.carteira.mix_produto.saber)} Saber · ${pct(p.carteira.mix_produto.executar)} Executar`} />
           <Row tag="✅" path="carteira.matriz_pace"          value={p.carteira.matriz_pace.slice(1).join(' · ') + ' cliente(s)/mês'} />
         </Section>

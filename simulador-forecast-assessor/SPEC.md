@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.2 | Agosto/2026**
+**V4 Company | Versão 1.3 | Agosto/2026**
 **Status: motor implementado, cenário Base da planilha reproduzido em +0,1%**
 
 ---
@@ -170,6 +170,7 @@ estar operando, não de operar um projeto específico.
 | `carteira.cap_ativos_integral` | 15 projetos | ✅ |
 | `carteira.cap_ativos_parcial` | 8 projetos | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
+| `carteira.tolerancia_self` | 1,2× | 🔴 |
 | `carteira.mix_produto` | 70% Saber / 30% Executar | ✅ |
 | `carteira.primeiros_saber` | 5 | ✅ |
 | `carteira.matriz_pace` | `1 1 1 2 2 2 2 2 2 2 2 2` | ✅ |
@@ -308,22 +309,28 @@ M4 = 1/9, M12 = 1. Sobe linear do primeiro mês pós-Banca até o regime.
 Executado mês a mês. É aqui que a Fonte 3 nasce.
 
 ```
-da_matriz(m)      = matriz_pace[m]                              → Fonte 1
-
 ativos_vigentes   = Σ executar_novos(k)   k de max(1, m−5) até m−1
-capacidade_livre  = max(0, cap_ativos − ativos_vigentes − da_matriz)
 
-orig_operada      = min(orig_potencial(m), capacidade_livre)    → Fonte 2
-orig_transbordo   = orig_potencial(m) − orig_operada            → Fonte 3
+da_matriz(m)      = ativos_vigentes ≥ cap_ativos ? 0 : matriz_pace[m]   → Fonte 1
+
+teto_proprio      = floor(cap_ativos × tolerancia_self)
+capacidade_livre  = max(0, teto_proprio − ativos_vigentes − da_matriz)
+
+orig_operada      = min(orig_potencial(m), capacidade_livre)            → Fonte 2
+orig_transbordo   = orig_potencial(m) − orig_operada                    → Fonte 3
 ```
 
-Leitura em palavras: **a matriz atribui primeiro** e o Assessor não recusa —
-é o compromisso da rede, e a razão de ele ter entrado. O que sobra de
-capacidade depois dos ativos vigentes ele preenche com o que originou. O que
-vender além disso é repassado, e ele fica só com o CAC.
+Leitura em palavras: **a matriz atribui primeiro** e o Assessor não recusa — é o
+compromisso da rede, e a razão de ele ter entrado. Mas a matriz **para de
+atribuir** quando a carteira atinge o cap: ela não empurra cliente para quem já
+está no limite.
 
-A ordem importa: a alocação tem prioridade sobre a originação própria na
-disputa por capacidade.
+O Assessor, por outro lado, **pode romper o cap por conta própria** até
+`tolerancia_self`, assumindo o risco de qualidade — é decisão dele, não da rede.
+Acima disso ele repassa e fica só com o CAC.
+
+Os dois limites são diferentes de propósito: `cap_ativos` é onde a rede para de
+empurrar; `cap_ativos × tolerancia_self` é onde ele mesmo para.
 
 Cada bloco é então repartido por produto:
 
@@ -772,6 +779,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.3 — Agosto/2026. Mudanças v1.2 → v1.3:*
+- *A matriz para de atribuir quando a carteira atinge o cap; antes ela empurrava sempre e podia estourar o limite*
+- *O Assessor pode romper o cap por conta própria até `tolerancia_self` (1,2×), assumindo o risco; acima disso repassa*
 
 *SPEC v1.2 — Agosto/2026. Mudanças v1.1 → v1.2:*
 - *Contratos passam a ser inteiros, com acumulador de resto que trunca (não arredonda), para que a aquisição nunca recue*

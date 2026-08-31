@@ -127,23 +127,26 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
   let contratosAteAgora = 0
 
   for (let mes = 1; mes <= MESES; mes++) {
-    // 1) A matriz atribui seu pace, independente do perfil. É o compromisso da
-    //    rede — o Assessor não recusa cliente alocado.
-    const daMatriz = PARAMS.carteira.matriz_pace[mes] ?? 0
-
-    // 2) O que ele consegue originar por conta própria neste mês, em contratos
-    //    inteiros (a fração fica guardada para os meses seguintes).
-    const origPotencial = accOriginacao(originacaoMaxMes(input) * shapeComercial(mes))
-
-    // 3) Espaço que sobra na carteira depois dos ativos vigentes e do que a
-    //    matriz acabou de atribuir. O que couber ele opera (Fonte 2); o que
-    //    exceder é repassado e ele fica só com o CAC (Fonte 3).
+    // 1) Carteira vigente antes das entradas deste mês.
     const desdeAtivos = Math.max(1, mes - executarDuracao() + 1)
     let ativosVigentes = 0
     for (let m = desdeAtivos; m < mes; m++) {
       ativosVigentes += (execNovosMatriz[m] ?? 0) + (execNovosSelf[m] ?? 0)
     }
-    const capacidadeLivre = Math.max(0, cap - ativosVigentes - daMatriz)
+
+    // 2) A matriz atribui seu pace — mas PARA quando a carteira atinge o cap.
+    //    Ela não empurra cliente para um Assessor que já está no limite.
+    const daMatriz = ativosVigentes >= cap ? 0 : (PARAMS.carteira.matriz_pace[mes] ?? 0)
+
+    // 3) O que ele consegue originar por conta própria neste mês, em contratos
+    //    inteiros (a fração fica guardada para os meses seguintes).
+    const origPotencial = accOriginacao(originacaoMaxMes(input) * shapeComercial(mes))
+
+    // 4) Ele pode romper o cap por conta própria, até a tolerância — é decisão
+    //    dele, assumindo o risco de qualidade. O que passar disso é repassado e
+    //    ele fica só com o CAC (Fonte 3).
+    const tetoProprio = Math.floor(cap * PARAMS.carteira.tolerancia_self)
+    const capacidadeLivre = Math.max(0, tetoProprio - ativosVigentes - daMatriz)
 
     const origOperada = Math.min(origPotencial, capacidadeLivre)
     const origTransbordo = origPotencial - origOperada
