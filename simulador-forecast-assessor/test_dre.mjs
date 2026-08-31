@@ -20,13 +20,14 @@ const { simular } = Module.createRequire(import.meta.url)('./.test_out/lib/calcu
 
 // ─── Referência: planilha ────────────────────────────────────────────────────
 //
-// O pct_comercial de cada cenário NÃO é o mix de contratos da planilha — é o
-// perfil que, sob a premissa do closer (38 calls × 20% = 7,6 vendas/mês a 100%
-// comercial), reproduz o resultado daquele cenário.
+// Perfil e rede de cada cenário NÃO são o mix de contratos da planilha — são a
+// combinação que, sob as premissas do motor (pace da matriz de 1–2 clientes/mês,
+// teto de 38 calls × 20%, fator de rede), reproduz o resultado daquele cenário.
 const DRE = {
   base: {
     label: 'Base (70/30)',
-    pct_comercial: 0.45,                // perfil que reproduz o líquido do Base
+    pct_comercial: 0.35,
+    network: 'alto',
     receita_recebida_ano1: 292_875,
     renda_liquida_ano1:    149_303,
     renda_media_mes:        12_442,
@@ -36,9 +37,9 @@ const DRE = {
     breakeven_mes:               1,
   },
   upside: {
-    label: 'Upside (50/50) — INFORMATIVO, não alcançável',
-    informativo: true,
-    pct_comercial: 0.60,                // melhor perfil disponível
+    label: 'Upside (50/50)',
+    pct_comercial: 0.50,
+    network: 'alto',
     receita_recebida_ano1: 367_925,
     renda_liquida_ano1:    207_350,
     renda_media_mes:        17_279,
@@ -61,10 +62,10 @@ for (const cenario of Object.values(DRE)) {
     reserva_capital:    30_000,
     pct_comercial:      cenario.pct_comercial,
     dedicacao:          'integral',
-    forma_pagamento:    'a_vista',
+    network_level:      cenario.network ?? 'medio',
   })
 
-  console.log(`\n── ${cenario.label} · pct_comercial = ${(cenario.pct_comercial * 100).toFixed(0)}%`)
+  console.log(`\n── ${cenario.label} · ${(cenario.pct_comercial * 100).toFixed(0)}% comercial · rede ${cenario.network}`)
   console.log('  indicador              planilha        motor      delta')
 
   // Valores em R$ toleram desvio percentual; meses toleram ±1 (a planilha usa
@@ -96,18 +97,27 @@ for (const cenario of Object.values(DRE)) {
               `originação ${(mix.originacao * 100).toFixed(0)}%`)
 }
 
-console.log(`
-  NOTA: o cenário Upside da planilha (líquido de R$ 207.350 no ano 1) não é
-  alcançável sob a premissa do closer. O motor satura em ~R$ 162 mil por volta
-  de 65% comercial — a planilha assume que o Assessor opera 15 projetos E vende
-  4/mês ao mesmo tempo, o que o teto de 7,6 vendas/mês não comporta.`)
+// ─── Efeito da rede sobre o mix das fontes ───────────────────────────────────
+console.log('\n── Efeito da rede (35% comercial)')
+for (const n of ['baixo', 'medio', 'alto']) {
+  const r = simular({
+    meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
+    pct_comercial: 0.35, dedicacao: 'integral', network_level: n,
+  })
+  console.log(
+    `  rede ${n.padEnd(6)} → self ${(r.mix_m12.self_sourced * 100).toFixed(0).padStart(3)}% · ` +
+    `matriz ${(r.mix_m12.alocacao * 100).toFixed(0).padStart(3)}% · ` +
+    `renda M12 R$ ${brl(r.projecao[11].renda_liquida).padStart(6)} · ` +
+    `líq ano 1 R$ ${brl(r.kpis.renda_liquida_ano1).padStart(7)}`
+  )
+}
 
 // ─── Fonte 3 só deve aparecer com perfil muito comercial ─────────────────────
 console.log('\n── Fonte 3 (transbordo de originação)')
 for (const pct of [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]) {
   const r = simular({
     meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
-    pct_comercial: pct, dedicacao: 'integral', forma_pagamento: 'a_vista',
+    pct_comercial: pct, dedicacao: 'integral', network_level: 'medio',
   })
   const m12 = r.projecao[11]
   console.log(

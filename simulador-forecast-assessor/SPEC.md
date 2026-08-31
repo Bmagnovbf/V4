@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.0 | Agosto/2026**
+**V4 Company | Versão 1.1 | Agosto/2026**
 **Status: motor implementado, cenário Base da planilha reproduzido em +0,1%**
 
 ---
@@ -94,19 +94,19 @@ Procedência de cada parâmetro, sinalizada no código e no painel `/params`:
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
 | `entrada.a_vista` | R$ 20.000 | ✅ |
-| `entrada.parcela_valor` | R$ 1.700 | 🟡 |
-| `entrada.parcelas` | 12 | 🟡 |
+
+A **forma de pagamento não é input**: a matriz atribui clientes no mesmo pace
+independentemente de o Assessor ter pago à vista ou parcelado, então o campo não
+alterava a projeção operacional. O parcelamento segue existindo como argumento
+comercial, fora do modelo.
 
 A entrada vira **crédito integral** se o Assessor abrir a própria unidade
 (Caminho 3). O crédito não entra no cálculo — é argumento de venda, não linha
 de DRE.
 
-A entrada **não é despesa da renda líquida**. Ela entra no caixa:
-- **À vista:** caixa inicial = −R$ 20.000, antes do M1
-- **Parcelado:** R$ 1.700/mês deduzidos do fluxo de caixa nos M1–M12
-
-Isso preserva a renda líquida como medida operacional pura, comparável entre as
-duas formas de pagamento.
+A entrada **não é despesa da renda líquida** — entra no caixa como saldo inicial
+de −R$ 20.000, antes do M1. Isso preserva a renda líquida como medida
+operacional pura.
 
 ### 3.2 Produtos
 
@@ -171,16 +171,34 @@ estar operando, não de operar um projeto específico.
 | `carteira.cap_ativos_parcial` | 8 projetos | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.mix_produto` | 70% Saber / 30% Executar | ✅ |
-| `carteira.ramp_novos` | `1 1 2 3 4 4 5 5 5 6 6 7` | ✅ |
+| `carteira.matriz_pace` | `1 1 1 2 2 2 2 2 2 2 2 2` | ✅ |
 
-`ramp_novos[m]` é a quantidade de contratos **novos** no mês *m*, extraída do
-cenário Base da planilha (soma de matriz + self, Saber + Executar). Soma 49 no
-ano.
+`matriz_pace[m]` é quanto a **matriz atribui** ao Assessor no mês *m* — o
+compromisso da rede, independente do perfil, da rede dele e da forma de
+pagamento. Sobe de 1 para 2 no M4, quando ele já provou entrega. Soma 21 no ano.
+
+Tudo que cresce além disso vem da originação própria.
 
 `mix_produto` vem da mesma fonte: 34 Saber / 15 Executar no ano do cenário Base
 ≈ 69/31, arredondado para 70/30.
 
-### 3.6 Originação própria
+### 3.6 Rede de relacionamento
+
+Mesma pergunta do simulador da franquia: *como você avalia sua rede de
+relacionamento com empresários?*
+
+| Nível | Referência | Fator | Tag |
+|---|---|---|:--:|
+| Baixa | ≈ 10 empresas | 0,5× | 🔴 |
+| Média | ≈ 30 empresas | 1,0× | 🔴 |
+| Alta | ≈ 50 empresas ou + | 1,5× | 🔴 |
+
+O fator **multiplica** a capacidade de originação própria. Não é parcela: sem
+rede não há a quem vender, por mais comercial que seja o perfil. É a alavanca
+que empurra a carteira para a Fonte 2, onde ele fica com 80% em vez dos 30–35%
+da alocação.
+
+### 3.7 Originação própria
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
@@ -191,18 +209,19 @@ ano.
 Antes do M4 o Assessor está na Trilha (Imersão → Vivência → Trabalho de
 Conclusão → Banca) e ainda não tem selo — **100% da carteira vem da matriz**.
 
-O teto de vendas de um perfil 100% comercial é derivado, não digitado:
+O teto de vendas é derivado, não digitado:
 
 ```
-originacao_max_mes = calls_mes_max × conversao_call_venda
-                   = 38 × 0,20
-                   = 7,6 vendas/mês  (já rampado, no M12)
+originacao_max = calls_mes_max × conversao_call_venda × pct_comercial × fator_rede
+               = 38 × 0,20 × pct_comercial × fator_rede
 ```
+
+A 100% comercial com rede média: **7,6 vendas/mês**, já rampado no M12.
 
 Premissa da operação: um closer no talo toca 35–40 calls novas por mês e
 converte 20% de reunião realizada em venda.
 
-### 3.7 Thresholds do Termômetro
+### 3.8 Thresholds do Termômetro
 
 | Parâmetro | verde | amarelo | Tag |
 |---|---|---|:--:|
@@ -226,7 +245,7 @@ interface SimulacaoInput {
   reserva_capital:    number    // R$ 0 – 150.000
   pct_comercial:      number    // 0 – 1  (0 = 100% operacional)
   dedicacao:          'integral' | 'parcial'
-  forma_pagamento:    'a_vista' | 'parcelado'
+  network_level:      'baixo' | 'medio' | 'alto'
 }
 ```
 
@@ -262,11 +281,11 @@ projetos.
 **Teto do comercial — capacidade de vender:**
 
 ```
-orig_potencial(m) = 7,6 × pct_comercial × shape_comercial(m)
+orig_potencial(m) = 7,6 × pct_comercial × fator_rede × shape_comercial(m)
 ```
 
 O comercial **não tem teto operacional** — ele não opera. O que o limita é a
-agenda de calls.
+agenda de calls e o tamanho da rede.
 
 **Curva de maturação comercial:**
 
@@ -283,20 +302,22 @@ M4 = 1/9, M12 = 1. Sobe linear do primeiro mês pós-Banca até o regime.
 Executado mês a mês. É aqui que a Fonte 3 nasce.
 
 ```
-slots(m)        = ramp_novos[m] × (cap_ativos ÷ 15)
+da_matriz(m)      = matriz_pace[m]                              → Fonte 1
 
-orig_operada    = min(orig_potencial(m), slots(m))     → Fonte 2
-orig_transbordo = orig_potencial(m) − orig_operada     → Fonte 3
-da_matriz       = slots(m) − orig_operada              → Fonte 1
+ativos_vigentes   = Σ executar_novos(k)   k de max(1, m−5) até m−1
+capacidade_livre  = max(0, cap_ativos − ativos_vigentes − da_matriz)
+
+orig_operada      = min(orig_potencial(m), capacidade_livre)    → Fonte 2
+orig_transbordo   = orig_potencial(m) − orig_operada            → Fonte 3
 ```
 
-Leitura em palavras: o Assessor opera tudo que consegue originar **até encher a
-própria carteira**. O que ele vende além disso é repassado, e ele fica só com o
-CAC. As vagas que sobram na carteira a matriz preenche.
+Leitura em palavras: **a matriz atribui primeiro** e o Assessor não recusa —
+é o compromisso da rede, e a razão de ele ter entrado. O que sobra de
+capacidade depois dos ativos vigentes ele preenche com o que originou. O que
+vender além disso é repassado, e ele fica só com o CAC.
 
-Por isso a Fonte 3 é **zero** nos dois cenários da planilha: lá o Assessor
-absorve tudo que origina. Ela só liga acima de ~65% comercial, quando a
-capacidade de operar já caiu o bastante para o que ele vende não caber.
+A ordem importa: a alocação tem prioridade sobre a originação própria na
+disputa por capacidade.
 
 Cada bloco é então repartido por produto:
 
@@ -473,8 +494,8 @@ Seis campos, em ordem:
 | Meta de renda líquida no M12 | input + slider | R$ 5.000 – 45.000 | R$ 25.000 |
 | Retirada mínima mensal | input + slider | R$ 2.000 – 15.000 | R$ 8.000 |
 | Seu perfil | slider único | 0 – 100% comercial, passo 5 | 35% |
+| Rede de relacionamento | chips | baixa / média / alta | média |
 | Dedicação | chips | integral / parcial | integral |
-| Entrada na rede | chips | à vista / 12x | à vista |
 | Reserva de capital de giro | input + slider | R$ 0 – 150.000 | R$ 25.000 |
 
 O slider de perfil mostra os dois lados ao mesmo tempo ("70% operacional · 30%
@@ -553,47 +574,62 @@ Tolerância: **15%** em valores de R$, **±1 mês** em indicadores de mês. O mo
 é generativo e a planilha é desenhada à mão — exigir casamento exato seria
 ajustar o motor para replicar decisões manuais.
 
-### Cenário Base — âncora, precisa passar
+Perfil e rede de cada cenário não são o mix de contratos da planilha — são a
+combinação que, sob as premissas do motor, reproduz aquele resultado.
 
-Reproduz em **+0,1%** no líquido do ano, com perfil de **45% comercial**.
+### Cenário Base — 35% comercial, rede alta
 
-| Indicador | Planilha | Motor |
-|---|---|---|
-| Líquido ano 1 | R$ 149.303 | R$ 149.473 |
-| Líquido no M12 | R$ 28.846 | R$ 28.861 |
-| Projetos ativos M12 | 15 | 15,1 |
-| Payback | M6 | M6 |
-| Breakeven | M1 | M1 |
+| Indicador | Planilha | Motor | Δ |
+|---|---|---|---|
+| Receita ano 1 | R$ 292.875 | R$ 279.986 | −4,4% |
+| Líquido ano 1 | R$ 149.303 | R$ 152.774 | +2,3% |
+| Líquido no M12 | R$ 28.846 | R$ 30.663 | +6,3% |
+| Projetos ativos M12 | 15 | 13,0 | −13,5% |
+| Payback | M6 | M6 | — |
+| Breakeven | M1 | M1 | — |
 
-### Cenário Upside — informativo, não alcançável
+### Cenário Upside — 50% comercial, rede alta
 
-O Upside da planilha (líquido de R$ 207.350 no ano) **não é atingível** sob a
-premissa do closer. O motor satura em ~R$ 162 mil por volta de 65% comercial.
+| Indicador | Planilha | Motor | Δ |
+|---|---|---|---|
+| Receita ano 1 | R$ 367.925 | R$ 343.581 | −6,6% |
+| Líquido ano 1 | R$ 207.350 | R$ 199.942 | −3,6% |
+| Líquido no M12 | R$ 31.777 | R$ 35.246 | +10,9% |
+| Projetos ativos M12 | 15 | 13,6 | −9,1% |
+| Payback | M5 | M6 | +1 |
+| Breakeven | M1 | M1 | — |
 
-A causa: a planilha assume o Assessor operando 15 projetos **e** vendendo 4 por
-mês simultaneamente. Com teto de 7,6 vendas/mês, vender 4/mês já consome 53% da
-capacidade comercial, o que derruba a capacidade de operar abaixo dos 15
-projetos. As duas coisas não coexistem no modelo.
+O Upside voltou a ser alcançável depois que o network entrou: ele é o Assessor
+de rede alta que puxa a carteira para a Fonte 2. Antes do network, o motor
+saturava em ~R$ 162 mil e o cenário era reportado como inatingível.
 
-**Decisão pendente:** vale a premissa do closer ou vale o Upside da planilha? Se
-o Upside for o retrato correto, o que precisa subir é `calls_mes_max` ou
-`conversao_call_venda` — não o motor.
+Divergência residual conhecida: o motor entrega **menos projetos ativos e mais
+renda no M12** que a planilha nos dois cenários. É diferença de formato de
+curva — a planilha estabiliza antes, o motor cresce até o fim. O líquido do ano,
+que é a métrica de decisão, fecha dentro de 4%.
 
-O teste reporta o Upside sem falhar, com nota explicando.
+### Efeito da rede (35% comercial)
 
-### Curva de perfil
+| Rede | Self | Matriz | Renda M12 | Líquido ano 1 |
+|---|---|---|---|---|
+| Baixa | 59% | 41% | R$ 11.010 | R$ 60.297 |
+| Média | 74% | 26% | R$ 20.836 | R$ 106.536 |
+| Alta | 81% | 19% | R$ 30.663 | R$ 152.774 |
 
-O teste também imprime a varredura que sustenta a discussão de produto:
+A rede alta chega ao **81% self / 19% matriz** — a proporção que o produto
+persegue, já que a Fonte 2 paga 80% contra os 30–35% da alocação.
+
+### Curva de perfil (rede média)
 
 | Perfil | Ativos M12 | Fonte 3 | Renda M12 | Líquido ano 1 |
 |---|---|---|---|---|
-| 20% comercial | 15 | – | R$ 17.703 | R$ 97.434 |
-| 40% comercial | 15 | – | R$ 26.630 | R$ 139.065 |
-| 50% comercial | 14 | – | R$ 30.113 | R$ 153.172 |
-| 60% comercial | 11 | – | R$ 32.617 | R$ 160.569 |
-| 70% comercial | 8 | 11% | R$ 31.727 | R$ 157.562 |
-| 80% comercial | 6 | 30% | R$ 28.315 | R$ 141.241 |
-| 100% comercial | 0 | 100% | R$ 21.170 | R$ 94.518 |
+| 20% comercial | 8,0 | – | R$ 12.413 | R$ 66.902 |
+| 40% comercial | 11,1 | – | R$ 23.644 | R$ 119.747 |
+| 50% comercial | 12,6 | – | R$ 29.259 | R$ 146.169 |
+| 60% comercial | 10,9 | 17% | R$ 26.498 | R$ 155.882 |
+| 70% comercial | 8,2 | 36% | R$ 23.983 | R$ 143.998 |
+| 80% comercial | 5,5 | 60% | R$ 20.961 | R$ 120.909 |
+| 100% comercial | 5,0 | 72% | R$ 24.353 | R$ 126.576 |
 
 ---
 
@@ -622,8 +658,8 @@ mudar.
 
 - [x] `npm run build` sem erro nem warning de lint
 - [x] Cenário Base da planilha reproduzido dentro de 15%
-- [x] Cenário Upside reportado com nota, sem falhar o teste
-- [x] Fonte 3 = zero nos perfis até 60% comercial
+- [x] Cenário Upside reproduzido dentro de 15% (rede alta)
+- [x] Fonte 3 = zero nos perfis até ~55% comercial
 - [x] Nenhum número de negócio hard-coded fora de `params.ts`
 - [x] Todo parâmetro visível em `/params` com tag de procedência
 - [x] Projeto da franquia intocado
@@ -637,20 +673,19 @@ mudar.
 Três blocos, nesta ordem. Cada um responde uma pergunta diferente; não vale
 pular para o C.
 
-### Bloco A — Perfil
-Cinco pontos no slider, dedicação integral, meta fixa em R$ 25.000, reserva
-R$ 25.000, entrada à vista.
+### Bloco A — Perfil e rede
+Meta R$ 25.000, retirada R$ 8.000, reserva R$ 25.000, dedicação integral.
 
-| # | `pct_comercial` | Verificar |
-|---|---|---|
-| A1 | 20% | Carteira cheia (15), Fonte 3 zerada, renda M12 ≈ R$ 17,7K |
-| A2 | 40% | Carteira ainda cheia, self já relevante no mix |
-| A3 | 60% | Carteira cai para ~11, Fonte 3 ainda zero |
-| A4 | 80% | Carteira ~6, Fonte 3 em ~30% da receita |
-| A5 | 100% | Carteira zero, receita 100% Fonte 3, renda M12 ≈ R$ 21,2K |
+**A1–A5 — varrer o slider de perfil** (20/40/60/80/100% comercial) com rede
+média. Verificar: a carteira sobe até ~50% comercial e depois cai; a Fonte 3
+só aparece a partir de ~60%.
+
+**A6–A8 — varrer a rede** (baixa/média/alta) com 35% comercial. Verificar: o
+mix migra de 59% para 81% self, e o líquido do ano vai de R$ 60K a R$ 153K.
 
 Pergunta: a curva faz sentido para quem conhece a operação? É aqui que o achado
-do § 8 é julgado.
+do § 8 é julgado, e onde se decide se o fator de rede (0,5 / 1,0 / 1,5) está
+calibrado.
 
 ### Bloco B — Candidato real
 Três a cinco MQLs que já passaram pelo SDR, rodando o que eles de fato
@@ -668,17 +703,19 @@ baseline de regressão:
 
 | # | Input | Ativos M12 | Renda M12 | Pior caixa | Payback | Termômetro |
 |---|---|---|---|---|---|---|
-| C1 | Dedicação parcial | 8,1 | R$ 21.601 | −R$ 20.521 | M7 | amarelo (todos os eixos) |
-| C2 | Reserva R$ 0 | 15,1 | R$ 26.630 | −R$ 19.636 | M6 | **vermelho** por reserva |
-| C3 | Meta R$ 45K, 20% comercial | 15,1 | R$ 17.703 | −R$ 19.636 | M7 | **vermelho** por meta |
-| C4 | Entrada parcelada | 15,1 | R$ 26.630 | −R$ 2.626 | M4 | verde (todos os eixos) |
-| C5 | 100% comercial + parcial | 0,0 | R$ 21.170 | −R$ 23.000 | M8 | amarelo |
+| C1 | Dedicação parcial | | | | | |
+| C2 | Reserva R$ 0 | | | | | **vermelho** por reserva |
+| C3 | Meta R$ 45K, 20% comercial | | | | | **vermelho** por meta |
+| C4 | Rede baixa + 20% comercial | | | | | pior caso do funil |
+| C5 | 100% comercial + parcial | | | | | sem divisão por zero |
+
+*(baseline a preencher na primeira rodada pós-network)*
 
 Verificações qualitativas:
 - **C1** — cap cai de 15 para 8; a renda cai junto, mas menos que proporcional, porque o overhead é fixo
-- **C2** — o eixo de reserva vira vermelho sozinho e arrasta o nível final, com payback e meta em verde
-- **C3** — meta em 39% do projetado derruba só o eixo de meta
-- **C4** — parcelar troca um buraco de R$ 20K por um de R$ 2,6K e antecipa o payback em 2 meses
+- **C2** — o eixo de reserva vira vermelho sozinho e arrasta o nível final
+- **C3** — meta muito acima do projetado derruba só o eixo de meta
+- **C4** — rede baixa com perfil operacional é o candidato que depende quase só da matriz
 - **C5** — cap zero não gera divisão por zero; a ocupação é forçada a 0 e o dashboard renderiza
 
 Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
@@ -689,6 +726,13 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.1 — Agosto/2026. Mudanças v1.0 → v1.1:*
+- *Forma de pagamento deixa de ser input: a matriz atribui clientes no mesmo pace de qualquer jeito*
+- *Entra a rede de relacionamento (baixa/média/alta), mesma pergunta do simulador da franquia, multiplicando a originação própria*
+- *A matriz passa a atribuir um pace fixo de 1–2 clientes/mês em vez de preencher o que sobra da carteira; a alocação tem prioridade sobre a originação na disputa por capacidade*
+- *Reserva do termômetro passa a medir o déficit de retirada, não o pior caixa (que era a entrada); entra o input de retirada mínima mensal*
+- *Cenário Upside volta a ser alcançável com rede alta; âncoras do teste reancoradas*
 
 *SPEC v1.0 — Agosto/2026. Primeira versão, escrita depois do motor. Decisões
 travadas nesta versão: split por produto (Saber 30% / Executar 35% na alocação),

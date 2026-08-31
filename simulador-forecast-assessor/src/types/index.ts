@@ -16,7 +16,7 @@
 
 export type Dedicacao = 'integral' | 'parcial'
 
-export type FormaPagamento = 'a_vista' | 'parcelado'
+export type NetworkLevel = 'baixo' | 'medio' | 'alto'
 
 export type ViabilidadeNivel = 'verde' | 'amarelo' | 'vermelho'
 
@@ -30,7 +30,8 @@ export interface SimulacaoInput {
   /** Perfil: 0 = 100% operacional, 1 = 100% comercial. */
   pct_comercial: number
   dedicacao: Dedicacao
-  forma_pagamento: FormaPagamento
+  /** Tamanho da rede de relacionamento — multiplica a originação própria. */
+  network_level: NetworkLevel
 }
 
 /** Contagem de contratos movimentados no mês. */
@@ -68,8 +69,6 @@ export interface PLMensal extends Carteira {
   renda_liquida: number
   /** Quanto falta da renda para bancar a retirada mínima (0 quando cobre). */
   deficit_retirada: number
-  /** Parcela da entrada, quando parcelada (não entra na renda líquida). */
-  parcela_entrada: number
   fluxo_caixa: number
   caixa_acumulado: number
 }

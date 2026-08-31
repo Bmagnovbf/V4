@@ -6,10 +6,10 @@
 //
 // Encadeamento:
 //
-//   pct_comercial + dedicação
-//     → capacidade de OPERAR (cap de projetos) e de ORIGINAR (teto de vendas)
-//     → contratos novos/mês, repartidos entre matriz e self
-//     → originação acima da capacidade transborda para a Fonte 3 (CAC)
+//   matriz atribui um pace fixo de 1–2 clientes/mês (Fonte 1)
+//   network + pct_comercial → o que ele origina por conta própria
+//     → o que couber na capacidade livre ele opera (Fonte 2)
+//     → o que exceder transborda para a Fonte 3 (CAC)
 //     → receita por produto × split da fonte
 //     → (−) Simples, CSP Saber, CSP Executar, overhead
 //     → renda líquida → caixa acumulado → breakeven e payback
@@ -46,12 +46,6 @@ function capAtivos(input: SimulacaoInput): number {
   return base * fator
 }
 
-/** Rampa de contratos novos no mês, escalada pela capacidade do Assessor. */
-function novosSlots(mes: number, cap: number): number {
-  const base = PARAMS.carteira.ramp_novos[mes] ?? 0
-  return base * (cap / PARAMS.carteira.cap_ativos_integral)
-}
-
 /** Evita divisão por zero na ocupação quando o perfil é 100% comercial. */
 function ocupacao(ativos: number, cap: number): number {
   return cap > 0 ? ativos / cap : 0
@@ -67,9 +61,17 @@ function shapeComercial(mes: number): number {
   return (mes - inicio + 1) / (MESES - inicio + 1)
 }
 
-/** Teto de vendas/mês de um perfil 100% comercial, já rampado. */
-function originacaoMaxMes(): number {
-  return PARAMS.comercial.calls_mes_max * PARAMS.comercial.conversao_call_venda
+/**
+ * Teto de vendas/mês do Assessor, já rampado.
+ *
+ * Três fatores multiplicam: a agenda de calls (38 × 20% = 7,6/mês), o quanto do
+ * perfil é comercial e o tamanho da rede. Sem rede não há a quem vender, por
+ * mais comercial que seja o perfil — por isso o network entra como multiplicador
+ * e não como parcela.
+ */
+function originacaoMaxMes(input: SimulacaoInput): number {
+  const teto = PARAMS.comercial.calls_mes_max * PARAMS.comercial.conversao_call_venda
+  return teto * input.pct_comercial * PARAMS.network[input.network_level].fator
 }
 
 function overheadDoMes(mes: number): number {
@@ -91,16 +93,25 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
   const execNovosSelf: number[] = [0]
 
   for (let mes = 1; mes <= MESES; mes++) {
-    const slots = novosSlots(mes, cap)
+    // 1) A matriz atribui seu pace, independente do perfil. É o compromisso da
+    //    rede — o Assessor não recusa cliente alocado.
+    const daMatriz = PARAMS.carteira.matriz_pace[mes] ?? 0
 
-    // O que ele consegue originar neste mês.
-    const origPotencial =
-      originacaoMaxMes() * input.pct_comercial * shapeComercial(mes)
+    // 2) O que ele consegue originar por conta própria neste mês.
+    const origPotencial = originacaoMaxMes(input) * shapeComercial(mes)
 
-    // Cabe na carteira que ele opera → Fonte 2. O excedente vira Fonte 3.
-    const origOperada = Math.min(origPotencial, slots)
+    // 3) Espaço que sobra na carteira depois dos ativos vigentes e do que a
+    //    matriz acabou de atribuir. O que couber ele opera (Fonte 2); o que
+    //    exceder é repassado e ele fica só com o CAC (Fonte 3).
+    const desdeAtivos = Math.max(1, mes - executarDuracao() + 1)
+    let ativosVigentes = 0
+    for (let m = desdeAtivos; m < mes; m++) {
+      ativosVigentes += (execNovosMatriz[m] ?? 0) + (execNovosSelf[m] ?? 0)
+    }
+    const capacidadeLivre = Math.max(0, cap - ativosVigentes - daMatriz)
+
+    const origOperada = Math.min(origPotencial, capacidadeLivre)
     const origTransbordo = origPotencial - origOperada
-    const daMatriz = slots - origOperada
 
     const saber_novos_matriz     = daMatriz * saber
     const saber_novos_self       = origOperada * saber
@@ -154,7 +165,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
   const cac_executar_parcela = (E.ticket * PARAMS.originacao.executar_mult_mrr) / parcelas_exec
 
   const linhas: PLMensal[] = []
-  let caixa = input.forma_pagamento === 'a_vista' ? -PARAMS.entrada.a_vista : 0
+  let caixa = -PARAMS.entrada.a_vista
 
   for (let i = 0; i < MESES; i++) {
     const mes = i + 1
@@ -189,12 +200,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     // Independe da entrada — capital de giro e investimento são coisas distintas.
     const deficit_retirada = Math.max(0, input.retirada_minima - renda_liquida)
 
-    const parcela_entrada =
-      input.forma_pagamento === 'parcelado' && mes <= PARAMS.entrada.parcelas
-        ? PARAMS.entrada.parcela_valor
-        : 0
-
-    const fluxo_caixa = renda_liquida - parcela_entrada
+    const fluxo_caixa = renda_liquida
     caixa += fluxo_caixa
 
     linhas.push({
@@ -204,7 +210,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
       receita_originacao, receita_recebida,
       impostos, receita_liquida,
       csp_saber, csp_executar, overhead,
-      renda_liquida, deficit_retirada, parcela_entrada,
+      renda_liquida, deficit_retirada,
       fluxo_caixa, caixa_acumulado: caixa,
     })
   }
@@ -221,9 +227,7 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   const receita_recebida_ano1  = projecao.reduce((s, l) => s + l.receita_recebida, 0)
   const pior_caixa             = Math.min(...projecao.map(l => l.caixa_acumulado))
 
-  const investimento_total = input.forma_pagamento === 'a_vista'
-    ? PARAMS.entrada.a_vista
-    : PARAMS.entrada.parcela_valor * PARAMS.entrada.parcelas
+  const investimento_total = PARAMS.entrada.a_vista
 
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null

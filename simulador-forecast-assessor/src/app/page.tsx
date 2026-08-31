@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { simular } from '@/lib/calculator'
 import { fmt } from '@/lib/format'
 import { PARAMS } from '@/config/params'
-import type { Dedicacao, FormaPagamento } from '@/types'
+import type { Dedicacao, NetworkLevel } from '@/types'
 
 const MIN_RENDA = 5_000,  MAX_RENDA = 45_000, STEP_RENDA = 1_000
 const MIN_RET   = 2_000,  MAX_RET   = 15_000, STEP_RET   = 500
@@ -101,7 +101,7 @@ export default function InputPage() {
   const [reserva, setReserva] = useState(25_000)
   const [pctComercial, setPctComercial] = useState(35)
   const [dedicacao, setDedicacao] = useState<Dedicacao>('integral')
-  const [pagamento, setPagamento] = useState<FormaPagamento>('a_vista')
+  const [network, setNetwork] = useState<NetworkLevel>('medio')
 
   function handleSimular() {
     const resultado = simular({
@@ -110,7 +110,7 @@ export default function InputPage() {
       reserva_capital: reserva,
       pct_comercial: pctComercial / 100,
       dedicacao,
-      forma_pagamento: pagamento,
+      network_level: network,
     })
     sessionStorage.setItem('simulacao', JSON.stringify(resultado))
     router.push('/dashboard')
@@ -185,15 +185,16 @@ export default function InputPage() {
             footer={`Integral ≈ até ${PARAMS.carteira.cap_ativos_integral} projetos ativos · Parcial ≈ até ${PARAMS.carteira.cap_ativos_parcial}`}
           />
 
-          <ChipGroup<FormaPagamento>
-            label="Entrada na rede"
+          <ChipGroup<NetworkLevel>
+            label="Como você avalia sua rede de relacionamento com empresários?"
             options={[
-              { value: 'a_vista',   label: `${fmt(PARAMS.entrada.a_vista)} à vista` },
-              { value: 'parcelado', label: `${PARAMS.entrada.parcelas}x ${fmt(PARAMS.entrada.parcela_valor)}` },
+              { value: 'baixo', label: 'Baixa' },
+              { value: 'medio', label: 'Média' },
+              { value: 'alto',  label: 'Alta'  },
             ]}
-            value={pagamento}
-            onChange={setPagamento}
-            footer="Vira crédito integral se você abrir sua própria unidade"
+            value={network}
+            onChange={setNetwork}
+            footer={`Baixa ≈ ${PARAMS.network.baixo.empresas} empresas · Média ≈ ${PARAMS.network.medio.empresas} · Alta ≈ ${PARAMS.network.alto.empresas} ou +. Quanto maior a rede, mais clientes você traz — e esses pagam ${(PARAMS.produtos.saber.split_self * 100).toFixed(0)}% para você, contra ${(PARAMS.produtos.saber.split_matriz * 100).toFixed(0)}–${(PARAMS.produtos.executar.split_matriz * 100).toFixed(0)}% dos alocados pela matriz.`}
           />
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />

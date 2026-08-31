@@ -48,7 +48,7 @@ export default function DashboardPage() {
               Meta <strong>{fmt(input.meta_renda_liquida)}/mês</strong> ·
               retirada mínima <strong>{fmt(input.retirada_minima)}/mês</strong> ·
               Dedicação <strong>{input.dedicacao}</strong> ·
-              Entrada <strong>{input.forma_pagamento === 'a_vista' ? 'à vista' : 'parcelada'}</strong>
+              rede <strong>{({ baixo: 'baixa', medio: 'média', alto: 'alta' } as const)[input.network_level]}</strong>
             </p>
           </div>
           <button

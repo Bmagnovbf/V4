@@ -15,10 +15,10 @@
 export const PARAMS = {
 
   // ─── Entrada na rede ─────────────────────────────────────────────────────
+  // A forma de pagamento (à vista ou 12x) não altera a projeção: a matriz
+  // atribui clientes no mesmo pace de qualquer jeito. Por isso não é input.
   entrada: {
     a_vista:          20_000,  // ✅ vira crédito integral no upgrade para franquia
-    parcela_valor:     1_700,  // 🟡 deck: "de R$ 25.000 · 12x R$ 1.700"
-    parcelas:             12,  // 🟡
   },
 
   // ─── Produtos ────────────────────────────────────────────────────────────
@@ -75,11 +75,22 @@ export const PARAMS = {
     // seguem com capacidade cheia. Um perfil 70/30 comercial cai para ~8
     // projetos, e o que ele originar acima disso vira Fonte 3.
     pct_operacional_ref: 0.55,   // 🔴
-    // Rampa de contratos NOVOS por mês — extraída do cenário Base da planilha
-    // (soma matriz + self de Saber e Executar). Índice 1 = M1 … 12 = M12.
-    ramp_novos: [0, 1, 1, 2, 3, 4, 4, 5, 5, 5, 6, 6, 7] as readonly number[],  // ✅
+    // Pace de atribuição da matriz — clientes que a rede entrega ao Assessor
+    // para operar (Fonte 1). Independe da forma de pagamento e do perfil: é o
+    // compromisso da rede. Sobe de 1 para 2 quando ele já provou entrega.
+    matriz_pace: [0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2] as readonly number[],  // ✅
     // Mix de produto nos contratos novos. Base do DRE: 34 Saber / 15 Executar.
     mix_produto: { saber: 0.70, executar: 0.30 },  // ✅ ≈ 69/31 na planilha
+  },
+
+  // ─── Rede de relacionamento do Assessor ──────────────────────────────────
+  // Mesma pergunta do simulador da franquia. Multiplica a capacidade de
+  // originação própria: sem rede não há a quem vender, por mais comercial
+  // que seja o perfil.
+  network: {
+    baixo: { fator: 0.5, empresas: 10 },  // 🔴
+    medio: { fator: 1.0, empresas: 30 },  // 🔴
+    alto:  { fator: 1.5, empresas: 50 },  // 🔴
   },
 
   // ─── Originação própria do Assessor ──────────────────────────────────────

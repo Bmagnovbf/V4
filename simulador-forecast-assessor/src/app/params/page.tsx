@@ -53,7 +53,7 @@ export default function ParamsPage() {
 
         <Section title="Entrada na rede">
           <Row tag="✅" path="entrada.a_vista"       value={brl(p.entrada.a_vista)} />
-          <Row tag="🟡" path="entrada.parcela_valor" value={`${p.entrada.parcelas}x ${brl(p.entrada.parcela_valor)}`} />
+
         </Section>
 
         <Section title="Produto Saber (one-time)">
@@ -90,14 +90,20 @@ export default function ParamsPage() {
           <Row tag="🔴" path="carteira.cap_ativos_parcial"  value={`${p.carteira.cap_ativos_parcial} projetos`} />
           <Row tag="🔴" path="carteira.pct_operacional_ref" value={`${pct(p.carteira.pct_operacional_ref)} — abaixo disso a capacidade cai`} />
           <Row tag="✅" path="carteira.mix_produto"         value={`${pct(p.carteira.mix_produto.saber)} Saber · ${pct(p.carteira.mix_produto.executar)} Executar`} />
-          <Row tag="✅" path="carteira.ramp_novos"          value={p.carteira.ramp_novos.slice(1).join(' · ')} />
+          <Row tag="✅" path="carteira.matriz_pace"          value={p.carteira.matriz_pace.slice(1).join(' · ') + ' cliente(s)/mês'} />
+        </Section>
+
+        <Section title="Rede de relacionamento">
+          <Row tag="🔴" path="network.baixo" value={`≈ ${p.network.baixo.empresas} empresas · fator ${p.network.baixo.fator}×`} />
+          <Row tag="🔴" path="network.medio" value={`≈ ${p.network.medio.empresas} empresas · fator ${p.network.medio.fator}×`} />
+          <Row tag="🔴" path="network.alto"  value={`≈ ${p.network.alto.empresas} empresas · fator ${p.network.alto.fator}×`} />
         </Section>
 
         <Section title="Originação própria">
           <Row tag="✅" path="comercial.inicio_originacao_mes" value={`M${p.comercial.inicio_originacao_mes}`} />
           <Row tag="🟡" path="comercial.calls_mes_max"          value={`${p.comercial.calls_mes_max} calls novas/mês`} />
           <Row tag="🟡" path="comercial.conversao_call_venda"   value={pct(p.comercial.conversao_call_venda)} />
-          <Row tag="✅" path="→ teto de vendas"                 value={`${(p.comercial.calls_mes_max * p.comercial.conversao_call_venda).toFixed(1)} vendas/mês a 100% comercial`} />
+          <Row tag="✅" path="→ teto de vendas"                 value={`${(p.comercial.calls_mes_max * p.comercial.conversao_call_venda).toFixed(1)}/mês × % comercial × fator de rede`} />
         </Section>
 
         <Section title="Termômetro de Viabilidade">
