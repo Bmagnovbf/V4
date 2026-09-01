@@ -1,13 +1,20 @@
 'use client'
 
 import type { KPIs } from '@/types'
-import { fmt, fmtInt } from '@/lib/format'
+import { fmt, fmtInt, fmtPct } from '@/lib/format'
 
-function Card({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Card({
+  label, value, hint, destaque,
+}: { label: string; value: string; hint?: string; destaque?: boolean }) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #F2F2F2' }}>
-      <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#7A7A7A' }}>{label}</p>
-      <p className="text-2xl font-bold mt-1" style={{ color: '#1A1A1A' }}>{value}</p>
+    <div
+      className="bg-white rounded-2xl p-5 shadow-sm"
+      style={{ border: destaque ? '1px solid #1A5C38' : '1px solid #F2F2F2' }}
+    >
+      <p className="text-xs font-bold uppercase tracking-wide" style={{ color: destaque ? '#1A5C38' : '#7A7A7A' }}>
+        {label}
+      </p>
+      <p className="text-2xl font-bold mt-1" style={{ color: destaque ? '#1A5C38' : '#1A1A1A' }}>{value}</p>
       {hint && <p className="text-xs mt-1" style={{ color: '#7A7A7A' }}>{hint}</p>}
     </div>
   )
@@ -21,9 +28,12 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
       : 'a renda não alcança a retirada em 12 meses'
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card label="Renda em regime"    value={fmt(kpis.renda_regime)}  hint="pró-labore mensal, média dos M10–M12" />
-      <Card label="Líquido ano 1"      value={fmt(kpis.renda_liquida_ano1)} hint={`média de ${fmt(kpis.renda_media_mes)}/mês`} />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card label="Remuneração total"  value={fmt(kpis.remuneracao_regime)} destaque
+            hint="CSP + resultado, por mês em regime" />
+      <Card label="Resultado do negócio" value={fmt(kpis.renda_regime)} hint="margem depois de remunerar suas horas" />
+      <Card label="Horas de entrega"   value={`${fmtInt(kpis.horas_regime)}h`}
+            hint={`${fmtPct(kpis.ocupacao_horas * 100, 0)} de uma jornada de 176h/mês`} />
       <Card label="Projetos no M12"    value={fmtInt(kpis.projetos_ativos_m12)} hint="ativos simultâneos" />
       <Card label="Payback da entrada" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : '—'} hint={`entrada de ${fmt(kpis.investimento_total)}`} />
       <Card label="Reserva necessária" value={fmt(kpis.deficit_retirada_total)} hint={reservaHint} />

@@ -45,7 +45,7 @@ export function TermometroViabilidade({
           nivel={termometro.payback_nivel}
         />
         <Item
-          titulo="Renda projetada vs. meta"
+          titulo="Remuneração vs. meta"
           valor={`${(termometro.meta_ratio * 100).toFixed(0)}%`}
           nivel={termometro.meta_nivel}
         />

@@ -10,7 +10,10 @@ function cell(v: number, negativo = false) {
 }
 
 export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
-  const linhas: { label: string; get: (l: PLMensal) => number; neg?: boolean; forte?: boolean }[] = [
+  const linhas: {
+    label: string; get: (l: PLMensal) => number
+    neg?: boolean; forte?: boolean; destaque?: boolean; sufixo?: string; indent?: boolean
+  }[] = [
     { label: 'Saber · Alocação',        get: l => l.receita_saber_matriz },
     { label: 'Saber · Self-sourced',    get: l => l.receita_saber_self },
     { label: 'Executar · Alocação',     get: l => l.receita_executar_matriz },
@@ -18,10 +21,13 @@ export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
     { label: 'Originação (CAC)',        get: l => l.receita_originacao },
     { label: '(=) Receita recebida',    get: l => l.receita_recebida, forte: true },
     { label: '(−) Impostos',            get: l => l.impostos, neg: true },
-    { label: '(−) CSP Saber',           get: l => l.csp_saber, neg: true },
-    { label: '(−) CSP Executar',        get: l => l.csp_executar, neg: true },
+    { label: 'Custo de Serviço Prestado (CSP)', get: l => l.csp_total, neg: true, forte: true },
+    { label: 'CSP · Saber',             get: l => l.csp_saber, neg: true, indent: true },
+    { label: 'CSP · Executar',          get: l => l.csp_executar, neg: true, indent: true },
     { label: '(−) Freelas + ferramentas', get: l => l.overhead, neg: true },
-    { label: '(=) Renda líquida',       get: l => l.renda_liquida, forte: true },
+    { label: '(=) Resultado do negócio', get: l => l.renda_liquida, forte: true },
+    { label: 'Remuneração Total (CSP + resultado)', get: l => l.remuneracao_total, forte: true, destaque: true },
+    { label: 'Horas alocadas', get: l => l.horas_alocadas, sufixo: 'h' },
     { label: 'Caixa acumulado',         get: l => l.caixa_acumulado },
   ]
 
@@ -53,7 +59,11 @@ export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
                 <tr key={linha.label} style={{ borderBottom: '1px solid #F2F2F2' }}>
                   <td
                     className="text-left py-1.5 pr-3"
-                    style={{ color: linha.forte ? '#1A1A1A' : '#3D3D3D', fontWeight: linha.forte ? 700 : 400 }}
+                    style={{
+                      color: linha.destaque ? '#1A5C38' : linha.forte ? '#1A1A1A' : '#3D3D3D',
+                      fontWeight: linha.forte ? 700 : 400,
+                      paddingLeft: linha.indent ? '1rem' : undefined,
+                    }}
                   >
                     {linha.label}
                   </td>
@@ -64,23 +74,25 @@ export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
                         key={l.mes}
                         className="text-right py-1.5 px-2"
                         style={{
-                          color: linha.neg || v < 0 ? '#8B0000' : linha.forte ? '#1A1A1A' : '#3D3D3D',
+                          color: linha.destaque ? '#1A5C38'
+                            : linha.neg || v < 0 ? '#8B0000'
+                            : linha.forte ? '#1A1A1A' : '#3D3D3D',
                           fontWeight: linha.forte ? 700 : 400,
                         }}
                       >
-                        {cell(v, linha.neg)}
+                        {cell(v, linha.neg)}{linha.sufixo && v >= 0.5 ? linha.sufixo : ''}
                       </td>
                     )
                   })}
                   <td
                     className="text-right py-1.5 pl-3"
                     style={{
-                      color: linha.neg ? '#8B0000' : '#1A1A1A',
+                      color: linha.destaque ? '#1A5C38' : linha.neg ? '#8B0000' : '#1A1A1A',
                       fontWeight: 700,
                       borderLeft: '1px solid #F2F2F2',
                     }}
                   >
-                    {cell(ano, linha.neg)}
+                    {cell(ano, linha.neg)}{linha.sufixo && ano >= 0.5 ? linha.sufixo : ''}
                   </td>
                 </tr>
               )

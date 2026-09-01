@@ -241,15 +241,27 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     const impostos        = receita_recebida * PARAMS.impostos.simples
     const receita_liquida = receita_recebida - impostos
 
-    const csp_saber    = (c.saber_novos_matriz + c.saber_novos_self) * S.csp_onetime
-    const csp_executar = (c.executar_ativos_matriz + c.executar_ativos_self) * E.csp_mes
+    const saberEntregues   = c.saber_novos_matriz + c.saber_novos_self
+    const executarVigentes = c.executar_ativos_matriz + c.executar_ativos_self
+
+    const csp_saber    = saberEntregues * S.csp_onetime
+    const csp_executar = executarVigentes * E.csp_mes
+    const csp_total    = csp_saber + csp_executar
     const overhead     = overheadDoMes(mes)
 
-    const renda_liquida = receita_liquida - csp_saber - csp_executar - overhead
+    const horas_alocadas =
+      saberEntregues * PARAMS.horas.saber_onetime + executarVigentes * PARAMS.horas.executar_mes
 
-    // O quanto a renda do mês fica abaixo do que ele precisa retirar para viver.
-    // Independe da entrada — capital de giro e investimento são coisas distintas.
-    const deficit_retirada = Math.max(0, input.retirada_minima - renda_liquida)
+    const renda_liquida = receita_liquida - csp_total - overhead
+
+    // O CSP não sai do bolso: é o pagamento pelas horas que ele mesmo entrega.
+    // O que fica com o Assessor é o CSP mais o resultado do negócio.
+    const remuneracao_total = renda_liquida + csp_total
+
+    // O quanto falta para bancar a retirada mínima. Compara com a remuneração
+    // total, não com o resultado — senão exigiria reserva para cobrir um custo
+    // que ele não desembolsa.
+    const deficit_retirada = Math.max(0, input.retirada_minima - remuneracao_total)
 
     const fluxo_caixa = renda_liquida
     caixa += fluxo_caixa
@@ -260,8 +272,8 @@ function projetar(input: SimulacaoInput): PLMensal[] {
       receita_executar_matriz, receita_executar_self,
       receita_originacao, receita_recebida,
       impostos, receita_liquida,
-      csp_saber, csp_executar, overhead,
-      renda_liquida, deficit_retirada,
+      csp_saber, csp_executar, csp_total, overhead, horas_alocadas,
+      renda_liquida, remuneracao_total, deficit_retirada,
       fluxo_caixa, caixa_acumulado: caixa,
     })
   }
@@ -283,12 +295,18 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   const MESES_REGIME = 3
   const regime = projecao.slice(-MESES_REGIME)
   const renda_regime = regime.reduce((s, l) => s + l.renda_liquida, 0) / MESES_REGIME
+  const remuneracao_regime = regime.reduce((s, l) => s + l.remuneracao_total, 0) / MESES_REGIME
+  const horas_regime = regime.reduce((s, l) => s + l.horas_alocadas, 0) / MESES_REGIME
 
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
 
   return {
     renda_regime,
+    remuneracao_regime,
+    remuneracao_total_ano: projecao.reduce((s, l) => s + l.remuneracao_total, 0),
+    horas_regime,
+    ocupacao_horas: horas_regime / PARAMS.horas.referencia_mes,
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,
     renda_media_mes: renda_liquida_ano1 / MESES,
@@ -337,7 +355,7 @@ function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
   // Compara a meta com a renda em REGIME, não com o M12 isolado — senão o
   // veredito do termômetro depende de em qual mês caiu o último Saber.
   const meta_ratio = input.meta_renda_liquida > 0
-    ? kpis.renda_regime / input.meta_renda_liquida
+    ? kpis.remuneracao_regime / input.meta_renda_liquida
     : 0
   const meta_nivel = nivelMaior(
     meta_ratio,

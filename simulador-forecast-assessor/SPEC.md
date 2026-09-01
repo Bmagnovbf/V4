@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.3 | Agosto/2026**
+**V4 Company | Versão 1.4 | Setembro/2026**
 **Status: motor implementado, cenário Base da planilha reproduzido em +0,1%**
 
 ---
@@ -120,6 +120,7 @@ Só **Saber** e **Executar** entram no escopo do Assessor.
 | Split Fonte 1 (matriz) | **30%** → R$ 3.600 | **35%** → R$ 1.225/mês |
 | Split Fonte 2 (self) | **80%** → R$ 9.600 | **80%** → R$ 2.800/mês |
 | CSP | R$ 1.500 one-time, no mês da entrega | R$ 1.000/mês por projeto ativo |
+| Horas de entrega | 45h no mês da entrega | 13h/mês enquanto vigente |
 
 Todos ✅.
 
@@ -150,7 +151,38 @@ Os 15% do Saber e as 2× MRR do Executar **são a definição do CAC** — não 
 duas alternativas. O doc do produto e o deck escrevem a mesma regra de dois
 jeitos ("~15–17,5% ou 2–3× MRR" e "100% CAC").
 
-### 3.4 Impostos e overhead
+### 3.4 O CSP é remuneração, não desembolso
+
+Quem entrega é o próprio Assessor. O **Custo de Serviço Prestado** é o preço da
+hora dele, não dinheiro que sai do bolso — por isso o simulador o trata como
+parte do que ele recebe, e não como despesa que reduz o que leva.
+
+```
+(=) Receita recebida
+(−) Impostos
+Custo de Serviço Prestado (CSP)      ← pagamento das horas dele
+    CSP · Saber
+    CSP · Executar
+(−) Freelancers + ferramentas        ← esse sim é desembolso
+(=) Resultado do negócio             ← a margem, o "dividendo"
+
+Remuneração Total = CSP + Resultado  ← o que fica com ele
+```
+
+A distinção importa para a leitura: **Remuneração Total** responde "quanto eu
+ganho", e **Resultado do negócio** responde "isso é um negócio ou um autoemprego
+bem pago". Tratar o CSP como custo puro subestimava a renda em 53% a 99%,
+conforme o cenário.
+
+O termômetro compara a retirada mínima com a **Remuneração Total** — exigir
+reserva para cobrir um custo que ele não desembolsa inflava a reserva
+necessária.
+
+Decisão de ago/2026: não separamos quanto do CSP vai para freelancer e quanto é
+trabalho próprio. Tudo é considerado valor que ele recebe. O overhead cobre o
+apoio genérico à parte.
+
+### 3.5 Impostos e overhead
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
@@ -163,7 +195,7 @@ Overhead = freelancers IA-augmented sob demanda + ferramentas e acesso à
 plataforma. É adicional ao CSP e independe do volume de carteira — é custo de
 estar operando, não de operar um projeto específico.
 
-### 3.5 Carteira
+### 3.6 Carteira
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
@@ -189,7 +221,7 @@ overhead fixo), então abrir a carteira com ele produziria meses negativos.
 `mix_produto` vem da mesma fonte: 34 Saber / 15 Executar no ano do cenário Base
 ≈ 69/31, arredondado para 70/30.
 
-### 3.6 Rede de relacionamento
+### 3.7 Rede de relacionamento
 
 Mesma pergunta do simulador da franquia: *como você avalia sua rede de
 relacionamento com empresários?*
@@ -205,7 +237,7 @@ rede não há a quem vender, por mais comercial que seja o perfil. É a alavanca
 que empurra a carteira para a Fonte 2, onde ele fica com 80% em vez dos 30–35%
 da alocação.
 
-### 3.7 Originação própria
+### 3.8 Originação própria
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
@@ -228,7 +260,7 @@ A 100% comercial com rede média: **7,6 vendas/mês**, já rampado no M12.
 Premissa da operação: um closer no talo toca 35–40 calls novas por mês e
 converte 20% de reunião realizada em venda.
 
-### 3.8 Thresholds do Termômetro
+### 3.9 Thresholds do Termômetro
 
 | Parâmetro | verde | amarelo | Tag |
 |---|---|---|:--:|
@@ -424,8 +456,12 @@ receita_originacao(m)   = saber_originados(m) × 1.800
 (=) receita_liquida     = receita_recebida − impostos
 (−) csp_saber           = (saber_novos_matriz + saber_novos_self) × 1.500
 (−) csp_executar        = (executar_ativos_matriz + executar_ativos_self) × 1.000
+(=) csp_total           = csp_saber + csp_executar
 (−) overhead            = 1.000 / 1.500 / 2.000 conforme o mês
-(=) renda_liquida       = receita_liquida − csp_saber − csp_executar − overhead
+(=) renda_liquida       = receita_liquida − csp_total − overhead
+(=) remuneracao_total   = renda_liquida + csp_total
+
+horas_alocadas          = saber_entregues × 45 + executar_vigentes × 13
 ```
 
 Nota sobre a Fonte 3: entra em `receita_recebida` e portanto **é tributada** no
@@ -439,7 +475,7 @@ invisível nas linhas de resultado: ele não **perde** dinheiro (breakeven em M1
 ele ganha **quase nada** nos primeiros meses.
 
 ```
-deficit_retirada(m)    = max(0, retirada_minima − renda_liquida(m))
+deficit_retirada(m)    = max(0, retirada_minima − remuneracao_total(m))
 deficit_retirada_total = Σ deficit_retirada(m)
 mes_autossuficiencia   = primeiro m com deficit_retirada(m) = 0
 ```
@@ -504,7 +540,7 @@ Três eixos, sempre prevalecendo o **mais crítico**.
 
 ```
 reserva_ratio  = reserva_capital ÷ deficit_retirada_total   (∞ se o total = 0)
-meta_ratio     = renda_regime ÷ meta_renda_liquida
+meta_ratio     = remuneracao_regime ÷ meta_renda_liquida
 
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
 payback_nivel  = verde se ≤ M6    · amarelo se ≤ M9    · senão vermelho
@@ -566,7 +602,7 @@ Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
 2. **Termômetro** — nível final + os três eixos abertos
-3. **KPI cards** — renda em regime, líquido ano 1, projetos no M12, payback da entrada, reserva necessária, capital total
+3. **KPI cards** — remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback da entrada, reserva necessária, capital total
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -706,6 +742,35 @@ mudar.
 
 ---
 
+## 8b. Alerta: a carteira de 15 projetos não cabe na jornada
+
+A linha de horas, assim que entrou, mostrou um conflito entre dois parâmetros
+que antes não se falavam.
+
+| Cenário | Horas em regime | Ocupação de 176h/mês | Pico |
+|---|---|---|---|
+| Rede baixa · 20% com | 151h | 86% | 88% |
+| Rede média · 35% com | 222h | **126%** | 147% |
+| Rede alta · 35% com | 269h | **153%** | 187% |
+| Rede alta · 50% com | 329h | **187%** | 209% |
+
+Uma carteira de 15 projetos ativos consome, só de Executar, `15 × 13h = 195h` —
+já acima da jornada de referência, antes de entregar um Saber sequer. Cada Saber
+novo soma 45h.
+
+Três leituras possíveis, e não sabemos qual vale:
+
+1. **O cap de 15 está alto.** Pelas horas, a carteira sustentável fica em torno
+   de 8 a 10 projetos, não 15.
+2. **As horas por produto estão altas.** 45h por Saber e 13h/mês por Executar
+   podem refletir a entrega completa, não a parte que cabe ao Assessor.
+3. **Ele terceiriza mais do que o overhead sugere.** Nesse caso parte do CSP é
+   desembolso real, o que contraria a decisão de ago/2026 de tratar todo o CSP
+   como remuneração própria.
+
+Enquanto não se decide, o simulador exibe a ocupação sem travar nada. É
+informação para a conversa, não regra.
+
 ## 9. Critérios de Aceite
 
 - [x] `npm run build` sem erro nem warning de lint
@@ -779,6 +844,12 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.4 — Setembro/2026. Mudanças v1.3 → v1.4:*
+- *O CSP passa a ser tratado como remuneração do Assessor, não desembolso: entra o totalizador "Custo de Serviço Prestado (CSP)" e a linha "Remuneração Total (CSP + resultado)"*
+- *Entra a estimativa de horas de entrega — 45h por Saber no mês, 13h/mês por Executar vigente*
+- *Termômetro e meta passam a comparar contra a Remuneração Total*
+- *ALERTA ABERTO: a ocupação de horas passa de 100% na maioria dos cenários (ver § 8)*
 
 *SPEC v1.3 — Agosto/2026. Mudanças v1.2 → v1.3:*
 - *A matriz para de atribuir quando a carteira atinge o cap; antes ela empurrava sempre e podia estourar o limite*

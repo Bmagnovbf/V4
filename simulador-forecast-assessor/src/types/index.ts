@@ -64,10 +64,20 @@ export interface PLMensal extends Carteira {
   receita_liquida: number
   csp_saber: number
   csp_executar: number
+  /** Custo de Serviço Prestado (CSP) — soma das duas linhas acima. */
+  csp_total: number
   overhead: number
-  /** Pró-labore do mês. */
+  /** Horas de entrega estimadas no mês. */
+  horas_alocadas: number
+  /** Resultado do negócio, depois de remunerar as horas de entrega. */
   renda_liquida: number
-  /** Quanto falta da renda para bancar a retirada mínima (0 quando cobre). */
+  /**
+   * Remuneração total do Assessor no mês: o CSP (pagamento das horas que ele
+   * mesmo entrega) somado ao resultado do negócio. É o que de fato fica com
+   * ele — o CSP não é desembolso, é trabalho próprio.
+   */
+  remuneracao_total: number
+  /** Quanto falta da remuneração total para bancar a retirada mínima. */
   deficit_retirada: number
   fluxo_caixa: number
   caixa_acumulado: number
@@ -82,6 +92,13 @@ export interface KPIs {
    * dos M10–M12 alisa esse serrilhado sem esconder a tendência.
    */
   renda_regime: number
+  /** Remuneração total em regime — média dos 3 últimos meses. */
+  remuneracao_regime: number
+  remuneracao_total_ano: number
+  /** Horas de entrega em regime — média dos 3 últimos meses. */
+  horas_regime: number
+  /** Ocupação da jornada de referência em regime. */
+  ocupacao_horas: number
   renda_liquida_m12: number
   renda_liquida_ano1: number
   renda_media_mes: number

@@ -52,6 +52,15 @@ export const PARAMS = {
     executar_parcelas:     2,  // ✅
   },
 
+  // ─── Carga horária de entrega ────────────────────────────────────────────
+  // O CSP é o pagamento pelas horas que o próprio Assessor entrega. Estas são
+  // as horas por trás dele.
+  horas: {
+    saber_onetime:  45,   // ✅ horas para entregar um Saber, no mês da entrega
+    executar_mes:   13,   // ✅ horas/mês por Executar ativo, enquanto vigente
+    referencia_mes: 176,  // 🔴 jornada de referência (8h × 22 dias) para medir ocupação
+  },
+
   // ─── Impostos ────────────────────────────────────────────────────────────
   impostos: {
     simples: 0.06,  // ✅ sobre a receita recebida
