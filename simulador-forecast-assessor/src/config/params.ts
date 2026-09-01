@@ -39,7 +39,7 @@ export const PARAMS = {
     },
   },
 
-  // ─── Fonte 3 — originação sem operação ───────────────────────────────────
+  // ─── Fonte 3 · Originação — ele traz o cliente, outro da rede opera ───────
   // O Assessor vende um cliente que ele não vai operar e recebe o CAC daquele
   // cliente. O CAC É definido como 15% do deal no Saber e 2× o MRR no Executar
   // — não são duas alternativas, é a mesma regra. Pagamento one-time, no mês
@@ -102,20 +102,21 @@ export const PARAMS = {
   },
 
   // ─── Rede de relacionamento do Assessor ──────────────────────────────────
-  // Mesma pergunta do simulador da franquia. Multiplica a capacidade de
-  // originação própria: sem rede não há a quem vender, por mais comercial
-  // que seja o perfil.
+  // Mesma pergunta do simulador da franquia. Multiplica a capacidade de venda
+  // própria: sem rede não há a quem vender, por mais comercial que seja o
+  // perfil. Essas vendas alimentam a Fonte 2 (quando ele opera) e a Fonte 3
+  // (quando repassa).
   network: {
     baixo: { fator: 0.5, empresas: 10 },  // 🔴
     medio: { fator: 1.0, empresas: 30 },  // 🔴
     alto:  { fator: 1.5, empresas: 50 },  // 🔴
   },
 
-  // ─── Originação própria do Assessor ──────────────────────────────────────
+  // ─── Vendas próprias do Assessor ─────────────────────────────────────────
   comercial: {
-    // Mês em que ele passa a originar. Antes disso está na Trilha (Imersão +
+    // Mês em que ele passa a vender. Antes disso está na Trilha (Imersão +
     // Vivência + Banca) e ainda não tem selo — 100% da carteira vem da matriz.
-    inicio_originacao_mes: 4,   // ✅ Base começa self no M5, Upside no M4
+    inicio_vendas_mes: 4,       // ✅ Base começa self no M5, Upside no M4
     // Teto de vendas de um Assessor 100% comercial, já rampado (M12).
     // Premissa da operação: um closer no talo toca 35–40 calls novas/mês e
     // converte 20% de reunião realizada em venda → 7–8 vendas/mês.

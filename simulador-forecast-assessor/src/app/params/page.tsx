@@ -71,7 +71,7 @@ export default function ParamsPage() {
           <Row tag="✅" path="produtos.executar.duracao_meses"  value={`${E.duracao_meses} meses`} />
         </Section>
 
-        <Section title="Fonte 3 — originação sem operação (CAC)">
+        <Section title="Fonte 3 · Originação — ele traz, outro opera (CAC)">
           <Row tag="✅" path="originacao.saber_pct_ticket"  value={`${pct(p.originacao.saber_pct_ticket)} → ${brl(S.ticket * p.originacao.saber_pct_ticket)}`} />
           <Row tag="✅" path="originacao.executar_mult_mrr" value={`${p.originacao.executar_mult_mrr}× MRR → ${brl(E.ticket * p.originacao.executar_mult_mrr)}`} />
         </Section>
@@ -92,7 +92,7 @@ export default function ParamsPage() {
         </Section>
 
         <Section title="Carteira">
-          <Row tag="✅" path="carteira.cap_ativos_integral" value={`${p.carteira.cap_ativos_integral} projetos`} />
+          <Row tag="✅" path="carteira.cap_ativos_integral" value={`${p.carteira.cap_ativos_integral} projetos — teto para a Fonte 1 alocar`} />
           <Row tag="🔴" path="carteira.cap_ativos_parcial"  value={`${p.carteira.cap_ativos_parcial} projetos`} />
           <Row tag="🔴" path="carteira.pct_operacional_ref" value={`${pct(p.carteira.pct_operacional_ref)} — abaixo disso a capacidade cai`} />
           <Row tag="🔴" path="carteira.tolerancia_self"      value={`${p.carteira.tolerancia_self}× — a matriz trava no cap; ele rompe até aqui`} />
@@ -107,8 +107,8 @@ export default function ParamsPage() {
           <Row tag="🔴" path="network.alto"  value={`≈ ${p.network.alto.empresas} empresas · fator ${p.network.alto.fator}×`} />
         </Section>
 
-        <Section title="Originação própria">
-          <Row tag="✅" path="comercial.inicio_originacao_mes" value={`M${p.comercial.inicio_originacao_mes}`} />
+        <Section title="Vendas próprias (alimentam as Fontes 2 e 3)">
+          <Row tag="✅" path="comercial.inicio_vendas_mes"      value={`M${p.comercial.inicio_vendas_mes}`} />
           <Row tag="🟡" path="comercial.calls_mes_max"          value={`${p.comercial.calls_mes_max} calls novas/mês`} />
           <Row tag="🟡" path="comercial.conversao_call_venda"   value={pct(p.comercial.conversao_call_venda)} />
           <Row tag="✅" path="→ teto de vendas"                 value={`${(p.comercial.calls_mes_max * p.comercial.conversao_call_venda).toFixed(1)}/mês × % comercial × fator de rede`} />

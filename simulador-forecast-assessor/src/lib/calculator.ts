@@ -76,23 +76,27 @@ function ocupacao(ativos: number, cap: number): number {
 
 /**
  * Curva de maturação comercial: 0 até o selo sair, subindo linearmente até 1
- * no M12. Antes do `inicio_originacao_mes` ele está na Trilha e não origina.
+ * no M12. Antes do `inicio_vendas_mes` ele está na Trilha e não vende.
  */
 function shapeComercial(mes: number): number {
-  const inicio = PARAMS.comercial.inicio_originacao_mes
+  const inicio = PARAMS.comercial.inicio_vendas_mes
   if (mes < inicio) return 0
   return (mes - inicio + 1) / (MESES - inicio + 1)
 }
 
 /**
- * Teto de vendas/mês do Assessor, já rampado.
+ * Teto de vendas próprias/mês do Assessor, já rampado.
  *
  * Três fatores multiplicam: a agenda de calls (38 × 20% = 7,6/mês), o quanto do
  * perfil é comercial e o tamanho da rede. Sem rede não há a quem vender, por
  * mais comercial que seja o perfil — por isso o network entra como multiplicador
  * e não como parcela.
+ *
+ * Estas vendas alimentam DUAS fontes: viram Self-sourced (Fonte 2) quando ele
+ * opera, e Originação (Fonte 3) quando repassa. Por isso o nome é "vendas
+ * próprias" e não "originação" — Originação é o nome da Fonte 3.
  */
-function originacaoMaxMes(input: SimulacaoInput): number {
+function vendasPropriasMes(input: SimulacaoInput): number {
   const teto = PARAMS.comercial.calls_mes_max * PARAMS.comercial.conversao_call_venda
   return teto * input.pct_comercial * PARAMS.network[input.network_level].fator
 }
@@ -117,7 +121,7 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
 
   // Contratos são inteiros. Cada acumulador guarda a fração de um mês para o
   // seguinte, para que o total do ano não se perca no arredondamento.
-  const accOriginacao  = criarAcumulador()
+  const accVendas      = criarAcumulador()
   const accSaberMatriz = criarAcumulador()
   const accSaberSelf   = criarAcumulador()
   const accSaberOrig   = criarAcumulador()
@@ -138,9 +142,9 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
     //    Ela não empurra cliente para um Assessor que já está no limite.
     const daMatriz = ativosVigentes >= cap ? 0 : (PARAMS.carteira.matriz_pace[mes] ?? 0)
 
-    // 3) O que ele consegue originar por conta própria neste mês, em contratos
+    // 3) O que ele consegue vender por conta própria neste mês, em contratos
     //    inteiros (a fração fica guardada para os meses seguintes).
-    const origPotencial = accOriginacao(originacaoMaxMes(input) * shapeComercial(mes))
+    const vendasPotencial = accVendas(vendasPropriasMes(input) * shapeComercial(mes))
 
     // 4) Ele pode romper o cap por conta própria, até a tolerância — é decisão
     //    dele, assumindo o risco de qualidade. O que passar disso é repassado e
@@ -148,8 +152,9 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
     const tetoProprio = Math.floor(cap * PARAMS.carteira.tolerancia_self)
     const capacidadeLivre = Math.max(0, tetoProprio - ativosVigentes - daMatriz)
 
-    const origOperada = Math.min(origPotencial, capacidadeLivre)
-    const origTransbordo = origPotencial - origOperada
+    // O que ele opera vira Self-sourced (Fonte 2); o que repassa, Originação (Fonte 3).
+    const vendasOperadas  = Math.min(vendasPotencial, capacidadeLivre)
+    const vendasRepassadas = vendasPotencial - vendasOperadas
 
     // 4) Reparte cada bloco entre Saber e Executar. Enquanto a carteira não
     //    passa dos primeiros contratos, tudo é Saber. Depois, o Saber acumula
@@ -162,12 +167,12 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
       return forcados + Math.min(bloco - forcados, acc((bloco - forcados) * saber))
     }
 
-    const saber_novos_matriz    = repartir(daMatriz,       accSaberMatriz)
-    const saber_novos_self      = repartir(origOperada,    accSaberSelf)
-    const saber_originados      = repartir(origTransbordo, accSaberOrig)
-    const executar_novos_matriz = daMatriz       - saber_novos_matriz
-    const executar_novos_self   = origOperada    - saber_novos_self
-    const executar_originados   = origTransbordo - saber_originados
+    const saber_novos_matriz    = repartir(daMatriz,          accSaberMatriz)
+    const saber_novos_self      = repartir(vendasOperadas,    accSaberSelf)
+    const saber_originados      = repartir(vendasRepassadas,  accSaberOrig)
+    const executar_novos_matriz = daMatriz          - saber_novos_matriz
+    const executar_novos_self   = vendasOperadas    - saber_novos_self
+    const executar_originados   = vendasRepassadas  - saber_originados
 
     execNovosMatriz[mes] = executar_novos_matriz
     execNovosSelf[mes]   = executar_novos_self

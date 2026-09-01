@@ -255,12 +255,12 @@ da alocação.
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
-| `comercial.inicio_originacao_mes` | M4 | ✅ |
+| `comercial.inicio_vendas_mes` | M4 | ✅ |
 | `comercial.calls_mes_max` | 38 calls novas/mês | 🟡 |
 | `comercial.conversao_call_venda` | 20% | 🟡 |
 
 Antes do M4 o Assessor está na Trilha (Imersão → Vivência → Trabalho de
-Conclusão → Banca) e ainda não tem selo — **100% da carteira vem da matriz**.
+Conclusão → Banca) e ainda não tem selo — **100% da carteira vem da Fonte 1**.
 
 O teto de vendas é derivado, não digitado:
 
@@ -334,7 +334,7 @@ projetos.
 **Teto do comercial — capacidade de vender:**
 
 ```
-orig_potencial(m) = 7,6 × pct_comercial × fator_rede × shape_comercial(m)
+vendas_proprias(m) = 7,6 × pct_comercial × fator_rede × shape_comercial(m)
 ```
 
 O comercial **não tem teto operacional** — ele não opera. O que o limita é a
@@ -362,8 +362,8 @@ da_matriz(m)      = ativos_vigentes ≥ cap_ativos ? 0 : matriz_pace[m]   → Fo
 teto_proprio      = floor(cap_ativos × tolerancia_self)
 capacidade_livre  = max(0, teto_proprio − ativos_vigentes − da_matriz)
 
-orig_operada      = min(orig_potencial(m), capacidade_livre)            → Fonte 2
-orig_transbordo   = orig_potencial(m) − orig_operada                    → Fonte 3
+vendas_operadas   = min(vendas_proprias(m), capacidade_livre)           → Fonte 2
+vendas_repassadas = vendas_proprias(m) − vendas_operadas                → Fonte 3
 ```
 
 Leitura em palavras: **a matriz atribui primeiro** e o Assessor não recusa — é o

@@ -6,12 +6,25 @@
 //
 //   Produtos       Saber (R$ 12K one-time) · Executar (R$ 3,5K/mês, 6 meses)
 //
-//   Fonte 1 — ALOCAÇÃO      matriz origina, ele opera    Saber 30% · Executar 35%
-//   Fonte 2 — SELF-SOURCED  ele origina e opera          80% (20% royalty)
-//   Fonte 3 — ORIGINAÇÃO    ele origina, outro opera     CAC one-time
+//   Fonte 1 — ALOCAÇÃO      a matriz fecha o cliente e envia para ele operar
+//                           Saber 30% · Executar 35%
+//   Fonte 2 — SELF-SOURCED  ele traz o cliente e ele mesmo opera
+//                           80% (paga 20% de royalty)
+//   Fonte 3 — ORIGINAÇÃO    ele traz o cliente, outro da rede opera
+//                           CAC one-time, sem CSP
 //
-// Mecânica da Fonte 3: o que ele origina ALÉM da própria capacidade de operar
-// transborda — recebe o CAC sem tocar a entrega.
+// Mapeamento código ↔ negócio:
+//   sufixo `_matriz`      → Fonte 1 · Alocação
+//   sufixo `_self`        → Fonte 2 · Self-sourced
+//   sufixo `_originados`  → Fonte 3 · Originação
+//
+// "Vendas próprias" (no calculator) é a capacidade de trazer cliente, que
+// alimenta as Fontes 2 e 3 — não confundir com a Fonte 3, cujo nome é
+// Originação.
+//
+// O teto de projetos (`carteira.cap_ativos_integral`) trava a Fonte 1: a matriz
+// para de alocar quando a carteira chega lá. Ele pode passar disso vendendo por
+// conta própria.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type Dedicacao = 'integral' | 'parcial'
