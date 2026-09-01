@@ -1,5 +1,6 @@
 # PRD — Simulador de Forecast para Assessor V4
-**V4 Company | Rascunho | Agosto/2026**
+**V4 Company | Versão 1.1 | Setembro/2026**
+**Status: no ar em https://simulador-assessor.vercel.app**
 
 ---
 
@@ -79,18 +80,14 @@ A planilha desenha a rampa à mão. O simulador precisa de uma rampa que respond
 ao candidato, então o motor generaliza assim:
 
 ```
-% comercial do perfil
-  → capacidade de ORIGINAR (contratos/mês que ele traz)
-% operacional + dedicação
-  → capacidade de OPERAR (teto de projetos ativos simultâneos)
+matriz aloca um pace fixo de 1–2 clientes/mês       → Fonte 1 · Alocação
+network + % comercial → vendas próprias
+  → o que couber na capacidade ele opera            → Fonte 2 · Self-sourced
+  → o que exceder ele repassa e recebe o CAC        → Fonte 3 · Originação
 
-  originação que CABE na capacidade  → Fonte 2 (80%)
-  originação que TRANSBORDA          → Fonte 3 (CAC)
-  vagas restantes da carteira        → Fonte 1 (matriz aloca, 30/35%)
-
-  → receita por produto × split da fonte
-  → (−) Simples 6%, CSP Saber, CSP Executar, freelas+ferramentas
-  → renda líquida → caixa acumulado → breakeven e payback
+→ receita por produto × split da fonte
+→ (−) Simples 6%, CSP, freelas + ferramentas
+→ resultado do negócio · remuneração total · caixa → breakeven e payback
 ```
 
 ### Os dois tetos
@@ -98,26 +95,62 @@ ao candidato, então o motor generaliza assim:
 Operador e comercial esbarram em limites diferentes, e é o perfil que decide
 qual dos dois morde:
 
-- **Operador:** até **15 projetos ativos** simultâneos. Acima de
-  `pct_operacional_ref` (55%) a capacidade é cheia; abaixo, cai proporcional.
+- **Operador:** até **13 projetos ativos**. Acima de `pct_operacional_ref`
+  (55%) a capacidade é cheia; abaixo, cai proporcional. A matriz para de alocar
+  ao atingir o teto; ele pode passar disso vendendo por conta própria, até 1,2×.
 - **Comercial:** não tem teto operacional, tem teto de vendas. Um closer no
   talo toca **38 calls novas/mês** e converte **20%** de reunião realizada em
-  venda → **7,6 vendas/mês** a 100% comercial, já rampado no M12.
+  venda → **7,6 vendas/mês** a 100% comercial e rede média, já rampado no M12.
 
-| Perfil | Ativos M12 | Fonte 3 | Renda M12 | Líquido ano 1 |
-|---|---|---|---|---|
-| 20% comercial | 15 | – | R$ 17.703 | R$ 97.434 |
-| 40% comercial | 15 | – | R$ 26.630 | R$ 139.065 |
-| 50% comercial | 14 | – | R$ 30.113 | R$ 153.172 |
-| 60% comercial | 11 | – | R$ 32.617 | R$ 160.569 |
-| 70% comercial | 8 | 11% | R$ 31.727 | R$ 157.562 |
-| 80% comercial | 6 | 30% | R$ 28.315 | R$ 141.241 |
-| 100% comercial | 0 | 100% | R$ 21.170 | R$ 94.518 |
+Perfil variando, rede média:
 
-A Fonte 3 não é receita comum: no geral a carteira vem de clientes da matriz e
-de outras unidades, e o cliente que o Assessor vende ele quer operar. Ela só
-liga acima de ~65% comercial, quando a capacidade de operar já caiu o
-suficiente para o que ele vende não caber.
+| Perfil | Ativos M12 | Fonte 3 | Remuneração | Resultado | Líquido ano 1 |
+|---|---|---|---|---|---|
+| 20% comercial | 7 | – | R$ 17.873 | R$ 9.348 | R$ 61.893 |
+| 40% comercial | 11 | – | R$ 31.759 | R$ 21.556 | R$ 120.093 |
+| 50% comercial | 13 | – | R$ 38.336 | R$ 28.204 | R$ 149.193 |
+| 60% comercial | 10 | 22% | R$ 34.329 | R$ 23.726 | R$ 148.207 |
+| 70% comercial | 8 | 35% | R$ 31.080 | R$ 22.080 | R$ 139.877 |
+| 80% comercial | 6 | 36% | R$ 30.767 | R$ 23.767 | R$ 143.669 |
+| 100% comercial | 0 | 100% | R$ 18.523 | R$ 18.523 | R$ 88.596 |
+
+A Fonte 3 não é receita comum: no geral a carteira vem da matriz e de outras
+unidades, e o cliente que o Assessor traz ele quer operar. Ela só liga acima de
+~55% comercial, quando a capacidade de operar já caiu o suficiente para o que
+ele vende não caber.
+
+### O efeito da rede
+
+Rede fixa em 35% comercial:
+
+| Rede | Self | Alocação | Remuneração | Horas | Líquido ano 1 |
+|---|---|---|---|---|---|
+| Baixa | 58% | 42% | R$ 18.014 | 152h | R$ 60.261 |
+| Média | 72% | 28% | R$ 28.472 | 206h | R$ 107.673 |
+| Alta | **80%** | **20%** | R$ 36.036 | 250h | R$ 149.193 |
+
+A rede alta chega ao 80/20 que o produto persegue, porque a Fonte 2 paga 80%
+contra os 30–35% da alocação.
+
+### O CSP é remuneração, não desembolso
+
+Quem entrega é o próprio Assessor, então o CSP é o preço da hora dele, não
+dinheiro que sai do bolso.
+
+```
+Custo de Serviço Prestado (CSP)      ← pagamento das horas dele
+(−) Freelas + ferramentas            ← desembolso: overhead + CSP terceirizado
+(=) Resultado do negócio             ← a margem, o "dividendo"
+Remuneração Total = CSP + Resultado  ← o que fica com ele
+```
+
+**Remuneração Total** responde "quanto eu ganho"; **Resultado do negócio**
+responde "isso é um negócio ou um autoemprego bem pago".
+
+Acima de **190h/mês** ele não dá conta sozinho: o CSP das horas excedentes vira
+freelancer, sai da Remuneração Total e entra na linha de freelas. É o que dá
+consequência econômica ao excesso, sem trava artificial — crescer além da
+própria capacidade continua valendo a pena, só que com margem menor.
 
 ### Achado: a Fonte 3 paga bem menos que operar
 
@@ -128,75 +161,86 @@ Comparando o mesmo contrato nas duas pontas:
 | Saber | R$ 9.600 − R$ 1.500 CSP = **R$ 8.100** | **R$ 1.800** | 4,5× |
 | Executar (6 meses) | R$ 16.800 − R$ 6.000 CSP = **R$ 10.800** | **R$ 7.000** | 1,5× |
 
-É por isso que a renda não cresce monotonicamente com o % comercial: o
-Assessor 100% comercial precisaria de um volume muito maior que 7,6 vendas/mês
-para compensar. Se a BU quiser que o caminho comercial seja tão atrativo
-quanto o operacional, o ajuste é no CAC (hoje 15% do Saber) ou no teto de
-vendas — não no motor.
-
-### Conflito conhecido com a planilha
-
-Sob a premissa do closer, o cenário **Upside** da planilha (líquido de
-R$ 207.350 no ano 1) **não é alcançável** — o motor satura em ~R$ 162 mil por
-volta de 65% comercial. A planilha assume que o Assessor opera 15 projetos
-**e** vende 4/mês ao mesmo tempo; o teto de 7,6 vendas/mês não comporta as
-duas coisas. O cenário Base reproduz em +0,1%, num perfil de ~45% comercial.
-
-Decisão pendente: vale a premissa do closer ou vale o Upside da planilha?
+É por isso que a remuneração não cresce monotonicamente com o % comercial. Se a
+BU quiser que o caminho comercial seja tão atrativo quanto o operacional, o
+ajuste é no CAC (hoje 15% do Saber) ou no teto de vendas — não no motor.
 
 ### Validação
-`test_dre.mjs` compara a saída do motor com os dois cenários da planilha.
-Rodar com `npx tsc -p tsconfig.test.json && node test_dre.mjs`.
+`test_dre.mjs` compara a saída com os dois cenários da planilha e verifica que
+nenhum contrato é fracionário em 126 combinações × 12 meses. Rodar com
+`npx tsc -p tsconfig.test.json && node test_dre.mjs`.
+
+Base reproduz em **−0,1%** no líquido do ano; Upside em **−4,5%**.
 
 ---
 
 ## 5. Inputs do candidato
 
 Só vira input o que o candidato sabe sobre si mesmo. Benchmark da rede
-(tickets, splits, CSP, imposto, duração do Executar, rampa da matriz) fica em
-`src/config/params.ts`.
+(tickets, splits, CSP, horas, imposto, duração do Executar, pace da matriz)
+fica em `src/config/params.ts`.
 
 | Input | Formato | O que altera |
 |---|---|---|
-| Meta de renda líquida no M12 | slider R$ 5–45K | Termômetro: renda projetada vs. meta |
-| Retirada mínima mensal | slider R$ 0–30K | Quanto ele precisa retirar enquanto não atinge o objetivo — define a reserva necessária |
+| Meta de renda líquida no M12 | slider R$ 5–45K | Termômetro: remuneração vs. meta |
+| Retirada mínima mensal | slider R$ 2–15K | Define a reserva necessária |
 | Perfil operacional × comercial | slider 0–100% | Mix entre as 3 fontes — a alavanca central |
-| Rede de relacionamento | baixa / média / alta | Multiplica a originação própria — empurra a carteira para a Fonte 2 (80%) |
-| Dedicação | integral / parcial | Teto de projetos ativos (15 ou 8) |
-| Reserva de capital de giro | slider R$ 0–60K | Termômetro: cobre a retirada até a renda alcançá-la |
+| Rede de relacionamento | baixa / média / alta | Multiplica as vendas próprias — empurra a carteira para a Fonte 2 |
+| Dedicação | integral / parcial | Teto de projetos ativos (13 ou 8) |
+| Reserva de capital de giro | slider R$ 0–150K | Termômetro: cobre a retirada até a remuneração alcançá-la |
+
+A **forma de pagamento da entrada não é input**: a matriz aloca no mesmo pace
+independentemente, então o campo não alterava a projeção.
 
 ---
 
 ## 6. Dashboard
 
-- Termômetro em três eixos: reserva vs. exigido pelo ramp-up, payback, renda vs. meta
-- KPIs: renda no M12, líquido do ano 1, payback, projetos ativos
+- Termômetro em três eixos independentes: reserva vs. retirada mínima (giro),
+  payback (investimento) e remuneração vs. meta (ambição)
+- KPIs: remuneração total, resultado do negócio, horas de entrega, projetos no
+  M12, payback da entrada, reserva necessária, capital total
 - Cards das 3 fontes com contagem de contratos e share da receita
 - Área empilhada: receita por fonte, 12 meses
-- Barras + linha: renda líquida mensal e caixa acumulado, com a meta marcada
+- Barras + linha: renda mensal e caixa acumulado, com meta e retirada marcadas
 - Tabela do DRE completo, linha a linha, com coluna de ano
 
 ---
 
 ## 7. Pendências
 
-### Calibração do motor (🔴 no `/params`)
-- [ ] `comercial.originacao_max_mes = 10` — contratos/mês de um Assessor 100%
-      comercial. É extrapolação linear do DRE; precisa de sanidade da operação.
+### Calibração (🔴 no `/params`)
+Sem lastro empírico — esta será a primeira turma, não há assessores em operação
+para medir. Ficam como estimativa até a turma rodar.
+
+- [ ] `network.fator` (0,5 / 1,0 / 1,5) — quanto rede alta vende a mais que média
+- [ ] `carteira.tolerancia_self = 1,2×` — até onde ele rompe o cap por conta própria
 - [ ] `carteira.cap_ativos_parcial = 8` — teto com dedicação parcial
+- [ ] `carteira.pct_operacional_ref = 55%` — onde a capacidade começa a cair
 - [ ] Thresholds do termômetro (reserva, payback, meta)
 
 ### Produto
 - [ ] Taxa de manutenção anual do Selo — não entra no DRE hoje
-- [ ] Crédito do upgrade: R$ 20K integral (deck diz integral; doc deixa em aberto)
-- [ ] Churn/renovação do Executar além dos 6 meses do contrato
+- [ ] Churn/renovação do Executar além dos 6 meses de contrato
+- [ ] Mix dinâmico por retirada — analisado e adiado (ver abaixo)
 
-### Divergências abertas nos materiais
-- [ ] Premissa "15 ativos no M12 = 8 Saber + 7 Executar" não bate com a planilha
-      (no M12 do Base são 4 Saber novos + 11 Executar ativos)
-- [ ] "12x R$ 1.197" na aba de premissas vs. "12x R$ 1.700" no deck — usei o deck
+### Analisado e adiado
+**Priorizar Saber quando a retirada é alta.** Simulado em set/2026. Melhora o
+caixa do primeiro semestre em 43% e reduz a reserva necessária, mas o ganho no
+ano 1 é artefato de horizonte truncado: contando o backlog de Executar que cai
+depois do M12, o mix 70/30 é o melhor dos quatro testados. Reavaliar só com KPI
+de base recorrente e backlog na tela, senão o candidato veria o cenário pior
+como se fosse o melhor.
 
-### Escopo futuro
-- [ ] Exportação (o simulador da franquia usa `pptxgenjs`)
-- [ ] Simulação do lado da matriz
-- [ ] Os 3 caminhos pós-12 meses
+---
+
+## 8. Fora do escopo
+
+- **Exportação em PDF ou PPT.** Decisão de set/2026: o simulador existe para o
+  candidato entender a dinâmica e as correlações durante a call, não para virar
+  material que ele leva embora. O foco seguinte é capacidade operacional.
+- Produtos **Ter** e **Potencializar**
+- **Override do padrinho** no cálculo do Assessor
+- Simulação do lado da matriz
+- Os 3 caminhos pós-12 meses
+- Autenticação

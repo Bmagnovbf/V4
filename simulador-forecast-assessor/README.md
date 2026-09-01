@@ -50,13 +50,21 @@ O motor reproduz a planilha "ASSESSOR V4 · DRE PROJETADO 12 MESES":
 npx tsc -p tsconfig.test.json && node test_dre.mjs
 ```
 
-Compara os cenários Base (37% comercial) e Upside (45% comercial) contra a
-planilha. Valores em R$ toleram 15% de desvio — a planilha usa uma rampa
-desenhada à mão e o motor usa uma rampa generativa que responde ao perfil do
-candidato. Meses toleram ±1.
+Compara os cenários Base e Upside contra a planilha e verifica que nenhum
+contrato é fracionário em 126 combinações × 12 meses. Valores em R$ toleram 15%
+de desvio — a planilha usa uma rampa desenhada à mão e o motor usa uma rampa
+generativa que responde ao perfil do candidato. Meses toleram ±1.
+
+Base reproduz em −0,1% no líquido do ano; Upside em −4,5%.
 
 ## Deploy
 
-Monorepo `Bmagnovbf/V4`, branch `main`. Criar projeto Vercel próprio com
-**Root Directory = `simulador-forecast-assessor`** (o projeto `simulador-forecast`
-já usa `simulador-forecast` como root e não pode ser reapontado).
+**https://simulador-assessor.vercel.app**
+
+Projeto Vercel `simulador-assessor`, apontando para o monorepo `Bmagnovbf/V4`,
+branch `main`, com **Root Directory = `simulador-forecast-assessor`**. Push na
+`main` dispara o build. Público, sem Deployment Protection.
+
+Pendente: marcar "Automatically expose System Environment Variables" nas env
+vars do projeto, para o rodapé do `/params` mostrar a data do deploy em vez de
+"dev local".

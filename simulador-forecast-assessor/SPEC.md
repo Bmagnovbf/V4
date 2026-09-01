@@ -1,6 +1,6 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.4 | Setembro/2026**
-**Status: motor implementado, cenário Base da planilha reproduzido em +0,1%**
+**V4 Company | Versão 1.5 | Setembro/2026**
+**Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
 
@@ -32,7 +32,9 @@ entre si.
 - Taxa de manutenção anual do Selo
 - Simulação do lado da matriz (quanto a matriz ganha por Assessor)
 - Os 3 caminhos pós-12 meses (renovar / sociedade / própria unidade)
-- Exportação (.pptx) — o simulador da franquia tem, este ainda não
+- **Exportação em PDF ou PPT.** Decisão de set/2026: o simulador existe para o
+  candidato entender a dinâmica e as correlações durante a call, não para virar
+  material que ele leva embora. O foco seguinte é capacidade operacional.
 - Autenticação
 
 ---
@@ -519,15 +521,15 @@ R$ 45.831 (R$ 20.000 de entrada + R$ 25.831 de giro).
 ### 4.7 Caixa
 
 ```
-parcela_entrada(m) = 1.700   se forma_pagamento = 'parcelado' e m ≤ 12
-                   = 0       caso contrário
+fluxo_caixa(m)     = renda_liquida(m)
 
-fluxo_caixa(m)     = renda_liquida(m) − parcela_entrada(m)
-
-caixa_acumulado(0) = −20.000   se forma_pagamento = 'a_vista'
-                   = 0         se parcelado
+caixa_acumulado(0) = −20.000                              (entrada na rede)
 caixa_acumulado(m) = caixa_acumulado(m−1) + fluxo_caixa(m)
 ```
+
+O caixa parte do resultado do negócio, não da remuneração total: o CSP remunera
+horas já trabalhadas e sai do caixa da operação. O payback mede o retorno da
+entrada de R$ 20.000.
 
 ### 4.8 KPIs
 
@@ -542,7 +544,7 @@ projetos_ativos_m12   = total_ativos(12)
 breakeven_mes         = primeiro m com renda_liquida(m) > 0
 payback_mes           = primeiro m com caixa_acumulado(m) ≥ 0
 pior_caixa            = min(caixa_acumulado(m))
-investimento_total    = 20.000 (à vista) | 20.400 (12 × 1.700)
+investimento_total    = 20.000
 ```
 
 `pior_caixa` é o número que importa para o candidato: é quanto de reserva o
@@ -705,33 +707,33 @@ O Upside voltou a ser alcançável depois que o network entrou: ele é o Assesso
 de rede alta que puxa a carteira para a Fonte 2. Antes do network, o motor
 saturava em ~R$ 162 mil e o cenário era reportado como inatingível.
 
-Divergência residual conhecida: o motor entrega **menos projetos ativos e mais
-renda no M12** que a planilha nos dois cenários. É diferença de formato de
-curva — a planilha estabiliza antes, o motor cresce até o fim. O líquido do ano,
-que é a métrica de decisão, fecha dentro de 4%.
+Divergência residual conhecida: o motor entrega **menos projetos ativos** que a
+planilha nos dois cenários. É diferença de formato de curva — a planilha
+estabiliza antes, o motor cresce até o fim. O líquido do ano, que é a métrica de
+decisão, fecha dentro de 5%.
 
 ### Efeito da rede (35% comercial)
 
-| Rede | Self | Matriz | Renda em regime | Líquido ano 1 |
-|---|---|---|---|---|
-| Baixa | 74% | 26% | R$ 11.312 | R$ 64.218 |
-| Média | 68% | 32% | R$ 17.960 | R$ 104.106 |
-| Alta | 83% | 17% | R$ 28.748 | R$ 154.782 |
+| Rede | Self | Alocação | Remuneração | Horas | Líquido ano 1 |
+|---|---|---|---|---|---|
+| Baixa | 58% | 42% | R$ 18.014 | 152h | R$ 60.261 |
+| Média | 72% | 28% | R$ 28.472 | 206h | R$ 107.673 |
+| Alta | **80%** | **20%** | R$ 36.036 | 250h | R$ 149.193 |
 
-A rede alta chega ao **83% self / 17% matriz** — a proporção que o produto
-persegue, já que a Fonte 2 paga 80% contra os 30–35% da alocação.
+A rede alta chega ao **80% self / 20% alocação** — a proporção que o produto
+persegue, já que a Fonte 2 paga 80% contra os 30–35% da Fonte 1.
 
 ### Curva de perfil (rede média)
 
-| Perfil | Ativos M12 | Fonte 3 | Renda em regime | Líquido ano 1 |
-|---|---|---|---|---|
-| 20% comercial | 9 | – | R$ 11.856 | R$ 75.006 |
-| 40% comercial | 11 | – | R$ 19.592 | R$ 118.158 |
-| 50% comercial | 13 | – | R$ 26.240 | R$ 147.258 |
-| 60% comercial | 11 | 18% | R$ 23.468 | R$ 157.256 |
-| 70% comercial | 8 | 48% | R$ 20.680 | R$ 146.350 |
-| 80% comercial | 5 | 68% | R$ 17.686 | R$ 124.054 |
-| 100% comercial | 5 | 74% | R$ 21.027 | R$ 126.658 |
+| Perfil | Ativos M12 | Fonte 3 | Remuneração | Resultado | Líquido ano 1 |
+|---|---|---|---|---|---|
+| 20% comercial | 7 | – | R$ 17.873 | R$ 9.348 | R$ 61.893 |
+| 40% comercial | 11 | – | R$ 31.759 | R$ 21.556 | R$ 120.093 |
+| 50% comercial | 13 | – | R$ 38.336 | R$ 28.204 | R$ 149.193 |
+| 60% comercial | 10 | 22% | R$ 34.329 | R$ 23.726 | R$ 148.207 |
+| 70% comercial | 8 | 35% | R$ 31.080 | R$ 22.080 | R$ 139.877 |
+| 80% comercial | 6 | 36% | R$ 30.767 | R$ 23.767 | R$ 143.669 |
+| 100% comercial | 0 | 100% | R$ 18.523 | R$ 18.523 | R$ 88.596 |
 
 ---
 
@@ -785,12 +787,15 @@ própria capacidade continua valendo a pena, só que com margem menor.
 - [x] Cenário Base da planilha reproduzido dentro de 15%
 - [x] Cenário Upside reproduzido dentro de 15% (rede alta)
 - [x] Fonte 3 = zero nos perfis até ~55% comercial
+- [x] CSP migra para freelas quando as horas passam de 190h/mês
 - [x] Contratos inteiros em 126 combinações × 12 meses
 - [x] Nenhum número de negócio hard-coded fora de `params.ts`
 - [x] Todo parâmetro visível em `/params` com tag de procedência
 - [x] Projeto da franquia intocado
-- [ ] Deploy Vercel com Root Directory próprio e sem Deployment Protection
+- [x] Deploy Vercel com Root Directory próprio e sem Deployment Protection
+- [x] Nomenclatura das 3 fontes alinhada entre código, tela e documentação
 - [ ] Thresholds do termômetro calibrados com candidatos reais
+- [ ] `VERCEL_GIT_COMMIT_DATE` exposta (rodapé do `/params` mostra "dev local")
 
 ---
 
@@ -803,11 +808,12 @@ pular para o C.
 Meta R$ 25.000, retirada R$ 8.000, reserva R$ 25.000, dedicação integral.
 
 **A1–A5 — varrer o slider de perfil** (20/40/60/80/100% comercial) com rede
-média. Verificar: a carteira sobe até ~50% comercial e depois cai; a Fonte 3
-só aparece a partir de ~60%.
+média. Verificar: a carteira sobe até 50% comercial (13 projetos, o teto) e
+depois cai; a Fonte 3 só aparece a partir de ~55%.
 
 **A6–A8 — varrer a rede** (baixa/média/alta) com 35% comercial. Verificar: o
-mix migra de 59% para 81% self, e o líquido do ano vai de R$ 60K a R$ 153K.
+mix migra de 58% para 80% self, o líquido do ano vai de R$ 60K a R$ 149K, e a
+partir da rede média a ocupação passa de 190h e começa a terceirizar.
 
 Pergunta: a curva faz sentido para quem conhece a operação? É aqui que o achado
 do § 8 é julgado, e onde se decide se o fator de rede (0,5 / 1,0 / 1,5) está
@@ -852,6 +858,12 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.5 — Setembro/2026. Mudanças v1.4 → v1.5:*
+- *Nomenclatura das fontes alinhada no motor: "vendas próprias" é a capacidade de trazer cliente (alimenta as Fontes 2 e 3); "Originação" fica reservado para a Fonte 3*
+- *Confirmado que o teto de 13 projetos é a carteira TOTAL e trava a Fonte 1 · Alocação*
+- *Exportação (PDF/PPT) sai do escopo em definitivo*
+- *§ 4.7 corrigida: o parcelamento da entrada não existe mais no motor*
 
 *SPEC v1.4 — Setembro/2026. Mudanças v1.3 → v1.4:*
 - *O CSP passa a ser tratado como remuneração do Assessor, não desembolso: entra o totalizador "Custo de Serviço Prestado (CSP)" e a linha "Remuneração Total (CSP + resultado)"*
