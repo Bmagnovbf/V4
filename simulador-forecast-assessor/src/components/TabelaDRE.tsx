@@ -21,20 +21,28 @@ export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
     { label: 'Originação (CAC)',        get: l => l.receita_originacao },
     { label: '(=) Receita recebida',    get: l => l.receita_recebida, forte: true },
     { label: '(−) Impostos',            get: l => l.impostos, neg: true },
-    { label: 'Custo de Serviço Prestado (CSP)', get: l => l.csp_total, neg: true, forte: true },
+    { label: 'Custo de Serviço Prestado (CSP)', get: l => l.csp_proprio, neg: true, forte: true },
     { label: 'CSP · Saber',             get: l => l.csp_saber, neg: true, indent: true },
     { label: 'CSP · Executar',          get: l => l.csp_executar, neg: true, indent: true },
-    { label: '(−) Freelas + ferramentas', get: l => l.overhead, neg: true },
+    { label: '(−) Freelas + ferramentas', get: l => l.freelas_total, neg: true },
+    { label: 'dos quais terceirizado',  get: l => l.csp_terceirizado, neg: true, indent: true },
     { label: '(=) Resultado do negócio', get: l => l.renda_liquida, forte: true },
     { label: 'Remuneração Total (CSP + resultado)', get: l => l.remuneracao_total, forte: true, destaque: true },
     { label: 'Horas alocadas', get: l => l.horas_alocadas, sufixo: 'h' },
+    { label: 'das quais terceirizadas', get: l => l.horas_terceirizadas, sufixo: 'h', indent: true },
     { label: 'Caixa acumulado',         get: l => l.caixa_acumulado },
   ]
 
+  const terceirizou = projecao.some(l => l.csp_terceirizado > 0)
+
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #F2F2F2' }}>
-      <p className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: '#3D3D3D' }}>
+      <p className="text-sm font-bold uppercase tracking-wide mb-1" style={{ color: '#3D3D3D' }}>
         DRE projetado · 12 meses
+      </p>
+      <p className="text-xs mb-4" style={{ color: '#7A7A7A' }}>
+        O CSP remunera as horas que você mesmo entrega
+        {terceirizou && ' — acima de 190h/mês ele vira freelancer e sai do seu bolso'}
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-xs whitespace-nowrap">
@@ -50,7 +58,7 @@ export function TabelaDRE({ projecao }: { projecao: PLMensal[] }) {
             </tr>
           </thead>
           <tbody>
-            {linhas.map(linha => {
+            {linhas.filter(l => terceirizou || !l.label.startsWith('dos quais') && !l.label.startsWith('das quais')).map(linha => {
               const acumula = linha.label !== 'Caixa acumulado'
               const ano = acumula
                 ? projecao.reduce((s, l) => s + linha.get(l), 0)

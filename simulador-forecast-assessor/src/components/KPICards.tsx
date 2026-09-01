@@ -33,7 +33,11 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
             hint="CSP + resultado, por mês em regime" />
       <Card label="Resultado do negócio" value={fmt(kpis.renda_regime)} hint="margem depois de remunerar suas horas" />
       <Card label="Horas de entrega"   value={`${fmtInt(kpis.horas_regime)}h`}
-            hint={`${fmtPct(kpis.ocupacao_horas * 100, 0)} de uma jornada de 176h/mês`} />
+            hint={
+              kpis.csp_terceirizado_ano > 0
+                ? `${fmtPct(kpis.ocupacao_horas * 100, 0)} do limite de 190h — o excedente vira freelancer`
+                : `${fmtPct(kpis.ocupacao_horas * 100, 0)} do limite de 190h/mês`
+            } />
       <Card label="Projetos no M12"    value={fmtInt(kpis.projetos_ativos_m12)} hint="ativos simultâneos" />
       <Card label="Payback da entrada" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : '—'} hint={`entrada de ${fmt(kpis.investimento_total)}`} />
       <Card label="Reserva necessária" value={fmt(kpis.deficit_retirada_total)} hint={reservaHint} />

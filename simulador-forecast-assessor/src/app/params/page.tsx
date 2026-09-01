@@ -76,6 +76,12 @@ export default function ParamsPage() {
           <Row tag="✅" path="originacao.executar_mult_mrr" value={`${p.originacao.executar_mult_mrr}× MRR → ${brl(E.ticket * p.originacao.executar_mult_mrr)}`} />
         </Section>
 
+        <Section title="Horas de entrega">
+          <Row tag="✅" path="horas.saber_onetime"  value={`${p.horas.saber_onetime}h por Saber, no mês da entrega`} />
+          <Row tag="✅" path="horas.executar_mes"   value={`${p.horas.executar_mes}h/mês por Executar vigente`} />
+          <Row tag="✅" path="horas.limite_proprio" value={`${p.horas.limite_proprio}h/mês — acima disso o CSP vira freelancer`} />
+        </Section>
+
         <Section title="Impostos e overhead">
           <Row tag="✅" path="impostos.simples" value={pct(p.impostos.simples)} />
           {p.overhead.map((f, i) => (

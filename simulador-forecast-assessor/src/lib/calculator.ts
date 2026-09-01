@@ -252,11 +252,21 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     const horas_alocadas =
       saberEntregues * PARAMS.horas.saber_onetime + executarVigentes * PARAMS.horas.executar_mes
 
+    // Até o limite de horas ele entrega sozinho e o CSP é remuneração dele.
+    // Acima disso precisa de freelancer: o CSP das horas excedentes deixa de
+    // ficar com ele e vira desembolso, na linha de freelas + ferramentas.
+    const horas_terceirizadas = Math.max(0, horas_alocadas - PARAMS.horas.limite_proprio)
+    const csp_terceirizado = horas_alocadas > 0
+      ? csp_total * (horas_terceirizadas / horas_alocadas)
+      : 0
+    const csp_proprio = csp_total - csp_terceirizado
+    const freelas_total = overhead + csp_terceirizado
+
     const renda_liquida = receita_liquida - csp_total - overhead
 
-    // O CSP não sai do bolso: é o pagamento pelas horas que ele mesmo entrega.
-    // O que fica com o Assessor é o CSP mais o resultado do negócio.
-    const remuneracao_total = renda_liquida + csp_total
+    // O que fica com o Assessor: o CSP das horas que ele mesmo entregou, mais
+    // o resultado do negócio.
+    const remuneracao_total = renda_liquida + csp_proprio
 
     // O quanto falta para bancar a retirada mínima. Compara com a remuneração
     // total, não com o resultado — senão exigiria reserva para cobrir um custo
@@ -272,7 +282,8 @@ function projetar(input: SimulacaoInput): PLMensal[] {
       receita_executar_matriz, receita_executar_self,
       receita_originacao, receita_recebida,
       impostos, receita_liquida,
-      csp_saber, csp_executar, csp_total, overhead, horas_alocadas,
+      csp_saber, csp_executar, csp_total, csp_proprio, csp_terceirizado,
+      overhead, freelas_total, horas_alocadas, horas_terceirizadas,
       renda_liquida, remuneracao_total, deficit_retirada,
       fluxo_caixa, caixa_acumulado: caixa,
     })
@@ -306,7 +317,8 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     remuneracao_regime,
     remuneracao_total_ano: projecao.reduce((s, l) => s + l.remuneracao_total, 0),
     horas_regime,
-    ocupacao_horas: horas_regime / PARAMS.horas.referencia_mes,
+    ocupacao_horas: horas_regime / PARAMS.horas.limite_proprio,
+    csp_terceirizado_ano: projecao.reduce((s, l) => s + l.csp_terceirizado, 0),
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,
     renda_media_mes: renda_liquida_ano1 / MESES,

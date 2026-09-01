@@ -64,11 +64,20 @@ export interface PLMensal extends Carteira {
   receita_liquida: number
   csp_saber: number
   csp_executar: number
-  /** Custo de Serviço Prestado (CSP) — soma das duas linhas acima. */
+  /** CSP de todas as horas de entrega do mês, próprias e terceirizadas. */
   csp_total: number
+  /** Parte do CSP que remunera as horas dele — entra na Remuneração Total. */
+  csp_proprio: number
+  /** Parte do CSP acima do limite de horas — vira desembolso com freelancer. */
+  csp_terceirizado: number
+  /** Overhead fixo do mês (ferramentas e apoio genérico). */
   overhead: number
+  /** Freelas + ferramentas: overhead fixo mais o CSP terceirizado. */
+  freelas_total: number
   /** Horas de entrega estimadas no mês. */
   horas_alocadas: number
+  /** Horas acima do limite que ele consegue entregar sozinho. */
+  horas_terceirizadas: number
   /** Resultado do negócio, depois de remunerar as horas de entrega. */
   renda_liquida: number
   /**
@@ -97,8 +106,10 @@ export interface KPIs {
   remuneracao_total_ano: number
   /** Horas de entrega em regime — média dos 3 últimos meses. */
   horas_regime: number
-  /** Ocupação da jornada de referência em regime. */
+  /** Ocupação do limite de horas próprias, em regime. */
   ocupacao_horas: number
+  /** CSP que foi para freelancer no ano, por estouro de horas. */
+  csp_terceirizado_ano: number
   renda_liquida_m12: number
   renda_liquida_ano1: number
   renda_media_mes: number

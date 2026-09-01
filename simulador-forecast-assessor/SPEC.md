@@ -120,7 +120,7 @@ Só **Saber** e **Executar** entram no escopo do Assessor.
 | Split Fonte 1 (matriz) | **30%** → R$ 3.600 | **35%** → R$ 1.225/mês |
 | Split Fonte 2 (self) | **80%** → R$ 9.600 | **80%** → R$ 2.800/mês |
 | CSP | R$ 1.500 one-time, no mês da entrega | R$ 1.000/mês por projeto ativo |
-| Horas de entrega | 45h no mês da entrega | 13h/mês enquanto vigente |
+| Horas de entrega | 42h no mês da entrega | 12h/mês enquanto vigente |
 
 Todos ✅.
 
@@ -163,11 +163,25 @@ parte do que ele recebe, e não como despesa que reduz o que leva.
 Custo de Serviço Prestado (CSP)      ← pagamento das horas dele
     CSP · Saber
     CSP · Executar
-(−) Freelancers + ferramentas        ← esse sim é desembolso
+(−) Freelancers + ferramentas        ← desembolso: overhead + CSP terceirizado
 (=) Resultado do negócio             ← a margem, o "dividendo"
 
-Remuneração Total = CSP + Resultado  ← o que fica com ele
+Remuneração Total = CSP próprio + Resultado   ← o que fica com ele
 ```
+
+**Até onde ele entrega sozinho.** O CSP só é remuneração dele enquanto as horas
+cabem na jornada. Acima de `horas.limite_proprio` (190h/mês) ele precisa de
+freelancer, e o CSP das horas excedentes deixa de ficar com ele:
+
+```
+horas_terceirizadas = max(0, horas_alocadas − 190)
+csp_terceirizado    = csp_total × (horas_terceirizadas ÷ horas_alocadas)
+csp_proprio         = csp_total − csp_terceirizado
+freelas_total       = overhead + csp_terceirizado
+```
+
+O rateio é proporcional às horas — não por projeto — para não criar degraus
+artificiais quando a carteira cruza o limite.
 
 A distinção importa para a leitura: **Remuneração Total** responde "quanto eu
 ganho", e **Resultado do negócio** responde "isso é um negócio ou um autoemprego
@@ -199,7 +213,7 @@ estar operando, não de operar um projeto específico.
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
-| `carteira.cap_ativos_integral` | 15 projetos | ✅ |
+| `carteira.cap_ativos_integral` | 13 projetos | ✅ |
 | `carteira.cap_ativos_parcial` | 8 projetos | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.tolerancia_self` | 1,2× | 🔴 |
@@ -459,9 +473,9 @@ receita_originacao(m)   = saber_originados(m) × 1.800
 (=) csp_total           = csp_saber + csp_executar
 (−) overhead            = 1.000 / 1.500 / 2.000 conforme o mês
 (=) renda_liquida       = receita_liquida − csp_total − overhead
-(=) remuneracao_total   = renda_liquida + csp_total
+(=) remuneracao_total   = renda_liquida + csp_proprio
 
-horas_alocadas          = saber_entregues × 45 + executar_vigentes × 13
+horas_alocadas          = saber_entregues × 42 + executar_vigentes × 12
 ```
 
 Nota sobre a Fonte 3: entra em `receita_recebida` e portanto **é tributada** no
@@ -742,34 +756,28 @@ mudar.
 
 ---
 
-## 8b. Alerta: a carteira de 15 projetos não cabe na jornada
+## 8b. Horas e terceirização
 
-A linha de horas, assim que entrou, mostrou um conflito entre dois parâmetros
-que antes não se falavam.
+Quando a linha de horas entrou, ela expôs um conflito: o cap de projetos e as
+horas por produto descreviam operações incompatíveis. A resolução de set/2026
+foi por três lados ao mesmo tempo — cap de 15 para 13, horas de 45/13 para
+42/12, e o excedente acima de 190h/mês virando freelancer em vez de renda.
 
-| Cenário | Horas em regime | Ocupação de 176h/mês | Pico |
-|---|---|---|---|
-| Rede baixa · 20% com | 151h | 86% | 88% |
-| Rede média · 35% com | 222h | **126%** | 147% |
-| Rede alta · 35% com | 269h | **153%** | 187% |
-| Rede alta · 50% com | 329h | **187%** | 209% |
+| Cenário | Ativos M12 | Horas em regime | Ocupação de 190h | CSP terceirizado/ano |
+|---|---|---|---|---|
+| Rede baixa · 20% com | 6 | 140h | 74% | — |
+| Rede média · 35% com | 10 | 206h | 108% | R$ 5.429 |
+| Rede alta · 35% com | 13 | 250h | 132% | R$ 11.979 |
+| Rede alta · 50% com | 14 | 274h | 144% | R$ 20.947 |
 
-Uma carteira de 15 projetos ativos consome, só de Executar, `15 × 13h = 195h` —
-já acima da jornada de referência, antes de entregar um Saber sequer. Cada Saber
-novo soma 45h.
+O estouro continua existindo nos cenários fortes, mas agora tem consequência
+econômica em vez de ficar como número solto: o Assessor que enche a carteira
+passa a pagar freelancer, e isso aparece na linha de freelas e sai da
+Remuneração Total. A tela mostra as duas sublinhas — "dos quais terceirizado" e
+"das quais terceirizadas" — apenas quando há estouro.
 
-Três leituras possíveis, e não sabemos qual vale:
-
-1. **O cap de 15 está alto.** Pelas horas, a carteira sustentável fica em torno
-   de 8 a 10 projetos, não 15.
-2. **As horas por produto estão altas.** 45h por Saber e 13h/mês por Executar
-   podem refletir a entrega completa, não a parte que cabe ao Assessor.
-3. **Ele terceiriza mais do que o overhead sugere.** Nesse caso parte do CSP é
-   desembolso real, o que contraria a decisão de ago/2026 de tratar todo o CSP
-   como remuneração própria.
-
-Enquanto não se decide, o simulador exibe a ocupação sem travar nada. É
-informação para a conversa, não regra.
+Isso também dá um limite natural ao modelo sem trava artificial: crescer além da
+própria capacidade continua valendo a pena, só que com margem menor.
 
 ## 9. Critérios de Aceite
 
@@ -847,9 +855,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 *SPEC v1.4 — Setembro/2026. Mudanças v1.3 → v1.4:*
 - *O CSP passa a ser tratado como remuneração do Assessor, não desembolso: entra o totalizador "Custo de Serviço Prestado (CSP)" e a linha "Remuneração Total (CSP + resultado)"*
-- *Entra a estimativa de horas de entrega — 45h por Saber no mês, 13h/mês por Executar vigente*
+- *Entra a estimativa de horas de entrega — 42h por Saber no mês, 12h/mês por Executar vigente*
+- *Acima de 190h/mês o CSP das horas excedentes vira freelancer: sai da Remuneração Total e entra na linha de freelas + ferramentas*
+- *Cap de projetos para repasse da matriz cai de 15 para 13*
 - *Termômetro e meta passam a comparar contra a Remuneração Total*
-- *ALERTA ABERTO: a ocupação de horas passa de 100% na maioria dos cenários (ver § 8)*
 
 *SPEC v1.3 — Agosto/2026. Mudanças v1.2 → v1.3:*
 - *A matriz para de atribuir quando a carteira atinge o cap; antes ela empurrava sempre e podia estourar o limite*

@@ -56,9 +56,11 @@ export const PARAMS = {
   // O CSP é o pagamento pelas horas que o próprio Assessor entrega. Estas são
   // as horas por trás dele.
   horas: {
-    saber_onetime:  45,   // ✅ horas para entregar um Saber, no mês da entrega
-    executar_mes:   13,   // ✅ horas/mês por Executar ativo, enquanto vigente
-    referencia_mes: 176,  // 🔴 jornada de referência (8h × 22 dias) para medir ocupação
+    saber_onetime:  42,   // ✅ horas para entregar um Saber, no mês da entrega
+    executar_mes:   12,   // ✅ horas/mês por Executar ativo, enquanto vigente
+    // Acima deste limite ele não dá conta sozinho: o CSP das horas excedentes
+    // deixa de ser remuneração dele e vira desembolso com freelancer.
+    limite_proprio: 190,  // ✅
   },
 
   // ─── Impostos ────────────────────────────────────────────────────────────
@@ -76,7 +78,7 @@ export const PARAMS = {
   // ─── Carteira ────────────────────────────────────────────────────────────
   carteira: {
     // Teto de projetos ativos simultâneos com dedicação integral.
-    cap_ativos_integral: 15,     // ✅ carteira do M12 nos dois cenários
+    cap_ativos_integral: 13,     // ✅ teto para a matriz repassar
     cap_ativos_parcial:   8,     // 🔴 dedicação parcial
     // Abaixo deste % operacional a capacidade de operar cai proporcionalmente:
     //   cap = cap_base × min(1, pct_operacional ÷ pct_operacional_ref)
