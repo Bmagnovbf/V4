@@ -331,6 +331,7 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   const renda_regime = regime.reduce((s, l) => s + l.renda_liquida, 0) / MESES_REGIME
   const remuneracao_regime = regime.reduce((s, l) => s + l.remuneracao_total, 0) / MESES_REGIME
   const horas_regime = regime.reduce((s, l) => s + l.horas_alocadas, 0) / MESES_REGIME
+  const faturamento_regime = regime.reduce((s, l) => s + l.receita_recebida, 0) / MESES_REGIME
 
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
@@ -338,6 +339,7 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   return {
     renda_regime,
     remuneracao_regime,
+    faturamento_regime,
     remuneracao_total_ano: projecao.reduce((s, l) => s + l.remuneracao_total, 0),
     horas_regime,
     ocupacao_horas: horas_regime / PARAMS.horas.limite_proprio,
@@ -376,10 +378,10 @@ function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
     PARAMS.termometro.reserva_ratio.amarelo,
   )
 
-  // Compara a meta com a renda em REGIME, não com o M12 isolado — senão o
+  // Compara a meta com o faturamento em REGIME, não com o M12 isolado — senão o
   // veredito do termômetro depende de em qual mês caiu o último Saber.
-  const meta_ratio = input.meta_renda_liquida > 0
-    ? kpis.remuneracao_regime / input.meta_renda_liquida
+  const meta_ratio = input.meta_faturamento > 0
+    ? kpis.faturamento_regime / input.meta_faturamento
     : 0
   const meta_nivel = nivelMaior(
     meta_ratio,

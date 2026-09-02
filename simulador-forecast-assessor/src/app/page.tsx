@@ -7,7 +7,7 @@ import { fmt } from '@/lib/format'
 import { PARAMS } from '@/config/params'
 import type { Dedicacao, NetworkLevel } from '@/types'
 
-const MIN_RENDA = 5_000,  MAX_RENDA = 45_000, STEP_RENDA = 1_000
+const MIN_FAT   = 5_000,  MAX_FAT   = 40_000, STEP_FAT   = 1_000
 const MIN_RET   = 2_000,  MAX_RET   = 15_000, STEP_RET   = 500
 const MIN_RES   = 0,      MAX_RES   = 150_000, STEP_RES  = 5_000
 
@@ -96,7 +96,7 @@ function ChipGroup<T extends string>({
 export default function InputPage() {
   const router = useRouter()
 
-  const [renda, setRenda] = useState(25_000)
+  const [fat, setFat] = useState(20_000)
   const [retirada, setRetirada] = useState(8_000)
   const [reserva, setReserva] = useState(25_000)
   const [pctComercial, setPctComercial] = useState(35)
@@ -105,7 +105,7 @@ export default function InputPage() {
 
   function handleSimular() {
     const resultado = simular({
-      meta_renda_liquida: renda,
+      meta_faturamento: fat,
       retirada_minima: retirada,
       reserva_capital: reserva,
       pct_comercial: pctComercial / 100,
@@ -132,10 +132,10 @@ export default function InputPage() {
         <div className="bg-white rounded-2xl p-6 space-y-8 shadow-sm" style={{ border: '1px solid #F2F2F2' }}>
 
           <CampoValor
-            label="Meta de Renda Líquida no Mês 12"
-            hint="Pró-labore mensal, já descontados impostos, CSP e ferramentas"
-            value={renda} setValue={setRenda}
-            min={MIN_RENDA} max={MAX_RENDA} step={STEP_RENDA}
+            label="Meta de Faturamento no Mês 12"
+            hint="Receita recebida por mês — o total que entra, antes de impostos"
+            value={fat} setValue={setFat}
+            min={MIN_FAT} max={MAX_FAT} step={STEP_FAT}
           />
 
           <CampoValor

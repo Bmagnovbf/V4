@@ -34,8 +34,8 @@ export type NetworkLevel = 'baixo' | 'medio' | 'alto'
 export type ViabilidadeNivel = 'verde' | 'amarelo' | 'vermelho'
 
 export interface SimulacaoInput {
-  /** Meta de renda líquida mensal (pró-labore) no mês 12. */
-  meta_renda_liquida: number
+  /** Meta de faturamento mensal (receita recebida, antes de impostos) no M12. */
+  meta_faturamento: number
   /** Quanto ele precisa retirar por mês enquanto não atinge o objetivo. */
   retirada_minima: number
   /** Reserva de capital de giro para cobrir a retirada até a renda alcançá-la. */
@@ -116,6 +116,8 @@ export interface KPIs {
   renda_regime: number
   /** Remuneração total em regime — média dos 3 últimos meses. */
   remuneracao_regime: number
+  /** Receita recebida em regime — média dos 3 últimos meses. */
+  faturamento_regime: number
   remuneracao_total_ano: number
   /** Horas de entrega em regime — média dos 3 últimos meses. */
   horas_regime: number
@@ -154,7 +156,7 @@ export interface Termometro {
   /** Reserva declarada ÷ o que falta para bancar a retirada mínima. */
   reserva_ratio: number
   reserva_nivel: ViabilidadeNivel
-  /** Remuneração em regime ÷ meta declarada. */
+  /** Faturamento em regime ÷ meta declarada. */
   meta_ratio: number
   meta_nivel: ViabilidadeNivel
   nivel_final: ViabilidadeNivel

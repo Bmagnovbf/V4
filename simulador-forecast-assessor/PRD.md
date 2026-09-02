@@ -182,7 +182,7 @@ fica em `src/config/params.ts`.
 
 | Input | Formato | O que altera |
 |---|---|---|
-| Meta de renda líquida no M12 | slider R$ 5–45K | Termômetro: remuneração vs. meta |
+| Meta de faturamento no M12 | slider R$ 5–40K | Receita recebida mensal — termômetro: faturamento vs. meta |
 | Retirada mínima mensal | slider R$ 2–15K | Define a reserva necessária |
 | Perfil operacional × comercial | slider 0–100% | Mix entre as 3 fontes — a alavanca central |
 | Rede de relacionamento | baixa / média / alta | Multiplica as vendas próprias — empurra a carteira para a Fonte 2 |
@@ -196,7 +196,7 @@ independentemente, então o campo não alterava a projeção.
 
 ## 6. Dashboard
 
-- Termômetro em dois eixos: reserva vs. retirada mínima e remuneração vs. meta.
+- Termômetro em dois eixos: reserva vs. retirada mínima e faturamento vs. meta.
   O payback é KPI de apoio, não critério — com a entrada baixa ele fica entre
   M4 e M6 em qualquer cenário
 - KPIs: remuneração total, resultado do negócio, horas de entrega, projetos no

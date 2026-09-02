@@ -40,7 +40,7 @@ export function TermometroViabilidade({
           nivel={termometro.reserva_nivel}
         />
         <Item
-          titulo="Remuneração vs. meta"
+          titulo="Faturamento vs. meta"
           valor={`${(termometro.meta_ratio * 100).toFixed(0)}%`}
           nivel={termometro.meta_nivel}
         />

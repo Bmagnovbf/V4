@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.10 | Setembro/2026**
+**V4 Company | Versão 1.11 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -313,7 +313,7 @@ com candidatos reais (§ 10, bloco B).
 
 ```ts
 interface SimulacaoInput {
-  meta_renda_liquida: number    // R$ 5.000 – 45.000
+  meta_faturamento:   number    // R$ 5.000 – 40.000
   retirada_minima:    number    // R$ 2.000 – 15.000
   reserva_capital:    number    // R$ 0 – 150.000
   pct_comercial:      number    // 0 – 1  (0 = 100% operacional)
@@ -326,9 +326,15 @@ Critério de o que vira input: **só o que o candidato sabe sobre si mesmo.**
 Benchmark da rede (tickets, splits, CSP, imposto, duração do Executar, rampa da
 matriz) fica em `params.ts` e não é editável na tela.
 
-`meta_renda_liquida` **não entra em nenhum cálculo** — é usada só no termômetro
-e como linha de referência no gráfico de renda. O motor não faz engenharia
-reversa a partir dela.
+`meta_faturamento` é a **receita recebida** mensal — o total que entra antes de
+impostos, somando as três fontes. **Não entra em nenhum cálculo**: é usada só no
+termômetro e como linha de referência no gráfico de receita. O motor não faz
+engenharia reversa a partir dela.
+
+O teto de R$ 40.000 é calibrado: de 606 combinações de rede, dedicação e perfil,
+10% alcançam esse faturamento em regime, e 4% passam de R$ 45.000. Um teto mais
+alto colocaria no slider números que nenhum cenário atinge, enviesando a
+conversa logo no primeiro campo.
 
 `retirada_minima` é *quanto ele precisa retirar por mês enquanto não atinge o
 objetivo*. Também não altera a projeção — mede o buraco entre o que ele precisa
@@ -607,7 +613,7 @@ Três eixos, sempre prevalecendo o **mais crítico**.
 
 ```
 reserva_ratio  = reserva_capital ÷ deficit_retirada_total   (∞ se o total = 0)
-meta_ratio     = remuneracao_regime ÷ meta_renda_liquida
+meta_ratio     = faturamento_regime ÷ meta_faturamento
 
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
 meta_nivel     = verde se ≥ 100%  · amarelo se ≥ 70%   · senão vermelho
@@ -621,8 +627,9 @@ margem, é **fôlego**: atravessar os primeiros meses com renda muito abaixo do
 que ele precisa retirar. O termômetro mede isso.
 
 Os dois eixos medem coisas independentes: **reserva** olha o capital de giro,
-**meta** olha a ambição declarada. O investimento de entrada é medido à parte,
-pelo KPI de payback.
+**meta** olha a ambição declarada — comparando o faturamento em regime com a
+meta, ambos em receita bruta. O investimento de entrada é medido à parte, pelo
+KPI de payback.
 
 ### 4.10 Mix de fontes no M12
 
@@ -645,7 +652,7 @@ Seis campos, em ordem:
 
 | Campo | Controle | Faixa | Default |
 |---|---|---|---|
-| Meta de renda líquida no M12 | input + slider | R$ 5.000 – 45.000 | R$ 25.000 |
+| Meta de faturamento no M12 | input + slider | R$ 5.000 – 40.000 | R$ 20.000 |
 | Retirada mínima mensal | input + slider | R$ 2.000 – 15.000 | R$ 8.000 |
 | Seu perfil | slider único | 0 – 100% comercial, passo 5 | 35% |
 | Rede de relacionamento | chips | baixa / média / alta | média |
@@ -668,7 +675,7 @@ Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
 2. **Termômetro** — nível final + os dois eixos abertos
-3. **KPI cards** — remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback da entrada, reserva necessária, capital total
+3. **KPI cards** — faturamento em regime, remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -991,6 +998,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.11 — Setembro/2026:*
+- *A meta passa de renda líquida para FATURAMENTO (receita recebida, antes de impostos), com teto de R$ 40.000 — alcançado por 10% dos cenários*
+- *A linha de meta migra do gráfico de renda para o de receita; entra o KPI de faturamento em regime*
 
 *SPEC v1.10 — Setembro/2026:*
 - *O payback sai do termômetro e vira KPI de apoio: com a entrada baixa ele não separa cenário bom de ruim*

@@ -45,7 +45,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-sm" style={{ color: '#3D3D3D' }}>
-              Meta <strong>{fmt(input.meta_renda_liquida)}/mês</strong> ·
+              Meta de faturamento <strong>{fmt(input.meta_faturamento)}/mês</strong> ·
               retirada mínima <strong>{fmt(input.retirada_minima)}/mês</strong> ·
               Dedicação <strong>{input.dedicacao}</strong> ·
               rede <strong>{({ baixo: 'baixa', medio: 'média', alto: 'alta' } as const)[input.network_level]}</strong>
@@ -63,8 +63,8 @@ export default function DashboardPage() {
         <TermometroViabilidade termometro={termometro} mesAutossuficiencia={kpis.mes_autossuficiencia} />
         <KPICards kpis={kpis} />
         <CardsFontes m12={m12} mix={mix_m12} />
-        <GraficoReceita projecao={projecao} />
-        <GraficoRenda projecao={projecao} meta={input.meta_renda_liquida} retirada={input.retirada_minima} />
+        <GraficoReceita projecao={projecao} meta={input.meta_faturamento} />
+        <GraficoRenda projecao={projecao} retirada={input.retirada_minima} />
         <TabelaDRE projecao={projecao} />
 
         <p className="text-center text-xs pb-6" style={{ color: '#7A7A7A' }}>

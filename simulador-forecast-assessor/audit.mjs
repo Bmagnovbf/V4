@@ -26,8 +26,8 @@ console.log('── Estrutura e identidades contábeis ──')
 let naoFinito = 0, fracionario = 0, identidade = 0, capEstouro = 0
 let maiorCarteira = 0
 for (const net of NET) for (const ded of DED) for (const pc of PCT)
-for (const meta of [5000,25000,45000]) for (const ret of [2000,8000,15000]) for (const res of [0,25000,150000]) {
-  const r = simular({ meta_renda_liquida: meta, retirada_minima: ret, reserva_capital: res,
+for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for (const res of [0,25000,150000]) {
+  const r = simular({ meta_faturamento: meta, retirada_minima: ret, reserva_capital: res,
     pct_comercial: pc, dedicacao: ded, network_level: net })
   for (const v of Object.values(r.kpis)) if (typeof v === 'number' && !Number.isFinite(v)) naoFinito++
   for (const l of r.projecao) {
@@ -51,7 +51,7 @@ ok(identidade === 0, 'identidades contábeis fecham')
 ok(capEstouro === 0, 'carteira nunca passa do teto próprio', `maior observada: ${maiorCarteira}`)
 
 console.log('\n── Coerência narrativa ──')
-const run = o => simular({ meta_renda_liquida: 25000, retirada_minima: 8000, reserva_capital: 25000,
+const run = o => simular({ meta_faturamento: 20000, retirada_minima: 8000, reserva_capital: 25000,
   pct_comercial: 0.35, dedicacao: 'integral', network_level: 'medio', ...o })
 
 let q = 0, pior = ''
@@ -104,8 +104,8 @@ for (const net of NET) for (const ded of DED) for (const pc of PCT) {
 ok(q === 0, 'vendas próprias nunca recuam')
 
 q = 0
-for (const net of NET) for (const res of [0,150000]) for (const m of [5000,45000]) for (const ret of [2000,15000]) {
-  const t = run({ network_level: net, reserva_capital: res, meta_renda_liquida: m, retirada_minima: ret }).termometro
+for (const net of NET) for (const res of [0,150000]) for (const m of [5000,40000]) for (const ret of [2000,15000]) {
+  const t = run({ network_level: net, reserva_capital: res, meta_faturamento: m, retirada_minima: ret }).termometro
   const p = [t.reserva_nivel, t.meta_nivel].reduce((a,b)=> ordem[b]>ordem[a]?b:a)
   if (t.nivel_final !== p) q++
 }

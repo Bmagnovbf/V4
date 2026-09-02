@@ -1,12 +1,12 @@
 'use client'
 
 import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from 'recharts'
 import type { PLMensal } from '@/types'
 import { fmt } from '@/lib/format'
 
-export function GraficoReceita({ projecao }: { projecao: PLMensal[] }) {
+export function GraficoReceita({ projecao, meta }: { projecao: PLMensal[]; meta: number }) {
   const data = projecao.map(l => ({
     mes: `M${l.mes}`,
     'Fonte 1 · Alocação':    Math.round(l.receita_saber_matriz + l.receita_executar_matriz),
@@ -27,6 +27,8 @@ export function GraficoReceita({ projecao }: { projecao: PLMensal[] }) {
             <YAxis tick={{ fontSize: 11, fill: '#7A7A7A' }} tickFormatter={(v: number) => `${v / 1000}K`} />
             <Tooltip formatter={(value: unknown) => fmt(Number(value))} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
+            <ReferenceLine y={meta} stroke="#D4900A" strokeDasharray="4 4"
+              label={{ value: 'meta', position: 'insideTopRight', fill: '#D4900A', fontSize: 11 }} />
             <Area type="monotone" dataKey="Fonte 1 · Alocação"     stackId="1" stroke="#7A7A7A" fill="#7A7A7A" />
             <Area type="monotone" dataKey="Fonte 2 · Self-sourced" stackId="1" stroke="#8B0000" fill="#8B0000" />
             <Area type="monotone" dataKey="Fonte 3 · Originação"   stackId="1" stroke="#D4900A" fill="#D4900A" />

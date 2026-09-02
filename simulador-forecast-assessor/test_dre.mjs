@@ -57,7 +57,7 @@ let falhas = 0
 
 for (const cenario of Object.values(DRE)) {
   const r = simular({
-    meta_renda_liquida: 25_000,
+    meta_faturamento: 20_000,
     retirada_minima:     8_000,
     reserva_capital:    30_000,
     pct_comercial:      cenario.pct_comercial,
@@ -110,7 +110,7 @@ console.log('\n── Contratos inteiros')
     for (const ded of ['integral', 'parcial']) {
       for (let pc = 0; pc <= 1.0001; pc += 0.05) {
         const r = simular({
-          meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
+          meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
           pct_comercial: pc, dedicacao: ded, network_level: net,
         })
         for (const l of r.projecao) {
@@ -134,7 +134,7 @@ console.log('\n── Contratos inteiros')
 console.log('\n── Efeito da rede (35% comercial)')
 for (const n of ['baixo', 'medio', 'alto']) {
   const r = simular({
-    meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
+    meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
     pct_comercial: 0.35, dedicacao: 'integral', network_level: n,
   })
   console.log(
@@ -149,7 +149,7 @@ for (const n of ['baixo', 'medio', 'alto']) {
 console.log('\n── Fonte 3 (transbordo de originação)')
 for (const pct of [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]) {
   const r = simular({
-    meta_renda_liquida: 25_000, retirada_minima: 8_000, reserva_capital: 30_000,
+    meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
     pct_comercial: pct, dedicacao: 'integral', network_level: 'medio',
   })
   const m12 = r.projecao[11]
