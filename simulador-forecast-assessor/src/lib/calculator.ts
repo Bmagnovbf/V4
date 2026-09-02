@@ -12,7 +12,7 @@
 //     → o que exceder transborda para a Fonte 3 (CAC)
 //     → receita por produto × split da fonte
 //     → (−) Simples, CSP Saber, CSP Executar, overhead
-//     → renda líquida → caixa acumulado → breakeven e payback
+//     → resultado · remuneração → caixa acumulado → breakeven e payback
 //
 // Validação: `test_dre.mjs` compara a saída com o cenário Base da planilha
 // (perfil de 45% comercial). O Upside é reportado como informativo — não é
@@ -282,7 +282,9 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     // que ele não desembolsa.
     const deficit_retirada = Math.max(0, input.retirada_minima - remuneracao_total)
 
-    const fluxo_caixa = renda_liquida
+    // O caixa do Assessor: entra o que fica com ele (remuneração total), sai o
+    // que ele precisa retirar para viver. O que sobrar amortiza a entrada.
+    const fluxo_caixa = remuneracao_total - input.retirada_minima
     caixa += fluxo_caixa
 
     linhas.push({

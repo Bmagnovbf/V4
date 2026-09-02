@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.6 | Setembro/2026**
+**V4 Company | Versão 1.7 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -220,7 +220,7 @@ estar operando, não de operar um projeto específico.
 | `carteira.fator_vendas_parcial` | 0,5× | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.tolerancia_self` | 1,2× | 🔴 |
-| `carteira.mix_alocacao` | 50% Saber / 50% Executar | 🟡 |
+| `carteira.mix_alocacao` | 40% Saber / 60% Executar | 🟡 |
 | `carteira.mix_self` | 70% Saber / 30% Executar | ✅ |
 | `carteira.primeiros_saber` | 5 | ✅ |
 | `carteira.matriz_pace` | `1 1 2 2 2 3 3 3 3 3 3 3` | ✅ |
@@ -239,10 +239,10 @@ overhead fixo), então abrir a carteira com ele produziria meses negativos.
 **O mix de produto é separado por fonte**, porque são decisões de agentes
 diferentes: a matriz escolhe o que aloca, o Assessor escolhe o que vende.
 
-- **Alocação — 50/50.** Na Fonte 1, o Executar rende R$ 102/h contra R$ 86/h do
-  Saber e ainda empilha, mas trava a agenda por 6 meses. Metade de Saber é o que
-  garante que o Assessor puramente operacional pague a entrada dentro do
-  primeiro ano — com 30% de Saber ele não paga em 12 meses.
+- **Alocação — 40/60**, pesando no Executar. Na Fonte 1 ele rende R$ 102/h
+  contra R$ 86/h do Saber, empilha, e entrega mais remuneração ao Assessor
+  puramente operacional. Não vamos a 30/70 porque ali a carteira encosta em
+  186h, sem folga antes das 190h em que passa a exigir freelancer.
 - **Vendas próprias — 70/30**, como na planilha.
 
 **Dedicação parcial** corta nos dois lados: o cap cai de 13 para 6 projetos e as
@@ -535,15 +535,32 @@ R$ 45.831 (R$ 20.000 de entrada + R$ 25.831 de giro).
 ### 4.7 Caixa
 
 ```
-fluxo_caixa(m)     = renda_liquida(m)
+fluxo_caixa(m)     = remuneracao_total(m) − retirada_minima
 
 caixa_acumulado(0) = −20.000                              (entrada na rede)
 caixa_acumulado(m) = caixa_acumulado(m−1) + fluxo_caixa(m)
+payback            = primeiro m com caixa_acumulado(m) ≥ 0
 ```
 
-O caixa parte do resultado do negócio, não da remuneração total: o CSP remunera
-horas já trabalhadas e sai do caixa da operação. O payback mede o retorno da
-entrada de R$ 20.000.
+**Entra o que fica com ele, sai o que ele precisa retirar para viver.** O que
+sobra amortiza a entrada.
+
+A base é a **remuneração total**, não o resultado do negócio. Usar o resultado
+distorcia a comparação entre produtos: um Executar alocado entrega R$ 7.350 de
+remuneração ao longo do ciclo mas só R$ 1.350 de resultado, porque o CSP come
+82% da receita — e o CSP volta para a mão dele. Medido pelo resultado, um mix
+pesado em Executar parecia nunca pagar a entrada, quando na verdade é o que
+mais entrega dinheiro.
+
+| Contrato alocado | Receita | CSP | Resultado | Remuneração |
+|---|---|---|---|---|
+| Saber | R$ 3.600 | R$ 1.500 | R$ 2.100 | R$ 3.600 |
+| Executar (6 meses) | R$ 7.350 | R$ 6.000 | R$ 1.350 | R$ 7.350 |
+
+Consequência: com retirada alta, o perfil puramente operacional pode **não
+pagar a entrada em 12 meses**. Com R$ 8.000/mês de retirada ele consome quase
+toda a remuneração; com R$ 5.000 paga por volta do M10. Isso é uma verdade do
+modelo, não um artefato.
 
 ### 4.8 KPIs
 
@@ -695,18 +712,22 @@ ajustar o motor para replicar decisões manuais.
 Perfil e rede de cada cenário não são o mix de contratos da planilha — são a
 combinação que, sob as premissas do motor, reproduz aquele resultado.
 
-### Cenário Base — 35% comercial, rede alta
+Os cenários rodam com **retirada zerada**, porque a planilha não tem esse
+conceito: o caixa dela absorve toda a renda. Sem isso, o payback do motor não
+seria comparável.
+
+### Cenário Base — 42,5% comercial, rede alta
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
-| Receita ano 1 | R$ 292.875 | R$ 270.950 | −7,5% |
-| Líquido ano 1 | R$ 149.303 | R$ 149.193 | **−0,1%** |
-| Líquido em regime | R$ 28.846 | R$ 25.696 | −10,9% |
-| Projetos ativos M12 | 15 | 13 | −13,3% |
-| Payback | M6 | M7 | +1 |
+| Receita ano 1 | R$ 292.875 | R$ 309.100 | +5,5% |
+| Líquido ano 1 | R$ 149.303 | R$ 158.554 | +6,2% |
+| Líquido em regime | R$ 28.846 | R$ 24.964 | −13,5% |
+| Projetos ativos M12 | 15 | 15 | 0,0% |
+| Payback | M6 | M5 | −1 |
 | Breakeven | M1 | M1 | — |
 
-### Cenário Upside — 50% comercial, rede alta
+### Cenário Upside — 55% comercial, rede alta
 
 | Indicador | Planilha | Motor | Δ |
 |---|---|---|---|
@@ -817,7 +838,8 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 | Vendas próprias nunca recuam | oscilação do arredondamento |
 | Nível final = pior dos três eixos | lógica do termômetro |
 | Sem saltos > 50% no slider | descontinuidade na conversa |
-| 0% comercial paga a entrada | narrativa do produto |
+| 0% comercial paga a entrada (retirada de R$ 5k) | narrativa do produto |
+| Retirada maior nunca antecipa o payback | sinal trocado no caixa |
 
 Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
 parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
@@ -901,6 +923,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.7 — Setembro/2026. Mudanças v1.6 → v1.7:*
+- *Payback corrigido: o caixa passa a somar (remuneração total − retirada mínima) em vez do resultado do negócio. Medir pelo resultado subestimava o Executar, cujo CSP come 82% da receita mas volta para a mão do Assessor*
+- *Mix de alocação vai de 50/50 para 40/60, pesando no Executar — com o payback correto, mais Executar entrega mais remuneração E paga antes*
+- *Cenários da planilha passam a rodar com retirada zerada, para o payback ser comparável*
 
 *SPEC v1.6 — Setembro/2026. Mudanças v1.5 → v1.6, todas vindas da auditoria do espaço de inputs:*
 - *O cap passa a contar a carteira inteira do mês (Saber + Executar); antes só Executar, e a carteira estourava o teto*

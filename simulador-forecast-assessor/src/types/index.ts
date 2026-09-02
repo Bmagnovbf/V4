@@ -130,7 +130,10 @@ export interface KPIs {
   projetos_ativos_m12: number
   breakeven_mes: number | null
   payback_mes: number | null
-  /** Pior caixa acumulado, já contando a entrada — base do payback. */
+  /**
+   * Pior caixa acumulado: entrada paga, mais o acumulado de
+   * (remuneração − retirada mínima). Base do payback.
+   */
   pior_caixa: number
   investimento_total: number
   /** Soma do que falta para bancar a retirada mínima. NÃO inclui a entrada. */
