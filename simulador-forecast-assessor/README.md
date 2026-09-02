@@ -55,7 +55,15 @@ contrato é fracionário em 126 combinações × 12 meses. Valores em R$ toleram
 de desvio — a planilha usa uma rampa desenhada à mão e o motor usa uma rampa
 generativa que responde ao perfil do candidato. Meses toleram ±1.
 
-Base reproduz em −0,1% no líquido do ano; Upside em −4,5%.
+Base reproduz em +10,3% no líquido do ano; Upside em −13,8%.
+
+E a auditoria do espaço de inputs, que procura quebras estruturais e
+incoerências narrativas em todas as combinações de rede, dedicação, perfil,
+meta, retirada e reserva:
+
+```bash
+npx tsc -p tsconfig.test.json && node audit.mjs
+```
 
 ## Deploy
 

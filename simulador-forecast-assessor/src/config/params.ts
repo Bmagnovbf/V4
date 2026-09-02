@@ -79,7 +79,9 @@ export const PARAMS = {
   carteira: {
     // Teto de projetos ativos simultâneos com dedicação integral.
     cap_ativos_integral: 13,     // ✅ teto para a matriz repassar
-    cap_ativos_parcial:   8,     // 🔴 dedicação parcial
+    cap_ativos_parcial:   6,     // 🔴 dedicação parcial
+    // Meia dedicação também vende menos: menos agenda para prospectar.
+    fator_vendas_parcial: 0.5,   // 🔴
     // Abaixo deste % operacional a capacidade de operar cai proporcionalmente:
     //   cap = cap_base × min(1, pct_operacional ÷ pct_operacional_ref)
     // Os dois cenários do DRE ficam em 63% e 55% operacional, então ambos
@@ -93,9 +95,16 @@ export const PARAMS = {
     // Pace de atribuição da matriz — clientes que a rede entrega ao Assessor
     // para operar (Fonte 1). Independe da forma de pagamento e do perfil: é o
     // compromisso da rede. Sobe de 1 para 2 quando ele já provou entrega.
-    matriz_pace: [0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2] as readonly number[],  // ✅
+    matriz_pace: [0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3] as readonly number[],  // ✅
     // Mix de produto nos contratos novos. Base do DRE: 34 Saber / 15 Executar.
-    mix_produto: { saber: 0.70, executar: 0.30 },  // ✅ ≈ 69/31 na planilha
+    // Mix de produto. São decisões de agentes diferentes: a matriz escolhe o
+    // que aloca, o Assessor escolhe o que vende.
+    //   Alocação — 50/50. O Executar rende 19% mais por hora e empilha, mas
+    //   trava a agenda por 6 meses; metade de Saber garante que o Assessor
+    //   puramente operacional pague a entrada dentro do primeiro ano.
+    //   Vendas próprias — 70/30, como na planilha.
+    mix_alocacao: { saber: 0.50, executar: 0.50 },  // 🟡
+    mix_self:     { saber: 0.70, executar: 0.30 },  // ✅ ≈ 69/31 na planilha
     // Premissa da planilha: "os 5 primeiros Saber, o 6º Executar". Faz sentido
     // operacional — um Executar isolado no início não cobre o próprio CSP.
     primeiros_saber: 5,  // ✅

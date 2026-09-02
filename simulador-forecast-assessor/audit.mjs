@@ -1,0 +1,131 @@
+// Auditoria do espaço de inputs. Roda com: npx tsc -p tsconfig.test.json && node audit.mjs
+import Module from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+const raiz = path.dirname(fileURLToPath(import.meta.url))
+const orig = Module._resolveFilename
+Module._resolveFilename = function (r, ...rest) {
+  if (r.startsWith('@/')) r = path.join(raiz, '.test_out', r.slice(2))
+  return orig.call(this, r, ...rest)
+}
+const req = Module.createRequire(import.meta.url)
+const { simular } = req('./.test_out/lib/calculator.js')
+const { PARAMS } = req('./.test_out/config/params.js')
+const brl = n => 'R$ ' + Math.round(n).toLocaleString('pt-BR')
+const ordem = { verde:0, amarelo:1, vermelho:2 }
+let falhas = 0
+const ok = (cond, nome, det='') => {
+  console.log(`  ${cond ? '✓' : '✗'} ${nome}${det ? ' — ' + det : ''}`)
+  if (!cond) falhas++
+}
+
+const NET = ['baixo','medio','alto'], DED = ['integral','parcial']
+const PCT = Array.from({length:21}, (_,i)=>i*0.05)
+
+console.log('── Estrutura e identidades contábeis ──')
+let naoFinito = 0, fracionario = 0, identidade = 0, capEstouro = 0
+let maiorCarteira = 0
+for (const net of NET) for (const ded of DED) for (const pc of PCT)
+for (const meta of [5000,25000,45000]) for (const ret of [2000,8000,15000]) for (const res of [0,25000,150000]) {
+  const r = simular({ meta_renda_liquida: meta, retirada_minima: ret, reserva_capital: res,
+    pct_comercial: pc, dedicacao: ded, network_level: net })
+  for (const v of Object.values(r.kpis)) if (typeof v === 'number' && !Number.isFinite(v)) naoFinito++
+  for (const l of r.projecao) {
+    for (const c of ['saber_novos_matriz','saber_novos_self','executar_novos_matriz','executar_novos_self',
+                     'saber_originados','executar_originados','executar_ativos_matriz','executar_ativos_self','total_ativos'])
+      if (!Number.isInteger(l[c]) || l[c] < 0) fracionario++
+    const somaF = l.receita_saber_matriz + l.receita_saber_self + l.receita_executar_matriz
+                + l.receita_executar_self + l.receita_originacao
+    if (Math.abs(somaF - l.receita_recebida) > 0.5) identidade++
+    if (Math.abs((l.csp_proprio + l.csp_terceirizado) - l.csp_total) > 0.5) identidade++
+    if (Math.abs((l.overhead + l.csp_terceirizado) - l.freelas_total) > 0.5) identidade++
+    if (Math.abs((l.renda_liquida + l.csp_proprio) - l.remuneracao_total) > 0.5) identidade++
+    if (l.total_ativos > maiorCarteira) maiorCarteira = l.total_ativos
+    const cap = ded === 'integral' ? PARAMS.carteira.cap_ativos_integral : PARAMS.carteira.cap_ativos_parcial
+    if (l.total_ativos > Math.floor(cap * PARAMS.carteira.tolerancia_self)) capEstouro++
+  }
+}
+ok(naoFinito === 0, 'todos os KPIs são números finitos')
+ok(fracionario === 0, 'nenhum contrato fracionário ou negativo')
+ok(identidade === 0, 'identidades contábeis fecham')
+ok(capEstouro === 0, 'carteira nunca passa do teto próprio', `maior observada: ${maiorCarteira}`)
+
+console.log('\n── Coerência narrativa ──')
+const run = o => simular({ meta_renda_liquida: 25000, retirada_minima: 8000, reserva_capital: 25000,
+  pct_comercial: 0.35, dedicacao: 'integral', network_level: 'medio', ...o })
+
+let q = 0, pior = ''
+for (const net of NET) for (const pc of PCT) {
+  const i = run({ network_level: net, pct_comercial: pc, dedicacao: 'integral' }).kpis.remuneracao_total_ano
+  const p = run({ network_level: net, pct_comercial: pc, dedicacao: 'parcial'  }).kpis.remuneracao_total_ano
+  if (p > i) { q++; pior = `${net}/${(pc*100).toFixed(0)}%c` }
+}
+ok(q === 0, 'dedicação parcial nunca rende mais que integral', q ? pior : '')
+
+q = 0
+for (const ded of DED) for (const pc of PCT) {
+  const v = NET.map(n => run({ network_level: n, dedicacao: ded, pct_comercial: pc }).kpis.remuneracao_total_ano)
+  if (v[1] < v[0] || v[2] < v[1]) q++
+}
+ok(q === 0, 'rede maior nunca rende menos')
+
+q = 0
+for (const net of NET) for (const ret of [2000,8000,15000]) {
+  let ant = null
+  for (const res of [0,25000,50000,100000,150000]) {
+    const t = run({ network_level: net, retirada_minima: ret, reserva_capital: res }).termometro
+    if (ant !== null && ordem[t.reserva_nivel] > ordem[ant]) q++
+    ant = t.reserva_nivel
+  }
+}
+ok(q === 0, 'mais reserva nunca piora o termômetro')
+
+q = 0
+for (const net of NET) {
+  let ant = -1
+  for (const ret of [2000,5000,8000,12000,15000]) {
+    const k = run({ network_level: net, retirada_minima: ret }).kpis
+    if (k.deficit_retirada_total < ant) q++
+    ant = k.deficit_retirada_total
+  }
+}
+ok(q === 0, 'retirada maior nunca reduz a reserva necessária')
+
+q = 0
+for (const net of NET) for (const ded of DED) for (const pc of PCT) {
+  const r = run({ network_level: net, dedicacao: ded, pct_comercial: pc })
+  for (let i = 1; i < 12; i++) {
+    const a = r.projecao[i-1], b = r.projecao[i]
+    const tA = a.saber_novos_self + a.executar_novos_self + a.saber_originados + a.executar_originados
+    const tB = b.saber_novos_self + b.executar_novos_self + b.saber_originados + b.executar_originados
+    if (tB < tA - 1) q++
+  }
+}
+ok(q === 0, 'vendas próprias nunca recuam')
+
+q = 0
+for (const net of NET) for (const res of [0,150000]) for (const m of [5000,45000]) for (const ret of [2000,15000]) {
+  const t = run({ network_level: net, reserva_capital: res, meta_renda_liquida: m, retirada_minima: ret }).termometro
+  const p = [t.reserva_nivel, t.payback_nivel, t.meta_nivel].reduce((a,b)=> ordem[b]>ordem[a]?b:a)
+  if (t.nivel_final !== p) q++
+}
+ok(q === 0, 'nível final do termômetro = pior dos três eixos')
+
+let maxSalto = 0, ondeSalto = ''
+for (const net of NET) for (let pc = 0; pc < 1.0; pc += 0.05) {
+  const a = run({ network_level: net, pct_comercial: pc }).kpis.remuneracao_regime
+  const b = run({ network_level: net, pct_comercial: pc + 0.05 }).kpis.remuneracao_regime
+  const d = a > 0 ? Math.abs(b-a)/a : 0
+  if (d > maxSalto) { maxSalto = d; ondeSalto = `${net} ${(pc*100).toFixed(0)}%→${((pc+0.05)*100).toFixed(0)}%` }
+}
+ok(maxSalto < 0.5, 'sem saltos acima de 50% entre passos do slider', `maior: ${(maxSalto*100).toFixed(0)}% em ${ondeSalto}`)
+
+q = 0
+for (const net of NET) {
+  const k = run({ network_level: net, pct_comercial: 0 }).kpis
+  if (k.payback_mes === null) q++
+}
+ok(q === 0, 'o perfil 0% comercial paga a entrada dentro de 12 meses')
+
+console.log(falhas === 0 ? '\n✓ Auditoria limpa' : `\n✗ ${falhas} verificações falharam`)
+process.exit(falhas === 0 ? 0 : 1)

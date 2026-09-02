@@ -98,7 +98,8 @@ function shapeComercial(mes: number): number {
  */
 function vendasPropriasMes(input: SimulacaoInput): number {
   const teto = PARAMS.comercial.calls_mes_max * PARAMS.comercial.conversao_call_venda
-  return teto * input.pct_comercial * PARAMS.network[input.network_level].fator
+  const dedicacao = input.dedicacao === 'integral' ? 1 : PARAMS.carteira.fator_vendas_parcial
+  return teto * input.pct_comercial * PARAMS.network[input.network_level].fator * dedicacao
 }
 
 function overheadDoMes(mes: number): number {
@@ -112,7 +113,8 @@ function overheadDoMes(mes: number): number {
 
 function montarCarteira(input: SimulacaoInput): Carteira[] {
   const cap = capAtivos(input)
-  const { saber } = PARAMS.carteira.mix_produto
+  const mixAloc = PARAMS.carteira.mix_alocacao.saber
+  const mixSelf = PARAMS.carteira.mix_self.saber
   const linhas: Carteira[] = []
 
   // Histórico de Executar novos, para calcular os ativos com churn de 6 meses.
@@ -138,17 +140,19 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
       ativosVigentes += (execNovosMatriz[m] ?? 0) + (execNovosSelf[m] ?? 0)
     }
 
-    // 2) A matriz atribui seu pace — mas PARA quando a carteira atinge o cap.
-    //    Ela não empurra cliente para um Assessor que já está no limite.
-    const daMatriz = ativosVigentes >= cap ? 0 : (PARAMS.carteira.matriz_pace[mes] ?? 0)
+    // 2) A matriz aloca seu pace, até encher o cap. O teto vale para a carteira
+    //    inteira do mês — Saber entregue e Executar vigente contam igual, porque
+    //    os dois consomem agenda.
+    const espacoNoCap = Math.max(0, cap - ativosVigentes)
+    const daMatriz = Math.min(PARAMS.carteira.matriz_pace[mes] ?? 0, espacoNoCap)
 
     // 3) O que ele consegue vender por conta própria neste mês, em contratos
     //    inteiros (a fração fica guardada para os meses seguintes).
     const vendasPotencial = accVendas(vendasPropriasMes(input) * shapeComercial(mes))
 
     // 4) Ele pode romper o cap por conta própria, até a tolerância — é decisão
-    //    dele, assumindo o risco de qualidade. O que passar disso é repassado e
-    //    ele fica só com o CAC (Fonte 3).
+    //    dele, assumindo o risco de qualidade e o custo do freela. O que passar
+    //    disso é repassado e ele fica só com o CAC (Fonte 3).
     const tetoProprio = Math.floor(cap * PARAMS.carteira.tolerancia_self)
     const capacidadeLivre = Math.max(0, tetoProprio - ativosVigentes - daMatriz)
 
@@ -159,17 +163,17 @@ function montarCarteira(input: SimulacaoInput): Carteira[] {
     // 4) Reparte cada bloco entre Saber e Executar. Enquanto a carteira não
     //    passa dos primeiros contratos, tudo é Saber. Depois, o Saber acumula
     //    a fração do mix e o Executar leva o resto, para a soma bater.
-    const repartir = (bloco: number, acc: (v: number) => number): number => {
+    const repartir = (bloco: number, mix: number, acc: (v: number) => number): number => {
       const faltamSaber = Math.max(0, PARAMS.carteira.primeiros_saber - contratosAteAgora)
       const forcados = Math.min(bloco, faltamSaber)
       contratosAteAgora += bloco
       if (forcados >= bloco) return bloco
-      return forcados + Math.min(bloco - forcados, acc((bloco - forcados) * saber))
+      return forcados + Math.min(bloco - forcados, acc((bloco - forcados) * mix))
     }
 
-    const saber_novos_matriz    = repartir(daMatriz,          accSaberMatriz)
-    const saber_novos_self      = repartir(vendasOperadas,    accSaberSelf)
-    const saber_originados      = repartir(vendasRepassadas,  accSaberOrig)
+    const saber_novos_matriz    = repartir(daMatriz,         mixAloc, accSaberMatriz)
+    const saber_novos_self      = repartir(vendasOperadas,   mixSelf, accSaberSelf)
+    const saber_originados      = repartir(vendasRepassadas, mixSelf, accSaberOrig)
     const executar_novos_matriz = daMatriz          - saber_novos_matriz
     const executar_novos_self   = vendasOperadas    - saber_novos_self
     const executar_originados   = vendasRepassadas  - saber_originados

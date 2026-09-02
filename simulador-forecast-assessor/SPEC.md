@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.5 | Setembro/2026**
+**V4 Company | Versão 1.6 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -216,12 +216,14 @@ estar operando, não de operar um projeto específico.
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
 | `carteira.cap_ativos_integral` | 13 projetos | ✅ |
-| `carteira.cap_ativos_parcial` | 8 projetos | 🔴 |
+| `carteira.cap_ativos_parcial` | 6 projetos | 🔴 |
+| `carteira.fator_vendas_parcial` | 0,5× | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.tolerancia_self` | 1,2× | 🔴 |
-| `carteira.mix_produto` | 70% Saber / 30% Executar | ✅ |
+| `carteira.mix_alocacao` | 50% Saber / 50% Executar | 🟡 |
+| `carteira.mix_self` | 70% Saber / 30% Executar | ✅ |
 | `carteira.primeiros_saber` | 5 | ✅ |
-| `carteira.matriz_pace` | `1 1 1 2 2 2 2 2 2 2 2 2` | ✅ |
+| `carteira.matriz_pace` | `1 1 2 2 2 3 3 3 3 3 3 3` | ✅ |
 
 `matriz_pace[m]` é quanto a **matriz atribui** ao Assessor no mês *m* — o
 compromisso da rede, independente do perfil, da rede dele e da forma de
@@ -234,8 +236,19 @@ Tudo que cresce além disso vem da originação própria.
 próprio CSP (recebe R$ 1.225/mês e custa R$ 1.000/mês, contra R$ 1.000 de
 overhead fixo), então abrir a carteira com ele produziria meses negativos.
 
-`mix_produto` vem da mesma fonte: 34 Saber / 15 Executar no ano do cenário Base
-≈ 69/31, arredondado para 70/30.
+**O mix de produto é separado por fonte**, porque são decisões de agentes
+diferentes: a matriz escolhe o que aloca, o Assessor escolhe o que vende.
+
+- **Alocação — 50/50.** Na Fonte 1, o Executar rende R$ 102/h contra R$ 86/h do
+  Saber e ainda empilha, mas trava a agenda por 6 meses. Metade de Saber é o que
+  garante que o Assessor puramente operacional pague a entrada dentro do
+  primeiro ano — com 30% de Saber ele não paga em 12 meses.
+- **Vendas próprias — 70/30**, como na planilha.
+
+**Dedicação parcial** corta nos dois lados: o cap cai de 13 para 6 projetos e as
+vendas próprias caem à metade (`fator_vendas_parcial`), porque meia dedicação
+também significa menos agenda para prospectar. Sem o corte nas vendas, o perfil
+parcial chegava a render mais que o integral em cenários de borda.
 
 ### 3.7 Rede de relacionamento
 
@@ -359,7 +372,8 @@ Executado mês a mês. É aqui que a Fonte 3 nasce.
 ```
 ativos_vigentes   = Σ executar_novos(k)   k de max(1, m−5) até m−1
 
-da_matriz(m)      = ativos_vigentes ≥ cap_ativos ? 0 : matriz_pace[m]   → Fonte 1
+espaco_no_cap     = max(0, cap_ativos − ativos_vigentes)
+da_matriz(m)      = min(matriz_pace[m], espaco_no_cap)                  → Fonte 1
 
 teto_proprio      = floor(cap_ativos × tolerancia_self)
 capacidade_livre  = max(0, teto_proprio − ativos_vigentes − da_matriz)
@@ -781,6 +795,34 @@ Remuneração Total. A tela mostra as duas sublinhas — "dos quais terceirizado
 Isso também dá um limite natural ao modelo sem trava artificial: crescer além da
 própria capacidade continua valendo a pena, só que com margem menor.
 
+## 8c. Auditoria do espaço de inputs
+
+`audit.mjs` varre todas as combinações de rede, dedicação, perfil, meta,
+retirada e reserva, verificando estrutura e coerência narrativa:
+
+```bash
+npx tsc -p tsconfig.test.json && node audit.mjs
+```
+
+| Verificação | O que pega |
+|---|---|
+| KPIs finitos | divisão por zero, NaN |
+| Contratos inteiros e não-negativos | quebra do acumulador |
+| Identidades contábeis | soma das fontes, CSP, freelas, remuneração |
+| Carteira ≤ teto próprio | cap aplicado sobre a base errada |
+| Parcial < integral | artefato de horizonte truncado |
+| Rede maior nunca rende menos | inversão de monotonicidade |
+| Mais reserva nunca piora o termômetro | threshold invertido |
+| Retirada maior nunca reduz a reserva | sinal trocado |
+| Vendas próprias nunca recuam | oscilação do arredondamento |
+| Nível final = pior dos três eixos | lógica do termômetro |
+| Sem saltos > 50% no slider | descontinuidade na conversa |
+| 0% comercial paga a entrada | narrativa do produto |
+
+Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
+parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
+no primeiro passo do slider e o perfil operacional sem payback em 12 meses.
+
 ## 9. Critérios de Aceite
 
 - [x] `npm run build` sem erro nem warning de lint
@@ -788,6 +830,7 @@ própria capacidade continua valendo a pena, só que com margem menor.
 - [x] Cenário Upside reproduzido dentro de 15% (rede alta)
 - [x] Fonte 3 = zero nos perfis até ~55% comercial
 - [x] CSP migra para freelas quando as horas passam de 190h/mês
+- [x] `audit.mjs` limpo em todo o espaço de inputs
 - [x] Contratos inteiros em 126 combinações × 12 meses
 - [x] Nenhum número de negócio hard-coded fora de `params.ts`
 - [x] Todo parâmetro visível em `/params` com tag de procedência
@@ -858,6 +901,12 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.6 — Setembro/2026. Mudanças v1.5 → v1.6, todas vindas da auditoria do espaço de inputs:*
+- *O cap passa a contar a carteira inteira do mês (Saber + Executar); antes só Executar, e a carteira estourava o teto*
+- *Dedicação parcial fica mais conservadora: cap de 8 para 6 e vendas próprias à metade — antes chegava a render mais que integral*
+- *Pace da matriz sobe para até 3 clientes/mês, e o mix de alocação passa a ser separado do mix de vendas próprias (50/50 contra 70/30)*
+- *Entra `audit.mjs`, que varre o espaço de inputs procurando quebras estruturais e incoerências narrativas*
 
 *SPEC v1.5 — Setembro/2026. Mudanças v1.4 → v1.5:*
 - *Nomenclatura das fontes alinhada no motor: "vendas próprias" é a capacidade de trazer cliente (alimenta as Fontes 2 e 3); "Originação" fica reservado para a Fonte 3*

@@ -97,7 +97,9 @@ export default function ParamsPage() {
           <Row tag="🔴" path="carteira.pct_operacional_ref" value={`${pct(p.carteira.pct_operacional_ref)} — abaixo disso a capacidade cai`} />
           <Row tag="🔴" path="carteira.tolerancia_self"      value={`${p.carteira.tolerancia_self}× — a matriz trava no cap; ele rompe até aqui`} />
           <Row tag="✅" path="carteira.primeiros_saber"      value={`${p.carteira.primeiros_saber} primeiros contratos`} />
-          <Row tag="✅" path="carteira.mix_produto"         value={`${pct(p.carteira.mix_produto.saber)} Saber · ${pct(p.carteira.mix_produto.executar)} Executar`} />
+          <Row tag="🟡" path="carteira.mix_alocacao"        value={`${pct(p.carteira.mix_alocacao.saber)} Saber · ${pct(p.carteira.mix_alocacao.executar)} Executar`} />
+          <Row tag="✅" path="carteira.mix_self"             value={`${pct(p.carteira.mix_self.saber)} Saber · ${pct(p.carteira.mix_self.executar)} Executar`} />
+          <Row tag="🔴" path="carteira.fator_vendas_parcial" value={`${p.carteira.fator_vendas_parcial}× nas vendas com dedicação parcial`} />
           <Row tag="✅" path="carteira.matriz_pace"          value={p.carteira.matriz_pace.slice(1).join(' · ') + ' cliente(s)/mês'} />
         </Section>
 
