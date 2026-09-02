@@ -189,7 +189,7 @@ export default function InputPage() {
             ]}
             value={network}
             onChange={setNetwork}
-            footer={`Baixa ≈ ${PARAMS.network.baixo.empresas} empresas · Média ≈ ${PARAMS.network.medio.empresas} · Alta ≈ ${PARAMS.network.alto.empresas} ou mais`}
+            footer={`Baixa = ${PARAMS.network.baixo.faixa} · Média = ${PARAMS.network.medio.faixa} · Alta = ${PARAMS.network.alto.faixa}`}
           />
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />

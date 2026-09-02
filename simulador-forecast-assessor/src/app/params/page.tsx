@@ -110,9 +110,9 @@ export default function ParamsPage() {
         </Section>
 
         <Section title="Rede de relacionamento">
-          <Row tag="🔴" path="network.baixo" value={`≈ ${p.network.baixo.empresas} empresas · fator ${p.network.baixo.fator}×`} />
-          <Row tag="🔴" path="network.medio" value={`≈ ${p.network.medio.empresas} empresas · fator ${p.network.medio.fator}×`} />
-          <Row tag="🔴" path="network.alto"  value={`≈ ${p.network.alto.empresas} empresas · fator ${p.network.alto.fator}×`} />
+          <Row tag="🔴" path="network.baixo" value={`${p.network.baixo.faixa} · fator ${p.network.baixo.fator}×`} />
+          <Row tag="🔴" path="network.medio" value={`${p.network.medio.faixa} · fator ${p.network.medio.fator}×`} />
+          <Row tag="🔴" path="network.alto"  value={`${p.network.alto.faixa} · fator ${p.network.alto.fator}×`} />
         </Section>
 
         <Section title="Vendas próprias (alimentam as Fontes 2 e 3)">

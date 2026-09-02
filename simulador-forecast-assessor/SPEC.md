@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.12 | Setembro/2026**
+**V4 Company | Versão 1.13 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -255,11 +255,11 @@ parcial chegava a render mais que o integral em cenários de borda.
 Mesma pergunta do simulador da franquia: *como você avalia sua rede de
 relacionamento com empresários?*
 
-| Nível | Referência | Fator | Tag |
+| Nível | Faixa | Fator | Tag |
 |---|---|---|:--:|
-| Baixa | ≈ 10 empresas | 0,5× | 🔴 |
-| Média | ≈ 30 empresas | 1,0× | 🔴 |
-| Alta | ≈ 50 empresas ou + | 1,5× | 🔴 |
+| Baixa | até 50 empresas | 0,5× | 🔴 |
+| Média | 50 a 100 empresas | 1,0× | 🔴 |
+| Alta | mais de 100 empresas | 1,5× | 🔴 |
 
 O fator **multiplica** a capacidade de originação própria. Não é parcela: sem
 rede não há a quem vender, por mais comercial que seja o perfil. É a alavanca
@@ -665,7 +665,7 @@ comercial"). É o controle central da tela — os outros quatro são contexto.
 **Os campos não revelam a consequência da resposta** (decisão de set/2026). O
 candidato deve responder sobre si mesmo, não sobre o resultado que quer ver. Os
 textos de apoio definem o que se pergunta e dão referência para calibrar a
-resposta — "Baixa ≈ 10 empresas · Média ≈ 30 · Alta ≈ 50 ou mais" —, nunca o
+resposta — "Baixa = até 50 empresas · Média = 50 a 100 · Alta = mais de 100" —, nunca o
 efeito no forecast. Dizer que a Fonte 2 paga 80% contra 30–35% da alocação
 transformava o slider de perfil num campo de otimização.
 
@@ -958,8 +958,8 @@ média. Verificar: a carteira sobe até 50% comercial (13 projetos, o teto) e
 depois cai; a Fonte 3 só aparece a partir de ~55%.
 
 **A6–A8 — varrer a rede** (baixa/média/alta) com 35% comercial. Verificar: o
-mix migra de 58% para 80% self, o líquido do ano vai de R$ 60K a R$ 149K, e a
-partir da rede média a ocupação passa de 190h e começa a terceirizar.
+mix migra para mais self-sourced, e a partir da rede média a ocupação passa de
+190h e começa a terceirizar.
 
 Pergunta: a curva faz sentido para quem conhece a operação? É aqui que o achado
 do § 8 é julgado, e onde se decide se o fator de rede (0,5 / 1,0 / 1,5) está
@@ -1004,6 +1004,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.13 — Setembro/2026:*
+- *Faixas de rede redefinidas: baixa até 50 empresas, média de 50 a 100, alta acima de 100*
 
 *SPEC v1.12 — Setembro/2026:*
 - *Os textos de apoio dos inputs deixam de revelar a consequência da resposta — o candidato responde sobre si, não sobre o resultado que quer ver*

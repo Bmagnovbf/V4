@@ -117,9 +117,9 @@ export const PARAMS = {
   // perfil. Essas vendas alimentam a Fonte 2 (quando ele opera) e a Fonte 3
   // (quando repassa).
   network: {
-    baixo: { fator: 0.5, empresas: 10 },  // 🔴
-    medio: { fator: 1.0, empresas: 30 },  // 🔴
-    alto:  { fator: 1.5, empresas: 50 },  // 🔴
+    baixo: { fator: 0.5, faixa: 'até 50 empresas'     },  // 🔴
+    medio: { fator: 1.0, faixa: '50 a 100 empresas'   },  // 🔴
+    alto:  { fator: 1.5, faixa: 'mais de 100 empresas'},  // 🔴
   },
 
   // ─── Vendas próprias do Assessor ─────────────────────────────────────────
