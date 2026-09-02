@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.14 | Setembro/2026**
+**V4 Company | Versão 1.15 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -172,11 +172,17 @@ Remuneração Total = CSP próprio + Resultado   ← o que fica com ele
 ```
 
 **Até onde ele entrega sozinho.** O CSP só é remuneração dele enquanto as horas
-cabem na jornada. Acima de `horas.limite_proprio` (190h/mês) ele precisa de
-freelancer, e o CSP das horas excedentes deixa de ficar com ele:
+cabem na jornada. Acima do limite ele precisa de freelancer, e o CSP das horas
+excedentes deixa de ficar com ele.
+
+O limite **depende da dedicação**: 190h/mês na integral, 88h na parcial (≈ 20h
+por semana). Com um limite único, o parcial nunca terceirizava e chegava a 144h
+mensais — 33h por semana, o que não descreve quem tem outra atividade em
+paralelo.
 
 ```
-horas_terceirizadas = max(0, horas_alocadas − 190)
+limite              = 190h (integral) | 88h (parcial)
+horas_terceirizadas = max(0, horas_alocadas − limite)
 csp_terceirizado    = csp_total × (horas_terceirizadas ÷ horas_alocadas)
 csp_proprio         = csp_total − csp_terceirizado
 freelas_total       = overhead + csp_terceirizado
@@ -216,7 +222,7 @@ estar operando, não de operar um projeto específico.
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
 | `carteira.cap_ativos_integral` | 13 projetos | ✅ |
-| `carteira.cap_ativos_parcial` | 6 projetos | 🔴 |
+| `carteira.cap_ativos_parcial` | 5 projetos | 🔴 |
 | `carteira.fator_vendas_parcial` | 0,5× | 🔴 |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.tolerancia_self` | 1,2× | 🔴 |
@@ -245,10 +251,16 @@ diferentes: a matriz escolhe o que aloca, o Assessor escolhe o que vende.
   186h, sem folga antes das 190h em que passa a exigir freelancer.
 - **Vendas próprias — 70/30**, como na planilha.
 
-**Dedicação parcial** corta nos dois lados: o cap cai de 13 para 6 projetos e as
-vendas próprias caem à metade (`fator_vendas_parcial`), porque meia dedicação
-também significa menos agenda para prospectar. Sem o corte nas vendas, o perfil
-parcial chegava a render mais que o integral em cenários de borda.
+**Dedicação parcial** corta em três lugares: o cap cai de 13 para 5 projetos, as
+vendas próprias caem à metade (`fator_vendas_parcial`) e o limite de horas
+próprias cai de 190h para 88h. Sem o corte nas vendas, o perfil parcial chegava
+a render mais que o integral em cenários de borda; sem o corte nas horas, ele
+trabalhava 33h por semana e nunca terceirizava. Com os três, fica entre 34% e
+54% da remuneração do integral, a 18–20h por semana.
+
+O KPI de horas mostra **as horas dele**, não as do projeto — o excedente aparece
+à parte como entrega de freelancer. Sem essa separação, a tela dizia "112h/mês"
+para alguém que na prática entrega 88h e paga freela pelo resto.
 
 ### 3.7 Rede de relacionamento
 
@@ -1008,6 +1020,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.15 — Setembro/2026:*
+- *O limite de horas próprias passa a depender da dedicação: 190h na integral, 88h na parcial. Com limite único o parcial nunca terceirizava e chegava a 33h por semana*
+- *Cap da dedicação parcial cai de 6 para 5 projetos*
+- *O KPI de horas passa a mostrar as horas dele, com as terceirizadas à parte*
 
 *SPEC v1.14 — Setembro/2026:*
 - *O termômetro deixa de dar veredito agregado: cada indicador ganha selo próprio e uma frase que explica o número em reais*

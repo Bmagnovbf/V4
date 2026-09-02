@@ -119,8 +119,12 @@ export interface KPIs {
   /** Receita recebida em regime — média dos 3 últimos meses. */
   faturamento_regime: number
   remuneracao_total_ano: number
-  /** Horas de entrega em regime — média dos 3 últimos meses. */
+  /** Horas de entrega em regime (total do projeto) — média dos 3 últimos meses. */
   horas_regime: number
+  /** Horas que ele mesmo entrega em regime — o resto vai para freelancer. */
+  horas_proprias_regime: number
+  /** Horas terceirizadas em regime. */
+  horas_terceirizadas_regime: number
   /** Ocupação do limite de horas próprias, em regime. */
   ocupacao_horas: number
   /** CSP que foi para freelancer no ano, por estouro de horas. */

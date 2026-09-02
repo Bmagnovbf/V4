@@ -112,6 +112,13 @@ function vendasPropriasMes(input: SimulacaoInput): number {
   return teto * input.pct_comercial * PARAMS.network[input.network_level].fator * dedicacao
 }
 
+/** Horas que ele mesmo consegue entregar por mês, conforme a dedicação. */
+function limiteHorasProprias(input: SimulacaoInput): number {
+  return input.dedicacao === 'integral'
+    ? PARAMS.horas.limite_proprio
+    : PARAMS.horas.limite_proprio_parcial
+}
+
 function overheadDoMes(mes: number): number {
   for (const faixa of PARAMS.overhead) {
     if (mes <= faixa.ate_mes) return faixa.valor
@@ -274,7 +281,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     // Até o limite de horas ele entrega sozinho e o CSP é remuneração dele.
     // Acima disso precisa de freelancer: o CSP das horas excedentes deixa de
     // ficar com ele e vira desembolso, na linha de freelas + ferramentas.
-    const horas_terceirizadas = Math.max(0, horas_alocadas - PARAMS.horas.limite_proprio)
+    const horas_terceirizadas = Math.max(0, horas_alocadas - limiteHorasProprias(input))
     const csp_terceirizado = horas_alocadas > 0
       ? csp_total * (horas_terceirizadas / horas_alocadas)
       : 0
@@ -332,6 +339,9 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   const remuneracao_regime = regime.reduce((s, l) => s + l.remuneracao_total, 0) / MESES_REGIME
   const horas_regime = regime.reduce((s, l) => s + l.horas_alocadas, 0) / MESES_REGIME
   const faturamento_regime = regime.reduce((s, l) => s + l.receita_recebida, 0) / MESES_REGIME
+  const horas_terceirizadas_regime =
+    regime.reduce((s, l) => s + l.horas_terceirizadas, 0) / MESES_REGIME
+  const horas_proprias_regime = horas_regime - horas_terceirizadas_regime
 
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
@@ -342,7 +352,9 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     faturamento_regime,
     remuneracao_total_ano: projecao.reduce((s, l) => s + l.remuneracao_total, 0),
     horas_regime,
-    ocupacao_horas: horas_regime / PARAMS.horas.limite_proprio,
+    horas_proprias_regime,
+    horas_terceirizadas_regime,
+    ocupacao_horas: horas_regime / limiteHorasProprias(input),
     csp_terceirizado_ano: projecao.reduce((s, l) => s + l.csp_terceirizado, 0),
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,

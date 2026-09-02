@@ -60,7 +60,10 @@ export const PARAMS = {
     executar_mes:   12,   // ✅ horas/mês por Executar ativo, enquanto vigente
     // Acima deste limite ele não dá conta sozinho: o CSP das horas excedentes
     // deixa de ser remuneração dele e vira desembolso com freelancer.
-    limite_proprio: 190,  // ✅
+    // Quem tem outra atividade em paralelo dispõe de bem menos horas — daí o
+    // limite próprio da dedicação parcial, ~20h por semana.
+    limite_proprio:         190,  // ✅ dedicação integral
+    limite_proprio_parcial:  88,  // 🔴 dedicação parcial
   },
 
   // ─── Impostos ────────────────────────────────────────────────────────────
@@ -79,7 +82,7 @@ export const PARAMS = {
   carteira: {
     // Teto de projetos ativos simultâneos com dedicação integral.
     cap_ativos_integral: 13,     // ✅ teto para a matriz repassar
-    cap_ativos_parcial:   6,     // 🔴 dedicação parcial
+    cap_ativos_parcial:   5,     // 🔴 dedicação parcial
     // Meia dedicação também vende menos: menos agenda para prospectar.
     fator_vendas_parcial: 0.5,   // 🔴
     // Abaixo deste % operacional a capacidade de operar cai proporcionalmente:

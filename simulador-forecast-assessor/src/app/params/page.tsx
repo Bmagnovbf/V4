@@ -85,7 +85,8 @@ export default function ParamsPage() {
         <Section title="Horas de entrega">
           <Row tag="✅" path="horas.saber_onetime"  value={`${p.horas.saber_onetime}h por Saber, no mês da entrega`} />
           <Row tag="✅" path="horas.executar_mes"   value={`${p.horas.executar_mes}h/mês por Executar vigente`} />
-          <Row tag="✅" path="horas.limite_proprio" value={`${p.horas.limite_proprio}h/mês — acima disso o CSP vira freelancer`} />
+          <Row tag="✅" path="horas.limite_proprio"          value={`${p.horas.limite_proprio}h/mês (integral) — acima disso o CSP vira freelancer`} />
+          <Row tag="🔴" path="horas.limite_proprio_parcial"  value={`${p.horas.limite_proprio_parcial}h/mês (parcial) ≈ ${(p.horas.limite_proprio_parcial/4.3).toFixed(0)}h/semana`} />
         </Section>
 
         <Section title="Impostos e overhead">
