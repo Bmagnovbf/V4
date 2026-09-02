@@ -127,6 +127,9 @@ export const PARAMS = {
     // Mês em que ele passa a vender. Antes disso está na Trilha (Imersão +
     // Vivência + Banca) e ainda não tem selo — 100% da carteira vem da matriz.
     inicio_vendas_mes: 4,       // ✅ Base começa self no M5, Upside no M4
+    // Forma da rampa comercial. Abaixo de 1 a curva é côncava: ele sai da Banca
+    // com a rede já aquecida e não começa do zero absoluto.
+    expoente_maturacao: 0.8,    // 🔴
     // Teto de vendas de um Assessor 100% comercial, já rampado (M12).
     // Premissa da operação: um closer no talo toca 35–40 calls novas/mês e
     // converte 20% de reunião realizada em venda → 7–8 vendas/mês.

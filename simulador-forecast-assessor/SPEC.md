@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.7 | Setembro/2026**
+**V4 Company | Versão 1.8 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -271,6 +271,7 @@ da alocação.
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
 | `comercial.inicio_vendas_mes` | M4 | ✅ |
+| `comercial.expoente_maturacao` | 0,8 | 🔴 |
 | `comercial.calls_mes_max` | 38 calls novas/mês | 🟡 |
 | `comercial.conversao_call_venda` | 20% | 🟡 |
 
@@ -358,12 +359,19 @@ agenda de calls e o tamanho da rede.
 **Curva de maturação comercial:**
 
 ```
-shape_comercial(m) = 0                              se m < 4
-                   = (m − 4 + 1) ÷ (12 − 4 + 1)     se m ≥ 4
-                   = (m − 3) ÷ 9
+shape_comercial(m) = 0                        se m < 4
+                   = ((m − 3) ÷ 9) ^ 0,8      se m ≥ 4
 ```
 
-M4 = 1/9, M12 = 1. Sobe linear do primeiro mês pós-Banca até o regime.
+A curva é **côncava**, não linear: quem sai da Banca já tem a rede aquecida por
+três meses de imersão e não começa do zero absoluto. M4 = 17%, M6 = 42%,
+M12 = 100%.
+
+Com a curva linear (expoente 1), a venda própria só ficava relevante depois do
+M8 — e como o payback acontece por volta do M5–M6, um Assessor que vende muito
+terminava com o **mesmo payback** de um que depende só da alocação. O expoente
+0,8 é o ponto onde a curva já diferencia os perfis sem afastar os cenários da
+planilha além da tolerância.
 
 ### 4.3 Repartição da carteira — as três fontes
 
@@ -562,11 +570,13 @@ mais entrega dinheiro.
 | Saber | R$ 3.600 | R$ 1.500 | R$ 2.100 | R$ 3.600 |
 | Executar (6 meses) | R$ 7.350 | R$ 6.000 | R$ 1.350 | R$ 7.350 |
 
-**Observação de calibração:** com a entrada em R$ 20.000, o payback cai entre M5
-e M6 em praticamente todo o espaço de inputs. O eixo perdeu poder de
-discriminação no termômetro — quase tudo fica verde. Os thresholds (verde ≤ M6,
-amarelo ≤ M9) merecem revisão, ou o eixo vira informação de apoio em vez de
-critério.
+**Observação de calibração:** o payback varia entre M4 e M6 no espaço de inputs
+— o perfil que vende paga antes do que depende só da alocação, mas a diferença é
+de um ou dois meses. É consequência do investimento ser baixo frente à
+remuneração mensal: com a entrada em R$ 20.000, qualquer cenário cobre o valor
+no primeiro semestre. Os thresholds (verde ≤ M6, amarelo ≤ M9) deixam quase tudo
+verde, então o eixo funciona melhor como informação de apoio do que como
+critério de viabilidade.
 
 ### 4.8 KPIs
 
@@ -676,6 +686,25 @@ Rodapé mostra `VERCEL_GIT_COMMIT_DATE` — exige marcar "Automatically expose
 System Environment Variables" nas env vars do projeto Vercel.
 
 ---
+
+## 5b. O valor do investimento não aparece para o candidato
+
+Decisão de set/2026: os **R$ 20.000 são informação interna**. Candidatos podem
+ter pago valores diferentes, e o ticket médio não deve ser exibido em nenhuma
+tela.
+
+Consequências no produto:
+
+- Os KPI cards mostram **"Payback do investimento"** sem o valor por trás, e o
+  card "Capital total" foi removido — ele expunha a entrada por subtração, já
+  que a reserva é conhecida.
+- O termômetro fala em "Payback do investimento", não "da entrada".
+- O rodapé de `/` e `/dashboard` não linka mais `/params`. O painel continua
+  acessível por URL para o time, e ganhou um aviso de uso interno no topo —
+  ele expõe tickets, splits, CSP e a entrada, nada disso para o candidato.
+
+O valor segue em `params.ts` e no motor: o payback é calculado sobre ele, só não
+é exibido.
 
 ## 6. Sistema de Design
 
@@ -844,6 +873,7 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 | Sem saltos > 50% no slider | descontinuidade na conversa |
 | 0% comercial paga a entrada | narrativa do produto |
 | Payback independe da retirada | mistura entre investimento e caixa pessoal |
+| Quem vende mais paga antes | curva de maturação lenta demais |
 
 Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
 parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
@@ -927,6 +957,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.8 — Setembro/2026. Mudanças v1.7 → v1.8:*
+- *O valor da entrada some da UI do candidato; `/params` deixa de ser linkado no rodapé e ganha aviso de uso interno*
+- *Curva de maturação comercial vira côncava (expoente 0,8). Com a curva linear, a venda própria só pesava depois do M8 e o payback ficava igual entre quem vende e quem só recebe alocação*
 
 *SPEC v1.7 — Setembro/2026. Mudanças v1.6 → v1.7:*
 - *Payback corrigido: o caixa passa a acumular a remuneração total em vez do resultado do negócio. Medir pelo resultado subestimava o Executar, cujo CSP come 82% da receita mas volta para a mão do Assessor*

@@ -75,13 +75,23 @@ function ocupacao(ativos: number, cap: number): number {
 }
 
 /**
- * Curva de maturação comercial: 0 até o selo sair, subindo linearmente até 1
- * no M12. Antes do `inicio_vendas_mes` ele está na Trilha e não vende.
+ * Curva de maturação comercial: 0 até o selo sair, subindo até 1 no M12.
+ * Antes do `inicio_vendas_mes` ele está na Trilha e não vende.
+ *
+ * A curva é côncava, não linear: quem sai da Banca já tem a rede aquecida por
+ * três meses de imersão. Com a curva linear a venda própria só ficava relevante
+ * depois do M8, e o payback acabava idêntico entre um Assessor que vende e um
+ * que depende só da alocação.
+ *
+ * O expoente 0,8 é o ponto onde a curva já diferencia os perfis sem afastar os
+ * cenários da planilha além da tolerância — 17% no primeiro mês de venda, 42%
+ * na metade do ano.
  */
 function shapeComercial(mes: number): number {
   const inicio = PARAMS.comercial.inicio_vendas_mes
   if (mes < inicio) return 0
-  return (mes - inicio + 1) / (MESES - inicio + 1)
+  const t = (mes - inicio + 1) / (MESES - inicio + 1)
+  return Math.pow(t, PARAMS.comercial.expoente_maturacao)
 }
 
 /**

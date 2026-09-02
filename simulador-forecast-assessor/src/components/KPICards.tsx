@@ -28,7 +28,7 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
       : 'a renda não alcança a retirada em 12 meses'
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       <Card label="Remuneração total"  value={fmt(kpis.remuneracao_regime)} destaque
             hint="CSP + resultado, por mês em regime" />
       <Card label="Resultado do negócio" value={fmt(kpis.renda_regime)} hint="margem depois de remunerar suas horas" />
@@ -39,9 +39,8 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
                 : `${fmtPct(kpis.ocupacao_horas * 100, 0)} do limite de 190h/mês`
             } />
       <Card label="Projetos no M12"    value={fmtInt(kpis.projetos_ativos_m12)} hint="ativos simultâneos" />
-      <Card label="Payback da entrada" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : '—'} hint={`entrada de ${fmt(kpis.investimento_total)}`} />
+      <Card label="Payback do investimento" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : 'após o M12'} hint="quando o retorno cobre o que você investiu" />
       <Card label="Reserva necessária" value={fmt(kpis.deficit_retirada_total)} hint={reservaHint} />
-      <Card label="Capital total"      value={fmt(kpis.investimento_total + kpis.deficit_retirada_total)} hint="entrada + reserva" />
     </div>
   )
 }

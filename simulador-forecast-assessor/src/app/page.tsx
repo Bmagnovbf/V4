@@ -201,7 +201,7 @@ export default function InputPage() {
 
           <CampoValor
             label="Reserva de Capital de Giro"
-            hint="Quanto você tem guardado para cobrir a retirada mínima até a renda alcançá-la (não inclui a entrada na rede)"
+            hint="Quanto você tem guardado para cobrir a retirada mínima até a operação alcançá-la"
             value={reserva} setValue={setReserva}
             min={MIN_RES} max={MAX_RES} step={STEP_RES}
           />
@@ -216,8 +216,7 @@ export default function InputPage() {
         </div>
 
         <p className="mt-6 text-center text-xs" style={{ color: '#7A7A7A' }}>
-          V4 Company · Uso interno — produto Assessor V4 ·{' '}
-          <a href="/params" className="underline">Ver parâmetros</a>
+          V4 Company · Assessor V4
         </p>
       </div>
     </main>

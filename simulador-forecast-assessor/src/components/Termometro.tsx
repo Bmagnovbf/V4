@@ -40,8 +40,8 @@ export function TermometroViabilidade({
           nivel={termometro.reserva_nivel}
         />
         <Item
-          titulo="Payback da entrada"
-          valor={payback ? `Mês ${payback}` : 'não paga em 12m'}
+          titulo="Payback do investimento"
+          valor={payback ? `Mês ${payback}` : 'após o M12'}
           nivel={termometro.payback_nivel}
         />
         <Item

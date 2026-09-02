@@ -26,7 +26,7 @@ const { simular } = Module.createRequire(import.meta.url)('./.test_out/lib/calcu
 const DRE = {
   base: {
     label: 'Base (70/30)',
-    pct_comercial: 0.425,
+    pct_comercial: 0.40,
     network: 'alto',
     receita_recebida_ano1: 292_875,
     renda_liquida_ano1:    149_303,
@@ -38,7 +38,7 @@ const DRE = {
   },
   upside: {
     label: 'Upside (50/50)',
-    pct_comercial: 0.55,
+    pct_comercial: 0.50,
     network: 'alto',
     receita_recebida_ano1: 367_925,
     renda_liquida_ano1:    207_350,

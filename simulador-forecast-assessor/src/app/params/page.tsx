@@ -40,9 +40,15 @@ export default function ParamsPage() {
 
         <div
           className="rounded-xl px-5 py-3 text-sm font-bold text-center"
+          style={{ backgroundColor: '#F4CCCC', border: '1px solid #8B0000', color: '#8B0000' }}
+        >
+          Uso interno V4 · não exibir ao candidato
+        </div>
+        <div
+          className="rounded-xl px-5 py-3 text-sm text-center"
           style={{ backgroundColor: '#FFF3CD', border: '1px solid #D4900A', color: '#D4900A' }}
         >
-          Painel somente leitura · Para alterar: edite{' '}
+          Somente leitura · Para alterar: edite{' '}
           <code className="font-mono text-xs">src/config/params.ts</code> e faça push para o GitHub
         </div>
 
@@ -111,6 +117,7 @@ export default function ParamsPage() {
 
         <Section title="Vendas próprias (alimentam as Fontes 2 e 3)">
           <Row tag="✅" path="comercial.inicio_vendas_mes"      value={`M${p.comercial.inicio_vendas_mes}`} />
+          <Row tag="🔴" path="comercial.expoente_maturacao"     value={`${p.comercial.expoente_maturacao} — curva côncava da rampa`} />
           <Row tag="🟡" path="comercial.calls_mes_max"          value={`${p.comercial.calls_mes_max} calls novas/mês`} />
           <Row tag="🟡" path="comercial.conversao_call_venda"   value={pct(p.comercial.conversao_call_venda)} />
           <Row tag="✅" path="→ teto de vendas"                 value={`${(p.comercial.calls_mes_max * p.comercial.conversao_call_venda).toFixed(1)}/mês × % comercial × fator de rede`} />

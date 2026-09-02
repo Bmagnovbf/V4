@@ -68,8 +68,7 @@ export default function DashboardPage() {
         <TabelaDRE projecao={projecao} />
 
         <p className="text-center text-xs pb-6" style={{ color: '#7A7A7A' }}>
-          V4 Company · Uso interno ·{' '}
-          <a href="/params" className="underline">Ver parâmetros</a>
+          V4 Company · Assessor V4
         </p>
       </div>
     </main>

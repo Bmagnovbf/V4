@@ -111,14 +111,31 @@ for (const net of NET) for (const res of [0,150000]) for (const m of [5000,45000
 }
 ok(q === 0, 'nível final do termômetro = pior dos três eixos')
 
-let maxSalto = 0, ondeSalto = ''
-for (const net of NET) for (let pc = 0; pc < 1.0; pc += 0.05) {
-  const a = run({ network_level: net, pct_comercial: pc }).kpis.remuneracao_regime
-  const b = run({ network_level: net, pct_comercial: pc + 0.05 }).kpis.remuneracao_regime
-  const d = a > 0 ? Math.abs(b-a)/a : 0
-  if (d > maxSalto) { maxSalto = d; ondeSalto = `${net} ${(pc*100).toFixed(0)}%→${((pc+0.05)*100).toFixed(0)}%` }
+// O primeiro passo (0 → 5%) é descontinuidade legítima: a 0% ele não vende
+// nada, e qualquer valor acima já produz contratos. Medimos a partir de 5%.
+let maxSalto = 0, ondeSalto = '', saltoInicial = 0
+for (const net of NET) {
+  const z = run({ network_level: net, pct_comercial: 0 }).kpis.remuneracao_regime
+  const p5 = run({ network_level: net, pct_comercial: 0.05 }).kpis.remuneracao_regime
+  saltoInicial = Math.max(saltoInicial, z > 0 ? (p5 - z)/z : 0)
+  for (let pc = 0.05; pc < 1.0; pc += 0.05) {
+    const a = run({ network_level: net, pct_comercial: pc }).kpis.remuneracao_regime
+    const b = run({ network_level: net, pct_comercial: pc + 0.05 }).kpis.remuneracao_regime
+    const d = a > 0 ? Math.abs(b-a)/a : 0
+    if (d > maxSalto) { maxSalto = d; ondeSalto = `${net} ${(pc*100).toFixed(0)}%→${((pc+0.05)*100).toFixed(0)}%` }
+  }
 }
-ok(maxSalto < 0.5, 'sem saltos acima de 50% entre passos do slider', `maior: ${(maxSalto*100).toFixed(0)}% em ${ondeSalto}`)
+ok(maxSalto < 0.5, 'sem saltos acima de 50% do 5% em diante', `maior: ${(maxSalto*100).toFixed(0)}% em ${ondeSalto}`)
+console.log(`  · salto 0%→5% (esperado, sai do zero): até ${(saltoInicial*100).toFixed(0)}%`)
+
+// O payback deve melhorar com mais venda própria
+q = 0
+for (const net of NET) {
+  const pb0 = run({ network_level: net, pct_comercial: 0 }).kpis.payback_mes ?? 99
+  const pb7 = run({ network_level: net, pct_comercial: 0.7 }).kpis.payback_mes ?? 99
+  if (pb7 > pb0) q++
+}
+ok(q === 0, 'quem vende mais nunca demora mais para pagar o investimento')
 
 q = 0
 for (const net of NET) {
