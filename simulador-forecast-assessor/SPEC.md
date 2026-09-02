@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.8 | Setembro/2026**
+**V4 Company | Versão 1.9 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -879,6 +879,37 @@ Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
 parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
 no primeiro passo do slider e o perfil operacional sem payback em 12 meses.
 
+## 8d. O salto de 0% para 5% comercial é intencional
+
+O primeiro passo do slider de perfil move a remuneração em regime em até 53%.
+Investigado em set/2026 e **mantido**: é a economia do produto aparecendo, não
+ruído de modelagem.
+
+A 5% comercial o motor produz **3 contratos no ano** — coerente com a premissa
+do closer (5% de 38 calls = 1,9/mês, 23 no ano, a 20% de conversão ≈ 4,6). O
+volume está certo. O que pesa é quanto vale cada um:
+
+| | Alocado | Próprio | Razão |
+|---|---|---|---|
+| Saber | R$ 3.600 | R$ 9.600 | **2,7×** |
+| Executar (6 meses) | R$ 7.350 | R$ 16.800 | 2,3× |
+
+Em rede alta com 5% comercial, a matriz aloca 31 contratos no ano (R$ 126.350) e
+ele vende 3 (R$ 33.200): **9% do volume gerando 26% da receita**. Um único Saber
+próprio vale R$ 9.600, contra R$ 8.387 de remuneração mensal de quem só recebe
+alocação — um contrato próprio equivale a um mês inteiro na alocação.
+
+Suavizar essa transição esconderia o principal argumento comercial do produto.
+
+**Resíduo de medição conhecido:** os 3 contratos caem em M8, M10 e M12, e dois
+deles estão dentro da janela de 3 meses do regime, o que amplifica. Medido no
+ano o ganho é 26%; no regime, 53%. Janelas maiores reduzem para 42% (4 meses) e
+35% (6 meses), ao custo de misturar meses de rampa no indicador de estado
+estável. Mantida a janela de 3 meses.
+
+A auditoria mede esse passo separadamente dos demais, justamente porque sair do
+zero é descontinuidade legítima.
+
 ## 9. Critérios de Aceite
 
 - [x] `npm run build` sem erro nem warning de lint
@@ -957,6 +988,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.9 — Setembro/2026:*
+- *Registrada a decisão de manter o salto de 0% → 5% comercial (§ 8d): reflete o split de 2,7× entre venda própria e alocação*
 
 *SPEC v1.8 — Setembro/2026. Mudanças v1.7 → v1.8:*
 - *O valor da entrada some da UI do candidato; `/params` deixa de ser linkado no rodapé e ganha aviso de uso interno*
