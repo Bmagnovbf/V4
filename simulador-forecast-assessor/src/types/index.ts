@@ -131,8 +131,9 @@ export interface KPIs {
   breakeven_mes: number | null
   payback_mes: number | null
   /**
-   * Pior caixa acumulado: entrada paga, mais o acumulado de
-   * (remuneração − retirada mínima). Base do payback.
+   * Pior retorno acumulado: a entrada, amortizada pela remuneração de cada mês.
+   * Base do payback. Não desconta a retirada mínima — essa é fluxo de caixa
+   * pessoal, medida à parte pelo `deficit_retirada_total`.
    */
   pior_caixa: number
   investimento_total: number

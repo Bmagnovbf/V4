@@ -58,9 +58,7 @@ let falhas = 0
 for (const cenario of Object.values(DRE)) {
   const r = simular({
     meta_renda_liquida: 25_000,
-    // A planilha não tem retirada mínima: o caixa dela absorve toda a renda.
-    // Zerar aqui deixa o payback comparável — com retirada, o nosso é maior.
-    retirada_minima:         0,
+    retirada_minima:     8_000,
     reserva_capital:    30_000,
     pct_comercial:      cenario.pct_comercial,
     dedicacao:          'integral',

@@ -535,15 +535,20 @@ R$ 45.831 (R$ 20.000 de entrada + R$ 25.831 de giro).
 ### 4.7 Caixa
 
 ```
-fluxo_caixa(m)     = remuneracao_total(m) − retirada_minima
+fluxo_caixa(m)     = remuneracao_total(m)
 
 caixa_acumulado(0) = −20.000                              (entrada na rede)
 caixa_acumulado(m) = caixa_acumulado(m−1) + fluxo_caixa(m)
 payback            = primeiro m com caixa_acumulado(m) ≥ 0
 ```
 
-**Entra o que fica com ele, sai o que ele precisa retirar para viver.** O que
-sobra amortiza a entrada.
+O payback mede o **retorno do investimento**: a entrada de R$ 20.000 amortizada
+pelo que o negócio devolve ao Assessor.
+
+**A retirada mínima não entra aqui.** Ela é fluxo de caixa pessoal dele, não
+custo do investimento — e já é medida pelo eixo de reserva do termômetro.
+Descontá-la também no payback misturaria duas perguntas diferentes e contaria o
+mesmo dinheiro em dois eixos.
 
 A base é a **remuneração total**, não o resultado do negócio. Usar o resultado
 distorcia a comparação entre produtos: um Executar alocado entrega R$ 7.350 de
@@ -557,10 +562,11 @@ mais entrega dinheiro.
 | Saber | R$ 3.600 | R$ 1.500 | R$ 2.100 | R$ 3.600 |
 | Executar (6 meses) | R$ 7.350 | R$ 6.000 | R$ 1.350 | R$ 7.350 |
 
-Consequência: com retirada alta, o perfil puramente operacional pode **não
-pagar a entrada em 12 meses**. Com R$ 8.000/mês de retirada ele consome quase
-toda a remuneração; com R$ 5.000 paga por volta do M10. Isso é uma verdade do
-modelo, não um artefato.
+**Observação de calibração:** com a entrada em R$ 20.000, o payback cai entre M5
+e M6 em praticamente todo o espaço de inputs. O eixo perdeu poder de
+discriminação no termômetro — quase tudo fica verde. Os thresholds (verde ≤ M6,
+amarelo ≤ M9) merecem revisão, ou o eixo vira informação de apoio em vez de
+critério.
 
 ### 4.8 KPIs
 
@@ -712,9 +718,7 @@ ajustar o motor para replicar decisões manuais.
 Perfil e rede de cada cenário não são o mix de contratos da planilha — são a
 combinação que, sob as premissas do motor, reproduz aquele resultado.
 
-Os cenários rodam com **retirada zerada**, porque a planilha não tem esse
-conceito: o caixa dela absorve toda a renda. Sem isso, o payback do motor não
-seria comparável.
+
 
 ### Cenário Base — 42,5% comercial, rede alta
 
@@ -838,8 +842,8 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 | Vendas próprias nunca recuam | oscilação do arredondamento |
 | Nível final = pior dos três eixos | lógica do termômetro |
 | Sem saltos > 50% no slider | descontinuidade na conversa |
-| 0% comercial paga a entrada (retirada de R$ 5k) | narrativa do produto |
-| Retirada maior nunca antecipa o payback | sinal trocado no caixa |
+| 0% comercial paga a entrada | narrativa do produto |
+| Payback independe da retirada | mistura entre investimento e caixa pessoal |
 
 Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
 parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
@@ -925,9 +929,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 ---
 
 *SPEC v1.7 — Setembro/2026. Mudanças v1.6 → v1.7:*
-- *Payback corrigido: o caixa passa a somar (remuneração total − retirada mínima) em vez do resultado do negócio. Medir pelo resultado subestimava o Executar, cujo CSP come 82% da receita mas volta para a mão do Assessor*
+- *Payback corrigido: o caixa passa a acumular a remuneração total em vez do resultado do negócio. Medir pelo resultado subestimava o Executar, cujo CSP come 82% da receita mas volta para a mão do Assessor*
+- *A retirada mínima NÃO entra no payback — é fluxo de caixa pessoal, não custo do investimento, e já é medida pelo eixo de reserva*
 - *Mix de alocação vai de 50/50 para 40/60, pesando no Executar — com o payback correto, mais Executar entrega mais remuneração E paga antes*
-- *Cenários da planilha passam a rodar com retirada zerada, para o payback ser comparável*
 
 *SPEC v1.6 — Setembro/2026. Mudanças v1.5 → v1.6, todas vindas da auditoria do espaço de inputs:*
 - *O cap passa a contar a carteira inteira do mês (Saber + Executar); antes só Executar, e a carteira estourava o teto*

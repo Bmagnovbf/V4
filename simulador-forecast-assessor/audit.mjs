@@ -122,22 +122,19 @@ ok(maxSalto < 0.5, 'sem saltos acima de 50% entre passos do slider', `maior: ${(
 
 q = 0
 for (const net of NET) {
-  const k = run({ network_level: net, pct_comercial: 0, retirada_minima: 5000 }).kpis
+  const k = run({ network_level: net, pct_comercial: 0 }).kpis
   if (k.payback_mes === null) q++
 }
-ok(q === 0, 'perfil 0% comercial com retirada de R$ 5k paga a entrada em 12 meses')
+ok(q === 0, 'o perfil 0% comercial paga a entrada dentro de 12 meses')
 
-// o payback deve piorar quando a retirada sobe
+// o payback mede retorno do investimento, então não depende da retirada
 q = 0
 for (const net of NET) for (const pc of [0, 0.35, 0.7]) {
-  let ant = 0
-  for (const ret of [2000, 5000, 8000, 12000, 15000]) {
-    const pb = run({ network_level: net, pct_comercial: pc, retirada_minima: ret }).kpis.payback_mes ?? 99
-    if (pb < ant) q++
-    ant = pb
-  }
+  const pbs = [2000, 5000, 8000, 12000, 15000].map(ret =>
+    run({ network_level: net, pct_comercial: pc, retirada_minima: ret }).kpis.payback_mes)
+  if (new Set(pbs).size > 1) q++
 }
-ok(q === 0, 'retirada maior nunca antecipa o payback')
+ok(q === 0, 'payback independe da retirada mínima')
 
 console.log(falhas === 0 ? '\n✓ Auditoria limpa' : `\n✗ ${falhas} verificações falharam`)
 process.exit(falhas === 0 ? 0 : 1)

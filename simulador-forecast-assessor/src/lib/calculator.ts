@@ -282,9 +282,11 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     // que ele não desembolsa.
     const deficit_retirada = Math.max(0, input.retirada_minima - remuneracao_total)
 
-    // O caixa do Assessor: entra o que fica com ele (remuneração total), sai o
-    // que ele precisa retirar para viver. O que sobrar amortiza a entrada.
-    const fluxo_caixa = remuneracao_total - input.retirada_minima
+    // Retorno do investimento: acumula o que o negócio devolve ao Assessor
+    // (remuneração total) contra a entrada. A retirada mínima NÃO entra aqui —
+    // ela é fluxo de caixa pessoal dele, não custo do investimento, e já é
+    // medida pelo eixo de reserva do termômetro.
+    const fluxo_caixa = remuneracao_total
     caixa += fluxo_caixa
 
     linhas.push({
