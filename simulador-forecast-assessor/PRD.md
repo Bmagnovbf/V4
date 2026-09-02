@@ -196,9 +196,10 @@ independentemente, então o campo não alterava a projeção.
 
 ## 6. Dashboard
 
-- Termômetro em dois eixos: reserva vs. retirada mínima e faturamento vs. meta.
-  O payback é KPI de apoio, não critério — com a entrada baixa ele fica entre
-  M4 e M6 em qualquer cenário
+- Leitura da simulação: reserva vs. retirada mínima e faturamento vs. meta,
+  cada um com selo próprio e leitura em reais, sem veredito agregado. O payback
+  é KPI de apoio, não critério — com a entrada baixa ele fica entre M4 e M6 em
+  qualquer cenário
 - KPIs: remuneração total, resultado do negócio, horas de entrega, projetos no
   M12, payback da entrada, reserva necessária, capital total
 - Cards das 3 fontes com contagem de contratos e share da receita

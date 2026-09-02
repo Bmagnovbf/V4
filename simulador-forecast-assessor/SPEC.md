@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.13 | Setembro/2026**
+**V4 Company | Versão 1.14 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -622,7 +622,7 @@ meta_ratio     = faturamento_regime ÷ meta_faturamento
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
 meta_nivel     = verde se ≥ 100%  · amarelo se ≥ 70%   · senão vermelho
 
-nivel_final    = o pior dos dois
+nivel_final    = o pior dos dois        (calculado, não exibido)
 ```
 
 **Por que estes três eixos e não margem.** No DRE o breakeven operacional é M1 e
@@ -684,7 +684,7 @@ Lê `sessionStorage.simulacao`. Sem resultado, redireciona para `/`.
 Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
-2. **Termômetro** — nível final + os dois eixos abertos
+2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
 3. **KPI cards** — faturamento em regime, remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
@@ -1008,6 +1008,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.14 — Setembro/2026:*
+- *O termômetro deixa de dar veredito agregado: cada indicador ganha selo próprio e uma frase que explica o número em reais*
 
 *SPEC v1.13 — Setembro/2026:*
 - *Faixas de rede redefinidas: baixa até 50 empresas, média de 50 a 100, alta acima de 100*
