@@ -261,6 +261,10 @@ relacionamento com empresários?*
 | Média | 50 a 100 empresas | 1,0× | 🔴 |
 | Alta | mais de 100 empresas | 1,5× | 🔴 |
 
+As faixas foram redefinidas em set/2026 (antes eram ~10 / ~30 / ~50), e os
+fatores foram **mantidos de propósito**: até 50 empresas ainda é pouco
+empresário, então a régua nova descreve melhor o funil sem mudar a economia.
+
 O fator **multiplica** a capacidade de originação própria. Não é parcela: sem
 rede não há a quem vender, por mais comercial que seja o perfil. É a alavanca
 que empurra a carteira para a Fonte 2, onde ele fica com 80% em vez dos 30–35%
