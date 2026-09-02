@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.9 | Setembro/2026**
+**V4 Company | Versão 1.10 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -295,8 +295,12 @@ converte 20% de reunião realizada em venda.
 | Parâmetro | verde | amarelo | Tag |
 |---|---|---|:--:|
 | `termometro.reserva_ratio` | ≥ 1,5× | ≥ 1,0× | 🔴 |
-| `termometro.payback_meses` | ≤ M6 | ≤ M9 | 🔴 |
 | `termometro.meta_ratio` | ≥ 100% | ≥ 70% | 🔴 |
+
+**O payback não é eixo do termômetro** (decisão de set/2026). Com a entrada
+baixa ele cai entre M4 e M6 em todo o espaço de inputs e não separa cenário bom
+de ruim — investimento baixo significa risco baixo e retorno rápido. Segue
+exibido como KPI, mas como informação de apoio.
 
 Todos 🔴 — são chute, e só devem ser calibrados depois da bateria de cenários
 com candidatos reais (§ 10, bloco B).
@@ -606,10 +610,9 @@ reserva_ratio  = reserva_capital ÷ deficit_retirada_total   (∞ se o total = 0
 meta_ratio     = remuneracao_regime ÷ meta_renda_liquida
 
 reserva_nivel  = verde se ≥ 1,5×  · amarelo se ≥ 1,0×  · senão vermelho
-payback_nivel  = verde se ≤ M6    · amarelo se ≤ M9    · senão vermelho
 meta_nivel     = verde se ≥ 100%  · amarelo se ≥ 70%   · senão vermelho
 
-nivel_final    = o pior dos três
+nivel_final    = o pior dos dois
 ```
 
 **Por que estes três eixos e não margem.** No DRE o breakeven operacional é M1 e
@@ -617,9 +620,9 @@ o payback M6 — o negócio fecha desde o primeiro mês. O risco do Assessor nã
 margem, é **fôlego**: atravessar os primeiros meses com renda muito abaixo do
 que ele precisa retirar. O termômetro mede isso.
 
-Os três eixos medem coisas independentes, sem contar o mesmo dinheiro duas
-vezes: **reserva** olha o capital de giro, **payback** olha o investimento de
-entrada, **meta** olha a ambição declarada.
+Os dois eixos medem coisas independentes: **reserva** olha o capital de giro,
+**meta** olha a ambição declarada. O investimento de entrada é medido à parte,
+pelo KPI de payback.
 
 ### 4.10 Mix de fontes no M12
 
@@ -664,7 +667,7 @@ Lê `sessionStorage.simulacao`. Sem resultado, redireciona para `/`.
 Ordem dos blocos:
 
 1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
-2. **Termômetro** — nível final + os três eixos abertos
+2. **Termômetro** — nível final + os dois eixos abertos
 3. **KPI cards** — remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback da entrada, reserva necessária, capital total
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
@@ -869,7 +872,7 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 | Mais reserva nunca piora o termômetro | threshold invertido |
 | Retirada maior nunca reduz a reserva | sinal trocado |
 | Vendas próprias nunca recuam | oscilação do arredondamento |
-| Nível final = pior dos três eixos | lógica do termômetro |
+| Nível final = pior dos dois eixos | lógica do termômetro |
 | Sem saltos > 50% no slider | descontinuidade na conversa |
 | 0% comercial paga a entrada | narrativa do produto |
 | Payback independe da retirada | mistura entre investimento e caixa pessoal |
@@ -988,6 +991,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.10 — Setembro/2026:*
+- *O payback sai do termômetro e vira KPI de apoio: com a entrada baixa ele não separa cenário bom de ruim*
 
 *SPEC v1.9 — Setembro/2026:*
 - *Registrada a decisão de manter o salto de 0% → 5% comercial (§ 8d): reflete o split de 2,7× entre venda própria e alocação*

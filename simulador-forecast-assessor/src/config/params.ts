@@ -139,12 +139,14 @@ export const PARAMS = {
   },
 
   // ─── Thresholds do Termômetro ────────────────────────────────────────────
-  // O breakeven operacional é M1 nos dois cenários — a viabilidade do Assessor
-  // não é margem, é fôlego: ele precisa atravessar M1–M4 com renda baixa.
+  // O breakeven operacional é M1 em todos os cenários — a viabilidade do
+  // Assessor não é margem, é fôlego para atravessar os primeiros meses.
+  //
+  // O payback não entra: com a entrada baixa ele cai entre M4 e M6 em todo o
+  // espaço de inputs e não separa cenário bom de ruim. Segue como KPI de apoio.
   termometro: {
-    reserva_ratio:  { verde: 1.5, amarelo: 1.0 },  // 🔴 reserva ÷ pior caixa acumulado
-    payback_meses:  { verde: 6,   amarelo: 9   },  // 🔴 Base = M6, Upside = M5
-    meta_ratio:     { verde: 1.0, amarelo: 0.7 },  // 🔴 renda projetada ÷ meta declarada
+    reserva_ratio: { verde: 1.5, amarelo: 1.0 },  // 🔴 reserva ÷ déficit de retirada
+    meta_ratio:    { verde: 1.0, amarelo: 0.7 },  // 🔴 remuneração em regime ÷ meta
   },
 
 } as const

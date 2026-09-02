@@ -106,10 +106,10 @@ ok(q === 0, 'vendas próprias nunca recuam')
 q = 0
 for (const net of NET) for (const res of [0,150000]) for (const m of [5000,45000]) for (const ret of [2000,15000]) {
   const t = run({ network_level: net, reserva_capital: res, meta_renda_liquida: m, retirada_minima: ret }).termometro
-  const p = [t.reserva_nivel, t.payback_nivel, t.meta_nivel].reduce((a,b)=> ordem[b]>ordem[a]?b:a)
+  const p = [t.reserva_nivel, t.meta_nivel].reduce((a,b)=> ordem[b]>ordem[a]?b:a)
   if (t.nivel_final !== p) q++
 }
-ok(q === 0, 'nível final do termômetro = pior dos três eixos')
+ok(q === 0, 'nível final do termômetro = pior dos dois eixos')
 
 // O primeiro passo (0 → 5%) é descontinuidade legítima: a 0% ele não vende
 // nada, e qualquer valor acima já produz contratos. Medimos a partir de 5%.

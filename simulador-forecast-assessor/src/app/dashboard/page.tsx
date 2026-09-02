@@ -60,7 +60,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <TermometroViabilidade termometro={termometro} payback={kpis.payback_mes} mesAutossuficiencia={kpis.mes_autossuficiencia} />
+        <TermometroViabilidade termometro={termometro} mesAutossuficiencia={kpis.mes_autossuficiencia} />
         <KPICards kpis={kpis} />
         <CardsFontes m12={m12} mix={mix_m12} />
         <GraficoReceita projecao={projecao} />

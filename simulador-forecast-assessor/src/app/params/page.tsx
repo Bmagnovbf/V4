@@ -123,9 +123,8 @@ export default function ParamsPage() {
           <Row tag="✅" path="→ teto de vendas"                 value={`${(p.comercial.calls_mes_max * p.comercial.conversao_call_venda).toFixed(1)}/mês × % comercial × fator de rede`} />
         </Section>
 
-        <Section title="Termômetro de Viabilidade">
+        <Section title="Termômetro de Viabilidade (dois eixos)">
           <Row tag="🔴" path="termometro.reserva_ratio" value={`verde ≥ ${p.termometro.reserva_ratio.verde}× · amarelo ≥ ${p.termometro.reserva_ratio.amarelo}×`} />
-          <Row tag="🔴" path="termometro.payback_meses" value={`verde ≤ M${p.termometro.payback_meses.verde} · amarelo ≤ M${p.termometro.payback_meses.amarelo}`} />
           <Row tag="🔴" path="termometro.meta_ratio"    value={`verde ≥ ${pct(p.termometro.meta_ratio.verde)} · amarelo ≥ ${pct(p.termometro.meta_ratio.amarelo)}`} />
         </Section>
 

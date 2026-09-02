@@ -196,8 +196,9 @@ independentemente, então o campo não alterava a projeção.
 
 ## 6. Dashboard
 
-- Termômetro em três eixos independentes: reserva vs. retirada mínima (giro),
-  payback (investimento) e remuneração vs. meta (ambição)
+- Termômetro em dois eixos: reserva vs. retirada mínima e remuneração vs. meta.
+  O payback é KPI de apoio, não critério — com a entrada baixa ele fica entre
+  M4 e M6 em qualquer cenário
 - KPIs: remuneração total, resultado do negócio, horas de entrega, projetos no
   M12, payback da entrada, reserva necessária, capital total
 - Cards das 3 fontes com contagem de contratos e share da receita

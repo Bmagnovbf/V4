@@ -19,8 +19,8 @@ function Item({ titulo, valor, nivel }: { titulo: string; valor: string; nivel: 
 }
 
 export function TermometroViabilidade({
-  termometro, payback, mesAutossuficiencia,
-}: { termometro: Termometro; payback: number | null; mesAutossuficiencia: number | null }) {
+  termometro, mesAutossuficiencia,
+}: { termometro: Termometro; mesAutossuficiencia: number | null }) {
   const c = CORES[termometro.nivel_final]
   const ratio = termometro.reserva_ratio
   return (
@@ -29,7 +29,7 @@ export function TermometroViabilidade({
         Termômetro de Viabilidade
       </p>
       <p className="text-2xl font-bold mt-1" style={{ color: c.fg }}>{c.label}</p>
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Item
           titulo="Reserva vs. retirada mínima"
           valor={
@@ -38,11 +38,6 @@ export function TermometroViabilidade({
               : mesAutossuficiencia === 1 ? 'renda cobre desde M1' : 'renda cobre'
           }
           nivel={termometro.reserva_nivel}
-        />
-        <Item
-          titulo="Payback do investimento"
-          valor={payback ? `Mês ${payback}` : 'após o M12'}
-          nivel={termometro.payback_nivel}
         />
         <Item
           titulo="Remuneração vs. meta"

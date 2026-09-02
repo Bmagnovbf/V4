@@ -143,10 +143,18 @@ export interface KPIs {
   mes_autossuficiencia: number | null
 }
 
+/**
+ * Termômetro de viabilidade — dois eixos.
+ *
+ * O payback ficou de fora de propósito: com a entrada baixa, ele cai entre M4 e
+ * M6 em todo o espaço de inputs e não separa cenário bom de ruim. Segue exibido
+ * como KPI, mas como informação de apoio, não como critério.
+ */
 export interface Termometro {
+  /** Reserva declarada ÷ o que falta para bancar a retirada mínima. */
   reserva_ratio: number
   reserva_nivel: ViabilidadeNivel
-  payback_nivel: ViabilidadeNivel
+  /** Remuneração em regime ÷ meta declarada. */
   meta_ratio: number
   meta_nivel: ViabilidadeNivel
   nivel_final: ViabilidadeNivel

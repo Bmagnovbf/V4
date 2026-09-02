@@ -362,11 +362,6 @@ function nivelMaior(v: number, verde: number, amarelo: number): ViabilidadeNivel
   return v >= verde ? 'verde' : v >= amarelo ? 'amarelo' : 'vermelho'
 }
 
-function nivelMenor(v: number | null, verde: number, amarelo: number): ViabilidadeNivel {
-  if (v === null) return 'vermelho'
-  return v <= verde ? 'verde' : v <= amarelo ? 'amarelo' : 'vermelho'
-}
-
 const PRIORIDADE: Record<ViabilidadeNivel, number> = { verde: 0, amarelo: 1, vermelho: 2 }
 
 function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
@@ -381,12 +376,6 @@ function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
     PARAMS.termometro.reserva_ratio.amarelo,
   )
 
-  const payback_nivel = nivelMenor(
-    kpis.payback_mes,
-    PARAMS.termometro.payback_meses.verde,
-    PARAMS.termometro.payback_meses.amarelo,
-  )
-
   // Compara a meta com a renda em REGIME, não com o M12 isolado — senão o
   // veredito do termômetro depende de em qual mês caiu o último Saber.
   const meta_ratio = input.meta_renda_liquida > 0
@@ -398,10 +387,10 @@ function calculaTermometro(input: SimulacaoInput, kpis: KPIs): Termometro {
     PARAMS.termometro.meta_ratio.amarelo,
   )
 
-  const nivel_final = [reserva_nivel, payback_nivel, meta_nivel]
+  const nivel_final = [reserva_nivel, meta_nivel]
     .reduce((pior, n) => (PRIORIDADE[n] > PRIORIDADE[pior] ? n : pior), 'verde' as ViabilidadeNivel)
 
-  return { reserva_ratio, reserva_nivel, payback_nivel, meta_ratio, meta_nivel, nivel_final }
+  return { reserva_ratio, reserva_nivel, meta_ratio, meta_nivel, nivel_final }
 }
 
 // ─── Ponto de entrada ────────────────────────────────────────────────────────
