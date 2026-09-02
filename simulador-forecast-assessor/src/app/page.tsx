@@ -165,11 +165,6 @@ export default function InputPage() {
               <span>{100 - pctComercial}% operacional</span>
               <span>{pctComercial}% comercial</span>
             </div>
-            <p className="text-xs" style={{ color: '#7A7A7A' }}>
-              Mais operacional → a matriz preenche sua carteira (Fonte 1, {(PARAMS.produtos.saber.split_matriz * 100).toFixed(0)}–{(PARAMS.produtos.executar.split_matriz * 100).toFixed(0)}%).
-              Mais comercial → você traz o cliente e fica com {(PARAMS.produtos.saber.split_self * 100).toFixed(0)}% (Fonte 2);
-              o que originar acima da sua capacidade vira comissão de originação (Fonte 3).
-            </p>
           </div>
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />
@@ -182,7 +177,7 @@ export default function InputPage() {
             ]}
             value={dedicacao}
             onChange={setDedicacao}
-            footer={`Integral ≈ até ${PARAMS.carteira.cap_ativos_integral} projetos ativos · Parcial ≈ até ${PARAMS.carteira.cap_ativos_parcial}`}
+            footer="Integral = dedicação exclusiva · Parcial = concilia com outra atividade"
           />
 
           <ChipGroup<NetworkLevel>
@@ -194,7 +189,7 @@ export default function InputPage() {
             ]}
             value={network}
             onChange={setNetwork}
-            footer={`Baixa ≈ ${PARAMS.network.baixo.empresas} empresas · Média ≈ ${PARAMS.network.medio.empresas} · Alta ≈ ${PARAMS.network.alto.empresas} ou +. Quanto maior a rede, mais clientes você traz — e esses pagam ${(PARAMS.produtos.saber.split_self * 100).toFixed(0)}% para você, contra ${(PARAMS.produtos.saber.split_matriz * 100).toFixed(0)}–${(PARAMS.produtos.executar.split_matriz * 100).toFixed(0)}% dos alocados pela matriz.`}
+            footer={`Baixa ≈ ${PARAMS.network.baixo.empresas} empresas · Média ≈ ${PARAMS.network.medio.empresas} · Alta ≈ ${PARAMS.network.alto.empresas} ou mais`}
           />
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />

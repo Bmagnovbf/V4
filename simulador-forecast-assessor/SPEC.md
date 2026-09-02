@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.11 | Setembro/2026**
+**V4 Company | Versão 1.12 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -659,9 +659,15 @@ Seis campos, em ordem:
 | Dedicação | chips | integral / parcial | integral |
 | Reserva de capital de giro | input + slider | R$ 0 – 150.000 | R$ 25.000 |
 
-O slider de perfil mostra os dois lados ao mesmo tempo ("70% operacional · 30%
-comercial") e traz abaixo a explicação de qual fonte cada extremo alimenta. É o
-controle central da tela — os outros quatro são contexto.
+O slider de perfil mostra os dois lados ao mesmo tempo ("65% operacional · 35%
+comercial"). É o controle central da tela — os outros quatro são contexto.
+
+**Os campos não revelam a consequência da resposta** (decisão de set/2026). O
+candidato deve responder sobre si mesmo, não sobre o resultado que quer ver. Os
+textos de apoio definem o que se pergunta e dão referência para calibrar a
+resposta — "Baixa ≈ 10 empresas · Média ≈ 30 · Alta ≈ 50 ou mais" —, nunca o
+efeito no forecast. Dizer que a Fonte 2 paga 80% contra 30–35% da alocação
+transformava o slider de perfil num campo de otimização.
 
 Não há estado de "incompleto": todos os campos têm default válido e o botão
 Simular está sempre habilitado. A tela é usada ao vivo numa call; travar o botão
@@ -998,6 +1004,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.12 — Setembro/2026:*
+- *Os textos de apoio dos inputs deixam de revelar a consequência da resposta — o candidato responde sobre si, não sobre o resultado que quer ver*
 
 *SPEC v1.11 — Setembro/2026:*
 - *A meta passa de renda líquida para FATURAMENTO (receita recebida, antes de impostos), com teto de R$ 40.000 — alcançado por 10% dos cenários*
