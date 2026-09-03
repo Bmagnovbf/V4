@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.16 | Setembro/2026**
+**V4 Company | Versão 1.17 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -694,7 +694,7 @@ Ordem dos blocos:
 1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
    aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
-3. **KPI cards** — faturamento em regime, remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
+3. **KPI cards** — remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -1016,6 +1016,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.17 — Setembro/2026:*
+- *O card "Faturamento em regime" sai dos KPIs: o número já aparece na leitura da simulação, confrontado com a meta, e repetido como card competia com a remuneração total pela atenção*
 
 *SPEC v1.16 — Setembro/2026:*
 - *A dedicação integral vira cláusula da COF: saem os chips da tela de input, o campo `dedicacao` do input e os parâmetros `cap_ativos_parcial`, `limite_proprio_parcial` e `fator_vendas_parcial`. `cap_ativos_integral` passa a se chamar `cap_ativos`*

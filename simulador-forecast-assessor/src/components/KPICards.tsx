@@ -29,8 +29,6 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card label="Faturamento em regime" value={fmt(kpis.faturamento_regime)}
-            hint="receita recebida por mês, antes de impostos" />
       <Card label="Remuneração total"  value={fmt(kpis.remuneracao_regime)} destaque
             hint="CSP + resultado, por mês em regime" />
       <Card label="Resultado do negócio" value={fmt(kpis.renda_regime)} hint="margem depois de remunerar suas horas" />
