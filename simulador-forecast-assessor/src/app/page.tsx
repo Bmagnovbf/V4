@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { simular } from '@/lib/calculator'
 import { fmt } from '@/lib/format'
 import { PARAMS } from '@/config/params'
-import type { Dedicacao, NetworkLevel } from '@/types'
+import type { NetworkLevel } from '@/types'
 
 const MIN_FAT   = 5_000,  MAX_FAT   = 40_000, STEP_FAT   = 1_000
 const MIN_RET   = 2_000,  MAX_RET   = 15_000, STEP_RET   = 500
@@ -100,7 +100,6 @@ export default function InputPage() {
   const [retirada, setRetirada] = useState(8_000)
   const [reserva, setReserva] = useState(25_000)
   const [pctComercial, setPctComercial] = useState(35)
-  const [dedicacao, setDedicacao] = useState<Dedicacao>('integral')
   const [network, setNetwork] = useState<NetworkLevel>('medio')
 
   function handleSimular() {
@@ -109,7 +108,6 @@ export default function InputPage() {
       retirada_minima: retirada,
       reserva_capital: reserva,
       pct_comercial: pctComercial / 100,
-      dedicacao,
       network_level: network,
     })
     sessionStorage.setItem('simulacao', JSON.stringify(resultado))
@@ -126,6 +124,9 @@ export default function InputPage() {
           </h1>
           <p className="text-sm" style={{ color: '#7A7A7A' }}>
             Projete receita, custos e renda líquida de um Assessor V4 nos primeiros 12 meses.
+          </p>
+          <p className="text-xs" style={{ color: '#7A7A7A' }}>
+            A COF exige <strong>dedicação integral</strong> — todas as projeções assumem 100% de dedicação.
           </p>
         </div>
 
@@ -168,17 +169,6 @@ export default function InputPage() {
           </div>
 
           <div style={{ borderTop: '1px solid #F2F2F2' }} />
-
-          <ChipGroup<Dedicacao>
-            label="Dedicação"
-            options={[
-              { value: 'integral', label: 'Integral' },
-              { value: 'parcial',  label: 'Parcial'  },
-            ]}
-            value={dedicacao}
-            onChange={setDedicacao}
-            footer="Integral = dedicação exclusiva · Parcial = concilia com outra atividade"
-          />
 
           <ChipGroup<NetworkLevel>
             label="Como você avalia sua rede de relacionamento com empresários?"

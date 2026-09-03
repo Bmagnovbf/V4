@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.15 | Setembro/2026**
+**V4 Company | Versão 1.16 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -175,13 +175,11 @@ Remuneração Total = CSP próprio + Resultado   ← o que fica com ele
 cabem na jornada. Acima do limite ele precisa de freelancer, e o CSP das horas
 excedentes deixa de ficar com ele.
 
-O limite **depende da dedicação**: 190h/mês na integral, 88h na parcial (≈ 20h
-por semana). Com um limite único, o parcial nunca terceirizava e chegava a 144h
-mensais — 33h por semana, o que não descreve quem tem outra atividade em
-paralelo.
+O limite é de **190h/mês**, único: a COF obriga dedicação integral, então não há
+cenário de jornada reduzida a modelar.
 
 ```
-limite              = 190h (integral) | 88h (parcial)
+limite              = 190h
 horas_terceirizadas = max(0, horas_alocadas − limite)
 csp_terceirizado    = csp_total × (horas_terceirizadas ÷ horas_alocadas)
 csp_proprio         = csp_total − csp_terceirizado
@@ -221,9 +219,7 @@ estar operando, não de operar um projeto específico.
 
 | Parâmetro | Valor | Tag |
 |---|---|:--:|
-| `carteira.cap_ativos_integral` | 13 projetos | ✅ |
-| `carteira.cap_ativos_parcial` | 5 projetos | 🔴 |
-| `carteira.fator_vendas_parcial` | 0,5× | 🔴 |
+| `carteira.cap_ativos` | 13 projetos | ✅ |
 | `carteira.pct_operacional_ref` | 55% | 🔴 |
 | `carteira.tolerancia_self` | 1,2× | 🔴 |
 | `carteira.mix_alocacao` | 40% Saber / 60% Executar | 🟡 |
@@ -251,12 +247,12 @@ diferentes: a matriz escolhe o que aloca, o Assessor escolhe o que vende.
   186h, sem folga antes das 190h em que passa a exigir freelancer.
 - **Vendas próprias — 70/30**, como na planilha.
 
-**Dedicação parcial** corta em três lugares: o cap cai de 13 para 5 projetos, as
-vendas próprias caem à metade (`fator_vendas_parcial`) e o limite de horas
-próprias cai de 190h para 88h. Sem o corte nas vendas, o perfil parcial chegava
-a render mais que o integral em cenários de borda; sem o corte nas horas, ele
-trabalhava 33h por semana e nunca terceirizava. Com os três, fica entre 34% e
-54% da remuneração do integral, a 18–20h por semana.
+**A dedicação é integral em todo o modelo** (set/2026). A COF passa a trazer a
+exclusividade como cláusula, então não existe cenário de dedicação parcial para
+simular: cap, limite de horas próprias e vendas próprias rodam sempre em 100%.
+Saíram do modelo os três parâmetros que faziam o corte — `cap_ativos_parcial`,
+`limite_proprio_parcial` e `fator_vendas_parcial` —, o chip da tela de input e o
+eixo correspondente da auditoria.
 
 O KPI de horas mostra **as horas dele**, não as do projeto — o excedente aparece
 à parte como entrega de freelancer. Sem essa separação, a tela dizia "112h/mês"
@@ -333,7 +329,6 @@ interface SimulacaoInput {
   retirada_minima:    number    // R$ 2.000 – 15.000
   reserva_capital:    number    // R$ 0 – 150.000
   pct_comercial:      number    // 0 – 1  (0 = 100% operacional)
-  dedicacao:          'integral' | 'parcial'
   network_level:      'baixo' | 'medio' | 'alto'
 }
 ```
@@ -347,8 +342,8 @@ impostos, somando as três fontes. **Não entra em nenhum cálculo**: é usada s
 termômetro e como linha de referência no gráfico de receita. O motor não faz
 engenharia reversa a partir dela.
 
-O teto de R$ 40.000 é calibrado: de 606 combinações de rede, dedicação e perfil,
-10% alcançam esse faturamento em regime, e 4% passam de R$ 45.000. Um teto mais
+O teto de R$ 40.000 é calibrado: de 303 combinações de rede e perfil, 10%
+alcançam esse faturamento em regime, e 4% passam de R$ 45.000. Um teto mais
 alto colocaria no slider números que nenhum cenário atinge, enviesando a
 conversa logo no primeiro campo.
 
@@ -364,13 +359,13 @@ e o perfil decide qual dos dois morde primeiro.
 **Teto do operador — capacidade de operar:**
 
 ```
-base = dedicacao === 'integral' ? 15 : 8
+base = cap_ativos            // 13, dedicação integral
 pct_operacional = 1 − pct_comercial
 cap_ativos = base × min(1, pct_operacional ÷ pct_operacional_ref)
 ```
 
 Acima de 55% operacional a capacidade é **cheia**. Abaixo disso cai
-proporcionalmente. Um perfil 70% comercial fica com `15 × (0,30 ÷ 0,55) ≈ 8,2`
+proporcionalmente. Um perfil 70% comercial fica com `13 × (0,30 ÷ 0,55) ≈ 7,1`
 projetos.
 
 **Teto do comercial — capacidade de vender:**
@@ -664,7 +659,7 @@ originacao   =  receita_originacao                              ÷ receita_receb
 
 ### 5.1 Tela de input (`/`)
 
-Seis campos, em ordem:
+Cinco campos, em ordem:
 
 | Campo | Controle | Faixa | Default |
 |---|---|---|---|
@@ -672,11 +667,12 @@ Seis campos, em ordem:
 | Retirada mínima mensal | input + slider | R$ 2.000 – 15.000 | R$ 8.000 |
 | Seu perfil | slider único | 0 – 100% comercial, passo 5 | 35% |
 | Rede de relacionamento | chips | baixa / média / alta | média |
-| Dedicação | chips | integral / parcial | integral |
 | Reserva de capital de giro | input + slider | R$ 0 – 150.000 | R$ 25.000 |
 
 O slider de perfil mostra os dois lados ao mesmo tempo ("65% operacional · 35%
-comercial"). É o controle central da tela — os outros quatro são contexto.
+comercial"). É o controle central da tela — os outros três são contexto. A
+dedicação integral não é campo: é cláusula da COF, e aparece como nota fixa no
+cabeçalho da tela.
 
 **Os campos não revelam a consequência da resposta** (decisão de set/2026). O
 candidato deve responder sobre si mesmo, não sobre o resultado que quer ver. Os
@@ -695,7 +691,8 @@ Lê `sessionStorage.simulacao`. Sem resultado, redireciona para `/`.
 
 Ordem dos blocos:
 
-1. **Cabeçalho** — perfil, meta, dedicação, forma de pagamento, botão Refazer
+1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
+   aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
 3. **KPI cards** — faturamento em regime, remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
@@ -883,8 +880,8 @@ própria capacidade continua valendo a pena, só que com margem menor.
 
 ## 8c. Auditoria do espaço de inputs
 
-`audit.mjs` varre todas as combinações de rede, dedicação, perfil, meta,
-retirada e reserva, verificando estrutura e coerência narrativa:
+`audit.mjs` varre todas as combinações de rede, perfil, meta, retirada e
+reserva, verificando estrutura e coerência narrativa:
 
 ```bash
 npx tsc -p tsconfig.test.json && node audit.mjs
@@ -896,7 +893,6 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 | Contratos inteiros e não-negativos | quebra do acumulador |
 | Identidades contábeis | soma das fontes, CSP, freelas, remuneração |
 | Carteira ≤ teto próprio | cap aplicado sobre a base errada |
-| Parcial < integral | artefato de horizonte truncado |
 | Rede maior nunca rende menos | inversão de monotonicidade |
 | Mais reserva nunca piora o termômetro | threshold invertido |
 | Retirada maior nunca reduz a reserva | sinal trocado |
@@ -909,7 +905,9 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 
 Rodada de set/2026 encontrou quatro problemas, todos corrigidos: dedicação
 parcial rendendo mais que integral, cap aplicado só sobre Executar, salto de 84%
-no primeiro passo do slider e o perfil operacional sem payback em 12 meses.
+no primeiro passo do slider e o perfil operacional sem payback em 12 meses. O
+primeiro deixou de existir com a dedicação integral obrigatória, e a verificação
+saiu da auditoria.
 
 ## 8d. O salto de 0% para 5% comercial é intencional
 
@@ -967,7 +965,8 @@ Três blocos, nesta ordem. Cada um responde uma pergunta diferente; não vale
 pular para o C.
 
 ### Bloco A — Perfil e rede
-Meta R$ 25.000, retirada R$ 8.000, reserva R$ 25.000, dedicação integral.
+Meta R$ 25.000, retirada R$ 8.000, reserva R$ 25.000 (dedicação integral,
+como em todo cenário).
 
 **A1–A5 — varrer o slider de perfil** (20/40/60/80/100% comercial) com rede
 média. Verificar: a carteira sobe até 50% comercial (13 projetos, o teto) e
@@ -991,23 +990,20 @@ para calibrar os thresholds do termômetro (§ 3.7).
 
 ### Bloco C — Estresse
 
-Base comum: meta R$ 25.000, reserva R$ 25.000, 40% comercial, integral, à
-vista — variando um fator por vez. Valores observados na v1.0, para servirem de
+Base comum: meta R$ 25.000, reserva R$ 25.000, 40% comercial, à vista — variando um fator por vez. Valores observados na v1.0, para servirem de
 baseline de regressão:
 
 | # | Input | Ativos M12 | Renda M12 | Pior caixa | Payback | Termômetro |
 |---|---|---|---|---|---|---|
-| C1 | Dedicação parcial | | | | | |
-| C2 | Reserva R$ 0 | | | | | **vermelho** por reserva |
-| C3 | Meta R$ 45K, 20% comercial | | | | | **vermelho** por meta |
-| C4 | Rede baixa + 20% comercial | | | | | pior caso do funil |
-| C5 | 100% comercial + parcial | | | | | sem divisão por zero |
+| C1 | Reserva R$ 0 | | | | | **vermelho** por reserva |
+| C2 | Meta R$ 45K, 20% comercial | | | | | **vermelho** por meta |
+| C3 | Rede baixa + 20% comercial | | | | | pior caso do funil |
+| C4 | 100% comercial | | | | | sem divisão por zero |
 
 *(baseline a preencher na primeira rodada pós-network)*
 
 Verificações qualitativas:
-- **C1** — cap cai de 15 para 8; a renda cai junto, mas menos que proporcional, porque o overhead é fixo
-- **C2** — o eixo de reserva vira vermelho sozinho e arrasta o nível final
+- **C1** — o eixo de reserva vira vermelho sozinho e arrasta o nível final
 - **C3** — meta muito acima do projetado derruba só o eixo de meta
 - **C4** — rede baixa com perfil operacional é o candidato que depende quase só da matriz
 - **C5** — cap zero não gera divisão por zero; a ocupação é forçada a 0 e o dashboard renderiza
@@ -1020,6 +1016,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.16 — Setembro/2026:*
+- *A dedicação integral vira cláusula da COF: saem os chips da tela de input, o campo `dedicacao` do input e os parâmetros `cap_ativos_parcial`, `limite_proprio_parcial` e `fator_vendas_parcial`. `cap_ativos_integral` passa a se chamar `cap_ativos`*
+- *A auditoria perde o eixo de dedicação e o check "parcial < integral"; as demais 606 combinações caem para 303*
 
 *SPEC v1.15 — Setembro/2026:*
 - *O limite de horas próprias passa a depender da dedicação: 190h na integral, 88h na parcial. Com limite único o parcial nunca terceirizava e chegava a 33h por semana*

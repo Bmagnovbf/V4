@@ -186,11 +186,14 @@ fica em `src/config/params.ts`.
 | Retirada mínima mensal | slider R$ 2–15K | Define a reserva necessária |
 | Perfil operacional × comercial | slider 0–100% | Mix entre as 3 fontes — a alavanca central |
 | Rede de relacionamento | baixa / média / alta | Multiplica as vendas próprias — empurra a carteira para a Fonte 2 |
-| Dedicação | integral / parcial | Teto de projetos ativos (13 ou 8) |
 | Reserva de capital de giro | slider R$ 0–150K | Termômetro: cobre a retirada até a remuneração alcançá-la |
 
 A **forma de pagamento da entrada não é input**: a matriz aloca no mesmo pace
 independentemente, então o campo não alterava a projeção.
+
+A **dedicação também não é input**: a COF a traz como cláusula de exclusividade,
+então todo cenário roda em 100% de dedicação. A tela informa a premissa, não
+pergunta.
 
 ---
 
@@ -217,7 +220,6 @@ para medir. Ficam como estimativa até a turma rodar.
 
 - [ ] `network.fator` (0,5 / 1,0 / 1,5) — quanto rede alta vende a mais que média
 - [ ] `carteira.tolerancia_self = 1,2×` — até onde ele rompe o cap por conta própria
-- [ ] `carteira.cap_ativos_parcial = 8` — teto com dedicação parcial
 - [ ] `carteira.pct_operacional_ref = 55%` — onde a capacidade começa a cair
 - [ ] Thresholds do termômetro (reserva, payback, meta)
 

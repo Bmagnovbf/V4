@@ -55,15 +55,14 @@ function criarAcumulador() {
 /**
  * Capacidade de operar projetos simultâneos.
  *
- * Depende da dedicação (integral/parcial) e do quanto do perfil é operacional.
- * Acima do perfil de referência a capacidade é cheia; abaixo dele cai
- * proporcionalmente. É o que faz um Assessor de veia comercial operar pouco e
- * repassar o excedente da própria originação para a Fonte 3.
+ * A dedicação é integral em todos os cenários — a COF obriga exclusividade —,
+ * então o que move a capacidade é só o quanto do perfil é operacional. Acima do
+ * perfil de referência a capacidade é cheia; abaixo dele cai proporcionalmente.
+ * É o que faz um Assessor de veia comercial operar pouco e repassar o excedente
+ * da própria originação para a Fonte 3.
  */
 function capAtivos(input: SimulacaoInput): number {
-  const base = input.dedicacao === 'integral'
-    ? PARAMS.carteira.cap_ativos_integral
-    : PARAMS.carteira.cap_ativos_parcial
+  const base = PARAMS.carteira.cap_ativos
   const pct_operacional = 1 - input.pct_comercial
   const fator = Math.min(1, pct_operacional / PARAMS.carteira.pct_operacional_ref)
   return Math.round(base * fator)
@@ -108,15 +107,12 @@ function shapeComercial(mes: number): number {
  */
 function vendasPropriasMes(input: SimulacaoInput): number {
   const teto = PARAMS.comercial.calls_mes_max * PARAMS.comercial.conversao_call_venda
-  const dedicacao = input.dedicacao === 'integral' ? 1 : PARAMS.carteira.fator_vendas_parcial
-  return teto * input.pct_comercial * PARAMS.network[input.network_level].fator * dedicacao
+  return teto * input.pct_comercial * PARAMS.network[input.network_level].fator
 }
 
-/** Horas que ele mesmo consegue entregar por mês, conforme a dedicação. */
-function limiteHorasProprias(input: SimulacaoInput): number {
-  return input.dedicacao === 'integral'
-    ? PARAMS.horas.limite_proprio
-    : PARAMS.horas.limite_proprio_parcial
+/** Horas que ele mesmo consegue entregar por mês, em dedicação integral. */
+function limiteHorasProprias(): number {
+  return PARAMS.horas.limite_proprio
 }
 
 function overheadDoMes(mes: number): number {
@@ -281,7 +277,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     // Até o limite de horas ele entrega sozinho e o CSP é remuneração dele.
     // Acima disso precisa de freelancer: o CSP das horas excedentes deixa de
     // ficar com ele e vira desembolso, na linha de freelas + ferramentas.
-    const horas_terceirizadas = Math.max(0, horas_alocadas - limiteHorasProprias(input))
+    const horas_terceirizadas = Math.max(0, horas_alocadas - limiteHorasProprias())
     const csp_terceirizado = horas_alocadas > 0
       ? csp_total * (horas_terceirizadas / horas_alocadas)
       : 0
@@ -354,7 +350,7 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     horas_regime,
     horas_proprias_regime,
     horas_terceirizadas_regime,
-    ocupacao_horas: horas_regime / limiteHorasProprias(input),
+    ocupacao_horas: horas_regime / limiteHorasProprias(),
     csp_terceirizado_ano: projecao.reduce((s, l) => s + l.csp_terceirizado, 0),
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,

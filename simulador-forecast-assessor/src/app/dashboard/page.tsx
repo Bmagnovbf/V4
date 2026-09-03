@@ -47,7 +47,7 @@ export default function DashboardPage() {
             <p className="text-sm" style={{ color: '#3D3D3D' }}>
               Meta de faturamento <strong>{fmt(input.meta_faturamento)}/mês</strong> ·
               retirada mínima <strong>{fmt(input.retirada_minima)}/mês</strong> ·
-              Dedicação <strong>{input.dedicacao}</strong> ·
+              dedicação <strong>integral</strong> ·
               rede <strong>{({ baixo: 'baixa', medio: 'média', alto: 'alta' } as const)[input.network_level]}</strong>
             </p>
           </div>

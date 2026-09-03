@@ -1,7 +1,7 @@
 'use client'
 
 import type { KPIs } from '@/types'
-import { fmt, fmtInt, fmtPct } from '@/lib/format'
+import { fmt, fmtInt } from '@/lib/format'
 
 function Card({
   label, value, hint, destaque,

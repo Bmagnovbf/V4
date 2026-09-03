@@ -85,8 +85,7 @@ export default function ParamsPage() {
         <Section title="Horas de entrega">
           <Row tag="✅" path="horas.saber_onetime"  value={`${p.horas.saber_onetime}h por Saber, no mês da entrega`} />
           <Row tag="✅" path="horas.executar_mes"   value={`${p.horas.executar_mes}h/mês por Executar vigente`} />
-          <Row tag="✅" path="horas.limite_proprio"          value={`${p.horas.limite_proprio}h/mês (integral) — acima disso o CSP vira freelancer`} />
-          <Row tag="🔴" path="horas.limite_proprio_parcial"  value={`${p.horas.limite_proprio_parcial}h/mês (parcial) ≈ ${(p.horas.limite_proprio_parcial/4.3).toFixed(0)}h/semana`} />
+          <Row tag="✅" path="horas.limite_proprio"          value={`${p.horas.limite_proprio}h/mês em dedicação integral — acima disso o CSP vira freelancer`} />
         </Section>
 
         <Section title="Impostos e overhead">
@@ -99,14 +98,12 @@ export default function ParamsPage() {
         </Section>
 
         <Section title="Carteira">
-          <Row tag="✅" path="carteira.cap_ativos_integral" value={`${p.carteira.cap_ativos_integral} projetos — teto para a Fonte 1 alocar`} />
-          <Row tag="🔴" path="carteira.cap_ativos_parcial"  value={`${p.carteira.cap_ativos_parcial} projetos`} />
+          <Row tag="✅" path="carteira.cap_ativos"         value={`${p.carteira.cap_ativos} projetos — teto para a Fonte 1 alocar`} />
           <Row tag="🔴" path="carteira.pct_operacional_ref" value={`${pct(p.carteira.pct_operacional_ref)} — abaixo disso a capacidade cai`} />
           <Row tag="🔴" path="carteira.tolerancia_self"      value={`${p.carteira.tolerancia_self}× — a matriz trava no cap; ele rompe até aqui`} />
           <Row tag="✅" path="carteira.primeiros_saber"      value={`${p.carteira.primeiros_saber} primeiros contratos`} />
           <Row tag="🟡" path="carteira.mix_alocacao"        value={`${pct(p.carteira.mix_alocacao.saber)} Saber · ${pct(p.carteira.mix_alocacao.executar)} Executar`} />
           <Row tag="✅" path="carteira.mix_self"             value={`${pct(p.carteira.mix_self.saber)} Saber · ${pct(p.carteira.mix_self.executar)} Executar`} />
-          <Row tag="🔴" path="carteira.fator_vendas_parcial" value={`${p.carteira.fator_vendas_parcial}× nas vendas com dedicação parcial`} />
           <Row tag="✅" path="carteira.matriz_pace"          value={p.carteira.matriz_pace.slice(1).join(' · ') + ' cliente(s)/mês'} />
         </Section>
 

@@ -19,16 +19,16 @@ const ok = (cond, nome, det='') => {
   if (!cond) falhas++
 }
 
-const NET = ['baixo','medio','alto'], DED = ['integral','parcial']
+const NET = ['baixo','medio','alto']
 const PCT = Array.from({length:21}, (_,i)=>i*0.05)
 
 console.log('── Estrutura e identidades contábeis ──')
 let naoFinito = 0, fracionario = 0, identidade = 0, capEstouro = 0
 let maiorCarteira = 0
-for (const net of NET) for (const ded of DED) for (const pc of PCT)
+for (const net of NET) for (const pc of PCT)
 for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for (const res of [0,25000,150000]) {
   const r = simular({ meta_faturamento: meta, retirada_minima: ret, reserva_capital: res,
-    pct_comercial: pc, dedicacao: ded, network_level: net })
+    pct_comercial: pc, network_level: net })
   for (const v of Object.values(r.kpis)) if (typeof v === 'number' && !Number.isFinite(v)) naoFinito++
   for (const l of r.projecao) {
     for (const c of ['saber_novos_matriz','saber_novos_self','executar_novos_matriz','executar_novos_self',
@@ -41,8 +41,7 @@ for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for 
     if (Math.abs((l.overhead + l.csp_terceirizado) - l.freelas_total) > 0.5) identidade++
     if (Math.abs((l.renda_liquida + l.csp_proprio) - l.remuneracao_total) > 0.5) identidade++
     if (l.total_ativos > maiorCarteira) maiorCarteira = l.total_ativos
-    const cap = ded === 'integral' ? PARAMS.carteira.cap_ativos_integral : PARAMS.carteira.cap_ativos_parcial
-    if (l.total_ativos > Math.floor(cap * PARAMS.carteira.tolerancia_self)) capEstouro++
+    if (l.total_ativos > Math.floor(PARAMS.carteira.cap_ativos * PARAMS.carteira.tolerancia_self)) capEstouro++
   }
 }
 ok(naoFinito === 0, 'todos os KPIs são números finitos')
@@ -52,19 +51,11 @@ ok(capEstouro === 0, 'carteira nunca passa do teto próprio', `maior observada: 
 
 console.log('\n── Coerência narrativa ──')
 const run = o => simular({ meta_faturamento: 20000, retirada_minima: 8000, reserva_capital: 25000,
-  pct_comercial: 0.35, dedicacao: 'integral', network_level: 'medio', ...o })
+  pct_comercial: 0.35, network_level: 'medio', ...o })
 
-let q = 0, pior = ''
-for (const net of NET) for (const pc of PCT) {
-  const i = run({ network_level: net, pct_comercial: pc, dedicacao: 'integral' }).kpis.remuneracao_total_ano
-  const p = run({ network_level: net, pct_comercial: pc, dedicacao: 'parcial'  }).kpis.remuneracao_total_ano
-  if (p > i) { q++; pior = `${net}/${(pc*100).toFixed(0)}%c` }
-}
-ok(q === 0, 'dedicação parcial nunca rende mais que integral', q ? pior : '')
-
-q = 0
-for (const ded of DED) for (const pc of PCT) {
-  const v = NET.map(n => run({ network_level: n, dedicacao: ded, pct_comercial: pc }).kpis.remuneracao_total_ano)
+let q = 0
+for (const pc of PCT) {
+  const v = NET.map(n => run({ network_level: n, pct_comercial: pc }).kpis.remuneracao_total_ano)
   if (v[1] < v[0] || v[2] < v[1]) q++
 }
 ok(q === 0, 'rede maior nunca rende menos')
@@ -92,8 +83,8 @@ for (const net of NET) {
 ok(q === 0, 'retirada maior nunca reduz a reserva necessária')
 
 q = 0
-for (const net of NET) for (const ded of DED) for (const pc of PCT) {
-  const r = run({ network_level: net, dedicacao: ded, pct_comercial: pc })
+for (const net of NET) for (const pc of PCT) {
+  const r = run({ network_level: net, pct_comercial: pc })
   for (let i = 1; i < 12; i++) {
     const a = r.projecao[i-1], b = r.projecao[i]
     const tA = a.saber_novos_self + a.executar_novos_self + a.saber_originados + a.executar_originados

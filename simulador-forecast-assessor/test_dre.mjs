@@ -61,7 +61,6 @@ for (const cenario of Object.values(DRE)) {
     retirada_minima:     8_000,
     reserva_capital:    30_000,
     pct_comercial:      cenario.pct_comercial,
-    dedicacao:          'integral',
     network_level:      cenario.network ?? 'medio',
   })
 
@@ -107,26 +106,24 @@ console.log('\n── Contratos inteiros')
   ]
   let violacoes = 0
   for (const net of ['baixo', 'medio', 'alto']) {
-    for (const ded of ['integral', 'parcial']) {
-      for (let pc = 0; pc <= 1.0001; pc += 0.05) {
-        const r = simular({
-          meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
-          pct_comercial: pc, dedicacao: ded, network_level: net,
-        })
-        for (const l of r.projecao) {
-          for (const c of CAMPOS) {
-            if (!Number.isInteger(l[c]) || l[c] < 0) {
-              if (violacoes < 5) {
-                console.log(`  ✗ ${net}/${ded}/${(pc*100).toFixed(0)}% M${l.mes} · ${c} = ${l[c]}`)
-              }
-              violacoes++
+    for (let pc = 0; pc <= 1.0001; pc += 0.05) {
+      const r = simular({
+        meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
+        pct_comercial: pc, network_level: net,
+      })
+      for (const l of r.projecao) {
+        for (const c of CAMPOS) {
+          if (!Number.isInteger(l[c]) || l[c] < 0) {
+            if (violacoes < 5) {
+              console.log(`  ✗ ${net}/${(pc*100).toFixed(0)}% M${l.mes} · ${c} = ${l[c]}`)
             }
+            violacoes++
           }
         }
       }
     }
   }
-  if (violacoes === 0) console.log('  ✓ 126 combinações × 12 meses — nenhum contrato fracionário')
+  if (violacoes === 0) console.log('  ✓ 63 combinações × 12 meses — nenhum contrato fracionário')
   else { console.log(`  ✗ ${violacoes} violações`); falhas++ }
 }
 
@@ -135,7 +132,7 @@ console.log('\n── Efeito da rede (35% comercial)')
 for (const n of ['baixo', 'medio', 'alto']) {
   const r = simular({
     meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
-    pct_comercial: 0.35, dedicacao: 'integral', network_level: n,
+    pct_comercial: 0.35, network_level: n,
   })
   console.log(
     `  rede ${n.padEnd(6)} → self ${(r.mix_m12.self_sourced * 100).toFixed(0).padStart(3)}% · ` +
@@ -150,7 +147,7 @@ console.log('\n── Fonte 3 (transbordo de originação)')
 for (const pct of [0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]) {
   const r = simular({
     meta_faturamento: 20_000, retirada_minima: 8_000, reserva_capital: 30_000,
-    pct_comercial: pct, dedicacao: 'integral', network_level: 'medio',
+    pct_comercial: pct, network_level: 'medio',
   })
   const m12 = r.projecao[11]
   console.log(

@@ -22,12 +22,13 @@
 // alimenta as Fontes 2 e 3 — não confundir com a Fonte 3, cujo nome é
 // Originação.
 //
-// O teto de projetos (`carteira.cap_ativos_integral`) trava a Fonte 1: a matriz
+// O teto de projetos (`carteira.cap_ativos`) trava a Fonte 1: a matriz
 // para de alocar quando a carteira chega lá. Ele pode passar disso vendendo por
 // conta própria.
+//
+// A dedicação é integral por definição: a COF obriga exclusividade, então todo
+// o modelo (capacidade, horas próprias e vendas) roda em 100% de dedicação.
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type Dedicacao = 'integral' | 'parcial'
 
 export type NetworkLevel = 'baixo' | 'medio' | 'alto'
 
@@ -42,7 +43,6 @@ export interface SimulacaoInput {
   reserva_capital: number
   /** Perfil: 0 = 100% operacional, 1 = 100% comercial. */
   pct_comercial: number
-  dedicacao: Dedicacao
   /** Tamanho da rede de relacionamento — multiplica a originação própria. */
   network_level: NetworkLevel
 }

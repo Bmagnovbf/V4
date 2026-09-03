@@ -25,7 +25,7 @@ export PATH="$PATH:/mnt/c/Program Files/nodejs"
 
 | Rota | O que é |
 |------|---------|
-| `/` | Tela de input (meta de renda, perfil, dedicação, entrada, reserva) |
+| `/` | Tela de input (meta de faturamento, retirada, perfil, rede, reserva) |
 | `/dashboard` | Termômetro, KPIs, 3 fontes, gráficos e DRE completo |
 | `/params` | Painel somente leitura dos benchmarks vigentes |
 
@@ -58,8 +58,8 @@ generativa que responde ao perfil do candidato. Meses toleram ±1.
 Base reproduz em +10,3% no líquido do ano; Upside em −13,8%.
 
 E a auditoria do espaço de inputs, que procura quebras estruturais e
-incoerências narrativas em todas as combinações de rede, dedicação, perfil,
-meta, retirada e reserva:
+incoerências narrativas em todas as combinações de rede, perfil, meta, retirada
+e reserva:
 
 ```bash
 npx tsc -p tsconfig.test.json && node audit.mjs
