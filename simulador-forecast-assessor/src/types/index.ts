@@ -127,6 +127,20 @@ export interface KPIs {
   horas_terceirizadas_regime: number
   /** Ocupação do limite de horas próprias, em regime. */
   ocupacao_horas: number
+  /**
+   * Mês de maior carga de entrega — o pico da operação no ano.
+   *
+   * A média em regime esconde justamente o mês que dimensiona a necessidade de
+   * freelancer: é no pico que ele precisa ter alguém contratado, não na média.
+   * Havendo empate (carga estável no fim do ano), fica o primeiro mês do platô.
+   */
+  mes_pico: number
+  /** Horas de entrega do projeto no mês de pico — dele e de terceiros. */
+  horas_pico: number
+  /** Parte do pico que cabe no limite dele. */
+  horas_pico_proprias: number
+  /** Parte do pico que estoura o limite e precisa de freelancer. */
+  horas_pico_terceirizadas: number
   /** CSP que foi para freelancer no ano, por estouro de horas. */
   csp_terceirizado_ano: number
   renda_liquida_m12: number

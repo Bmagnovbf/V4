@@ -23,7 +23,7 @@ const NET = ['baixo','medio','alto']
 const PCT = Array.from({length:21}, (_,i)=>i*0.05)
 
 console.log('── Estrutura e identidades contábeis ──')
-let naoFinito = 0, fracionario = 0, identidade = 0, capEstouro = 0
+let naoFinito = 0, fracionario = 0, identidade = 0, capEstouro = 0, picoEstouro = 0
 let maiorCarteira = 0
 for (const net of NET) for (const pc of PCT)
 for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for (const res of [0,25000,150000]) {
@@ -49,11 +49,19 @@ for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for 
   // em que a operação banca a retirada, menos o que consome nos meses em que
   // não banca, é a geração de caixa do período.
   if (Math.abs((geracaoPositiva - r.kpis.deficit_retirada_total) - r.kpis.geracao_caixa_periodo) > 0.5) identidade++
+
+  // O pico é o máximo real da série, a quebra fecha no total, e o que fica com
+  // ele nunca passa do limite de horas próprias — acima disso é freelancer.
+  const k = r.kpis
+  if (Math.abs(Math.max(...r.projecao.map(l => l.horas_alocadas)) - k.horas_pico) > 0.5) identidade++
+  if (Math.abs((k.horas_pico_proprias + k.horas_pico_terceirizadas) - k.horas_pico) > 0.5) identidade++
+  if (k.horas_pico_proprias > PARAMS.horas.limite_proprio + 0.5) picoEstouro++
 }
 ok(naoFinito === 0, 'todos os KPIs são números finitos')
 ok(fracionario === 0, 'nenhum contrato fracionário ou negativo')
 ok(identidade === 0, 'identidades contábeis fecham')
 ok(capEstouro === 0, 'carteira nunca passa do teto próprio', `maior observada: ${maiorCarteira}`)
+ok(picoEstouro === 0, 'horas próprias no pico nunca passam do limite')
 
 console.log('\n── Coerência narrativa ──')
 const run = o => simular({ meta_faturamento: 20000, retirada_minima: 8000, reserva_capital: 25000,

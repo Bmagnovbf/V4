@@ -203,8 +203,11 @@ pergunta.
   cada um com selo próprio e leitura em reais, sem veredito agregado. O payback
   é KPI de apoio, não critério — com a entrada baixa ele fica entre M4 e M6 em
   qualquer cenário
-- KPIs: remuneração total, geração de caixa no período, horas de entrega,
+- KPIs: remuneração total, geração de caixa no período, horas no mês de pico,
   projetos no M12, payback da entrada, reserva necessária, capital total
+- **Horas no mês de pico**: a carga total do projeto no mês mais cheio do ano,
+  com a quebra entre as horas dele (teto de 190h) e as que sobram para
+  freelancer — é o pico que dimensiona a contratação, não a média
 - **Geração de caixa no período**: Σ (remuneração total − retirada mínima) nos
   12 meses. Soma as duas fases da rampa — o que a operação consome antes de
   bancar a retirada e o que gera depois. Não inclui a entrada, que é medida

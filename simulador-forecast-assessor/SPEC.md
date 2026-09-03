@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.18 | Setembro/2026**
+**V4 Company | Versão 1.19 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -254,9 +254,20 @@ Saíram do modelo os três parâmetros que faziam o corte — `cap_ativos_parcia
 `limite_proprio_parcial` e `fator_vendas_parcial` —, o chip da tela de input e o
 eixo correspondente da auditoria.
 
-O KPI de horas mostra **as horas dele**, não as do projeto — o excedente aparece
-à parte como entrega de freelancer. Sem essa separação, a tela dizia "112h/mês"
-para alguém que na prática entrega 88h e paga freela pelo resto.
+O KPI de horas é medido no **mês de pico**, não em regime. O número grande é a
+carga do projeto naquele mês — o total que a operação exige, não importa quem
+entrega —, e logo abaixo vem a quebra entre o que cabe nas 190h dele e o que
+sobra para freelancer, em corpo maior que as legendas dos outros cards.
+
+A média em regime escondia justamente o mês que dimensiona a contratação: é no
+pico que ele precisa ter alguém disponível, não na média. Num perfil 35%
+comercial de rede média, a média em regime dá 250h e o pico do M9 chega a 270h —
+80h de freelancer, contra 60h na leitura anterior.
+
+O pico também não é sempre no fim do ano: com perfil muito comercial a carteira
+própria encolhe depois que ele passa a repassar para a Fonte 3, e o pico cai no
+meio do ano (M5–M7). Por isso o card nomeia o mês. Havendo empate, reporta o
+primeiro mês do platô — o mês em que a carga chegou lá.
 
 ### 3.7 Rede de relacionamento
 
@@ -718,7 +729,7 @@ Ordem dos blocos:
 1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
    aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
-3. **KPI cards** — remuneração total, geração de caixa no período, horas de entrega, projetos no M12, payback, reserva necessária
+3. **KPI cards** — remuneração total, geração de caixa no período, horas no mês de pico (com a quebra entre as dele e as de freelancer), projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -915,8 +926,9 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 |---|---|
 | KPIs finitos | divisão por zero, NaN |
 | Contratos inteiros e não-negativos | quebra do acumulador |
-| Identidades contábeis | soma das fontes, CSP, freelas, remuneração, geração de caixa |
+| Identidades contábeis | soma das fontes, CSP, freelas, remuneração, geração de caixa, pico de horas |
 | Carteira ≤ teto próprio | cap aplicado sobre a base errada |
+| Horas próprias no pico ≤ 190h | excedente deixando de virar freelancer |
 | Rede maior nunca rende menos | inversão de monotonicidade |
 | Mais reserva nunca piora o termômetro | threshold invertido |
 | Retirada maior nunca reduz a reserva | sinal trocado |
@@ -1040,6 +1052,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.19 — Setembro/2026:*
+- *O card de horas passa a mostrar o mês de pico: a carga total do projeto naquele mês, com a quebra entre as horas dele e as de freelancer em destaque. A média em regime escondia o mês que dimensiona a contratação*
 
 *SPEC v1.18 — Setembro/2026:*
 - *O card "Resultado do negócio" dá lugar a "Geração de caixa no período": Σ (remuneração total − retirada mínima) nos 12 meses, somando a fase de consumo da rampa e a de geração. O resultado do negócio segue no DRE e no § 3.5, mas como card ele respondia a uma pergunta que a Remuneração total já respondia melhor*

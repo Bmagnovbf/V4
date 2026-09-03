@@ -339,6 +339,10 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     regime.reduce((s, l) => s + l.horas_terceirizadas, 0) / MESES_REGIME
   const horas_proprias_regime = horas_regime - horas_terceirizadas_regime
 
+  // Mês de maior carga. `>` e não `>=` para que um platô no fim do ano reporte
+  // o mês em que a carga chegou lá, não o M12 por acidente de ordenação.
+  const pico = projecao.reduce((a, l) => (l.horas_alocadas > a.horas_alocadas ? l : a), projecao[0])
+
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
 
   // Caixa do Assessor no período: cada mês entrega a remuneração total (o CSP
@@ -358,6 +362,10 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     horas_proprias_regime,
     horas_terceirizadas_regime,
     ocupacao_horas: horas_regime / limiteHorasProprias(),
+    mes_pico: pico.mes,
+    horas_pico: pico.horas_alocadas,
+    horas_pico_proprias: pico.horas_alocadas - pico.horas_terceirizadas,
+    horas_pico_terceirizadas: pico.horas_terceirizadas,
     csp_terceirizado_ano: projecao.reduce((s, l) => s + l.csp_terceirizado, 0),
     renda_liquida_m12: m12.renda_liquida,
     renda_liquida_ano1,
