@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { SimulacaoResult } from '@/types'
+import { SIMULACAO_SCHEMA } from '@/lib/calculator'
 import { fmt } from '@/lib/format'
 import { TermometroViabilidade } from '@/components/Termometro'
 import { KPICards } from '@/components/KPICards'
@@ -15,10 +16,24 @@ export default function DashboardPage() {
   const router = useRouter()
   const [resultado, setResultado] = useState<SimulacaoResult | null>(null)
 
+  // O resultado guardado pode ter sido gerado por uma versão anterior do motor,
+  // sem os KPIs que a tela usa hoje — daí o selo. Sem ele, um campo novo saía
+  // como NaN na tela em vez de mandar refazer a simulação.
   useEffect(() => {
     const raw = sessionStorage.getItem('simulacao')
     if (!raw) { router.replace('/'); return }
-    setResultado(JSON.parse(raw))
+    try {
+      const salvo = JSON.parse(raw) as SimulacaoResult
+      if (salvo?.schema !== SIMULACAO_SCHEMA) {
+        sessionStorage.removeItem('simulacao')
+        router.replace('/')
+        return
+      }
+      setResultado(salvo)
+    } catch {
+      sessionStorage.removeItem('simulacao')
+      router.replace('/')
+    }
   }, [router])
 
   if (!resultado) return null

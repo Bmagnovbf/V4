@@ -27,6 +27,9 @@ import type {
 
 const MESES = 12
 
+/** Ver `SimulacaoResult.schema`. Suba a cada KPI ou campo novo na projeção. */
+export const SIMULACAO_SCHEMA = 2
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -437,5 +440,5 @@ export function simular(input: SimulacaoInput): SimulacaoResult {
     originacao:   m12.receita_originacao / total,
   }
 
-  return { input, projecao, kpis, termometro, mix_m12 }
+  return { schema: SIMULACAO_SCHEMA, input, projecao, kpis, termometro, mix_m12 }
 }

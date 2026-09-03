@@ -200,6 +200,14 @@ export interface MixFontesM12 {
 }
 
 export interface SimulacaoResult {
+  /**
+   * Versão do formato do resultado. O dashboard não recalcula: ele relê o JSON
+   * que a tela de input deixou no `sessionStorage`. Quando o motor ganha KPIs
+   * novos, um resultado guardado antes da mudança renderiza `NaN` nos campos
+   * que ainda não existiam. O selo faz o dashboard descartar o que está velho
+   * e mandar refazer a simulação. Suba a cada campo novo em KPIs ou PLMensal.
+   */
+  schema: number
   input: SimulacaoInput
   projecao: PLMensal[]
   kpis: KPIs

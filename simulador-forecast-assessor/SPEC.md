@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.19 | Setembro/2026**
+**V4 Company | Versão 1.20 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -729,7 +729,28 @@ Ordem dos blocos:
 1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
    aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
-3. **KPI cards** — remuneração total, geração de caixa no período, horas no mês de pico (com a quebra entre as dele e as de freelancer), projetos no M12, payback, reserva necessária
+3. **KPI cards** — remuneração total em regime, geração de caixa no período, horas no mês de pico (com a quebra entre as dele e as de freelancer), projetos no M12, payback, reserva necessária
+
+Os seis cards têm a mesma anatomia — rótulo, número, legenda colada na base —
+e altura uniforme, com a legenda empurrada por `mt-auto`. O card de horas é mais
+alto que os outros por causa da quebra; sem a altura uniforme, os vizinhos
+ficavam com um vão morto embaixo do número.
+
+Verde (`#1A5C38`) marca os dois cards de leitura positiva: remuneração em regime
+e geração de caixa. A geração vira vermelha (`#8B0000`) quando o ano fecha
+consumindo caixa, e é o mesmo vermelho que marca as horas a terceirizar.
+
+**A remuneração é a média dos meses 10 a 12, e o rótulo diz isso.** O M12
+isolado oscila de −17% a +16% contra a média conforme um contrato caia ou não
+naquele mês — num cenário de 70% comercial e rede baixa a série fecha em
+17k · 21k · 24k · 17k, com o M12 num vale. O card mostra o número estável e
+nomeia o período em vez de prometer um mês que não entrega.
+
+**O dashboard não recalcula**: ele relê o JSON que a tela de input deixou no
+`sessionStorage`. Por isso `SimulacaoResult` carrega um `schema`, comparado na
+leitura — um resultado guardado por uma versão anterior do motor é descartado e
+manda refazer a simulação. Sem o selo, um KPI novo saía como `NaN` na tela.
+Suba o `SIMULACAO_SCHEMA` a cada campo novo em `KPIs` ou `PLMensal`.
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -1052,6 +1073,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.20 — Setembro/2026:*
+- *`SimulacaoResult` ganha um selo de versão: o dashboard descarta resultado guardado por uma versão anterior do motor em vez de renderizar `NaN`*
+- *Os KPI cards passam a ter altura uniforme e número maior, com a legenda colada na base. A geração de caixa entra em verde junto com a remuneração*
+- *A remuneração deixa claro no rótulo que é a média dos meses 10 a 12 — o M12 isolado oscila até 17% contra ela*
 
 *SPEC v1.19 — Setembro/2026:*
 - *O card de horas passa a mostrar o mês de pico: a carga total do projeto naquele mês, com a quebra entre as horas dele e as de freelancer em destaque. A média em regime escondia o mês que dimensiona a contratação*
