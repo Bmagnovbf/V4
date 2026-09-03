@@ -340,6 +340,13 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   const horas_proprias_regime = horas_regime - horas_terceirizadas_regime
 
   const deficit_retirada_total = projecao.reduce((s, l) => s + l.deficit_retirada, 0)
+
+  // Caixa do Assessor no período: cada mês entrega a remuneração total (o CSP
+  // das horas dele mais o resultado) e consome a retirada mínima. Enquanto a
+  // operação não alcança a retirada, a parcela é negativa e come a reserva;
+  // depois vira positiva. A soma dos 12 meses diz onde o ano fecha.
+  const geracao_caixa_periodo =
+    projecao.reduce((s, l) => s + l.remuneracao_total, 0) - input.retirada_minima * MESES
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
 
   return {
@@ -362,6 +369,7 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
     pior_caixa,
     investimento_total,
     deficit_retirada_total,
+    geracao_caixa_periodo,
     mes_autossuficiencia,
   }
 }

@@ -145,6 +145,19 @@ export interface KPIs {
   investimento_total: number
   /** Soma do que falta para bancar a retirada mínima. NÃO inclui a entrada. */
   deficit_retirada_total: number
+  /**
+   * Caixa gerado nos 12 meses, já descontada a retirada mínima:
+   * Σ (remuneração total − retirada mínima).
+   *
+   * É a soma algébrica das duas fases da rampa — o consumo dos meses em que a
+   * operação ainda não banca a retirada e a geração dos meses em que passa a
+   * bancar. Responde "no fim do ano eu somei ou consumi caixa?", que é uma
+   * pergunta diferente do `pior_caixa` (retorno do investimento, sem retirada)
+   * e do `deficit_retirada_total` (só a parte consumida, sem a geração).
+   *
+   * A entrada NÃO entra: ela é investimento, medido pelo payback.
+   */
+  geracao_caixa_periodo: number
   /** Primeiro mês em que a renda líquida cobre a retirada mínima. */
   mes_autossuficiencia: number | null
 }

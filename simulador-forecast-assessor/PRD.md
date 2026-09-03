@@ -203,8 +203,12 @@ pergunta.
   cada um com selo próprio e leitura em reais, sem veredito agregado. O payback
   é KPI de apoio, não critério — com a entrada baixa ele fica entre M4 e M6 em
   qualquer cenário
-- KPIs: remuneração total, resultado do negócio, horas de entrega, projetos no
-  M12, payback da entrada, reserva necessária, capital total
+- KPIs: remuneração total, geração de caixa no período, horas de entrega,
+  projetos no M12, payback da entrada, reserva necessária, capital total
+- **Geração de caixa no período**: Σ (remuneração total − retirada mínima) nos
+  12 meses. Soma as duas fases da rampa — o que a operação consome antes de
+  bancar a retirada e o que gera depois. Não inclui a entrada, que é medida
+  pelo payback
 - Cards das 3 fontes com contagem de contratos e share da receita
 - Área empilhada: receita por fonte, 12 meses
 - Barras + linha: renda mensal e caixa acumulado, com meta e retirada marcadas

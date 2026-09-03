@@ -4,8 +4,8 @@ import type { KPIs } from '@/types'
 import { fmt, fmtInt } from '@/lib/format'
 
 function Card({
-  label, value, hint, destaque,
-}: { label: string; value: string; hint?: string; destaque?: boolean }) {
+  label, value, hint, destaque, alerta,
+}: { label: string; value: string; hint?: string; destaque?: boolean; alerta?: boolean }) {
   return (
     <div
       className="bg-white rounded-2xl p-5 shadow-sm"
@@ -14,7 +14,12 @@ function Card({
       <p className="text-xs font-bold uppercase tracking-wide" style={{ color: destaque ? '#1A5C38' : '#7A7A7A' }}>
         {label}
       </p>
-      <p className="text-2xl font-bold mt-1" style={{ color: destaque ? '#1A5C38' : '#1A1A1A' }}>{value}</p>
+      <p
+        className="text-2xl font-bold mt-1"
+        style={{ color: destaque ? '#1A5C38' : alerta ? '#8B0000' : '#1A1A1A' }}
+      >
+        {value}
+      </p>
       {hint && <p className="text-xs mt-1" style={{ color: '#7A7A7A' }}>{hint}</p>}
     </div>
   )
@@ -27,11 +32,21 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
       ? `renda cobre a retirada a partir do M${kpis.mes_autossuficiencia}`
       : 'a renda não alcança a retirada em 12 meses'
 
+  // O card soma as duas fases da rampa: o que a operação consome antes de
+  // bancar a retirada e o que gera depois. O hint nomeia a virada, senão o
+  // número negativo do início da rampa parece resultado ruim, não fase.
+  const caixaHint = kpis.geracao_caixa_periodo < 0
+    ? 'os 12 meses somados ainda consomem caixa, já descontada sua retirada'
+    : kpis.mes_autossuficiencia && kpis.mes_autossuficiencia > 1
+      ? `consome até o M${kpis.mes_autossuficiencia}, gera depois · já descontada sua retirada`
+      : 'nos 12 meses, já descontada sua retirada'
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       <Card label="Remuneração total"  value={fmt(kpis.remuneracao_regime)} destaque
             hint="CSP + resultado, por mês em regime" />
-      <Card label="Resultado do negócio" value={fmt(kpis.renda_regime)} hint="margem depois de remunerar suas horas" />
+      <Card label="Geração de caixa no período" value={fmt(kpis.geracao_caixa_periodo)}
+            alerta={kpis.geracao_caixa_periodo < 0} hint={caixaHint} />
       <Card label="Suas horas de entrega" value={`${fmtInt(kpis.horas_proprias_regime)}h`}
             hint={
               kpis.horas_terceirizadas_regime >= 0.5

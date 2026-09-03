@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.17 | Setembro/2026**
+**V4 Company | Versão 1.18 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -561,6 +561,30 @@ Exemplo (35% comercial, retirada de R$ 8.000):
 Reserva necessária: **R$ 25.831**. Autossuficiência: **M6**. Capital total:
 R$ 45.831 (R$ 20.000 de entrada + R$ 25.831 de giro).
 
+**Geração de caixa no período** fecha a outra metade da conta. O déficit mede só
+a fase de consumo; o candidato também quer saber onde o ano termina, somando a
+fase de geração:
+
+```
+geracao_caixa_periodo = Σ (remuneracao_total(m) − retirada_minima)
+                      = geração dos meses acima da retirada
+                        − deficit_retirada_total
+```
+
+As duas parcelas usam a mesma fórmula, com sinais opostos: antes da
+autossuficiência a operação consome a reserva, depois dela devolve. O total
+responde "no fim de 12 meses eu somei ou consumi caixa?" — pergunta que nem o
+déficit (só a parte consumida) nem o `pior_caixa` (retorno do investimento, sem
+retirada) respondem.
+
+**A entrada também não entra aqui**, pela mesma razão do déficit. E a base é a
+remuneração total, não o resultado do negócio: o CSP das horas dele é dinheiro
+que chega na conta dele, e ignorá-lo faria a simulação pedir reserva para cobrir
+um custo que ele não desembolsa.
+
+No exemplo acima o consumo soma R$ 25.831 até o M5 e a geração dos meses
+seguintes mais que compensa — o ano fecha em **+R$ 109.844** de caixa gerado.
+
 ### 4.7 Caixa
 
 ```
@@ -694,7 +718,7 @@ Ordem dos blocos:
 1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
    aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
-3. **KPI cards** — remuneração total, resultado do negócio, horas de entrega, projetos no M12, payback, reserva necessária
+3. **KPI cards** — remuneração total, geração de caixa no período, horas de entrega, projetos no M12, payback, reserva necessária
 4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
@@ -891,7 +915,7 @@ npx tsc -p tsconfig.test.json && node audit.mjs
 |---|---|
 | KPIs finitos | divisão por zero, NaN |
 | Contratos inteiros e não-negativos | quebra do acumulador |
-| Identidades contábeis | soma das fontes, CSP, freelas, remuneração |
+| Identidades contábeis | soma das fontes, CSP, freelas, remuneração, geração de caixa |
 | Carteira ≤ teto próprio | cap aplicado sobre a base errada |
 | Rede maior nunca rende menos | inversão de monotonicidade |
 | Mais reserva nunca piora o termômetro | threshold invertido |
@@ -1016,6 +1040,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.18 — Setembro/2026:*
+- *O card "Resultado do negócio" dá lugar a "Geração de caixa no período": Σ (remuneração total − retirada mínima) nos 12 meses, somando a fase de consumo da rampa e a de geração. O resultado do negócio segue no DRE e no § 3.5, mas como card ele respondia a uma pergunta que a Remuneração total já respondia melhor*
+- *A auditoria ganha a identidade das duas fases: geração − déficit = geração de caixa do período*
 
 *SPEC v1.17 — Setembro/2026:*
 - *O card "Faturamento em regime" sai dos KPIs: o número já aparece na leitura da simulação, confrontado com a meta, e repetido como card competia com a remuneração total pela atenção*

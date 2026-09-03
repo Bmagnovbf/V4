@@ -30,6 +30,7 @@ for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for 
   const r = simular({ meta_faturamento: meta, retirada_minima: ret, reserva_capital: res,
     pct_comercial: pc, network_level: net })
   for (const v of Object.values(r.kpis)) if (typeof v === 'number' && !Number.isFinite(v)) naoFinito++
+  let geracaoPositiva = 0
   for (const l of r.projecao) {
     for (const c of ['saber_novos_matriz','saber_novos_self','executar_novos_matriz','executar_novos_self',
                      'saber_originados','executar_originados','executar_ativos_matriz','executar_ativos_self','total_ativos'])
@@ -41,8 +42,13 @@ for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for 
     if (Math.abs((l.overhead + l.csp_terceirizado) - l.freelas_total) > 0.5) identidade++
     if (Math.abs((l.renda_liquida + l.csp_proprio) - l.remuneracao_total) > 0.5) identidade++
     if (l.total_ativos > maiorCarteira) maiorCarteira = l.total_ativos
+    geracaoPositiva += Math.max(0, l.remuneracao_total - ret)
     if (l.total_ativos > Math.floor(PARAMS.carteira.cap_ativos * PARAMS.carteira.tolerancia_self)) capEstouro++
   }
+  // As duas fases da rampa têm que fechar no total: o que ele gera nos meses
+  // em que a operação banca a retirada, menos o que consome nos meses em que
+  // não banca, é a geração de caixa do período.
+  if (Math.abs((geracaoPositiva - r.kpis.deficit_retirada_total) - r.kpis.geracao_caixa_periodo) > 0.5) identidade++
 }
 ok(naoFinito === 0, 'todos os KPIs são números finitos')
 ok(fracionario === 0, 'nenhum contrato fracionário ou negativo')
