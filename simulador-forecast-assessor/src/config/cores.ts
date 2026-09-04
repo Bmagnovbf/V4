@@ -7,18 +7,21 @@
 // nada no build.
 //
 // Os tons são mais fechados do que um vermelho/amarelo/laranja puros porque o
-// mesmo valor precisa servir a dois usos com exigências opostas: no gráfico é
-// área grande (onde o `fillOpacity` clareia e a cor volta a ler como a cor
-// nomeada) e no card é texto pequeno em negrito sobre branco, que a versão
-// vívida deixaria ilegível — um amarelo puro fica em 1,7:1 de contraste.
+// mesmo valor precisa servir a dois usos com exigências opostas. No card a cor
+// é FUNDO de selo, com o texto em branco por cima — e fundo de texto branco
+// precisa ser escuro. No gráfico é área grande, e o `fillOpacity` clareia o tom
+// de volta para a cor nomeada (o amarelo, por exemplo, vira `#B69B54`).
+//
+// Os contrastes abaixo são do branco sobre a cor, que é como ela aparece no
+// selo. Todos passam em AA para texto pequeno.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const COR_FONTE = {
-  /** Fonte 1 · Alocação — vermelho. Contraste 6,5:1 sobre branco. */
+  /** Fonte 1 · Alocação — vermelho. Branco sobre ela: 6,5:1. */
   alocacao:     '#C00000',
-  /** Fonte 2 · Self-sourced — amarelo. Contraste 3,8:1. */
-  self_sourced: '#A67C00',
-  /** Fonte 3 · Originação — laranja. Contraste 4,6:1. */
+  /** Fonte 2 · Self-sourced — amarelo. Branco sobre ela: 4,6:1. */
+  self_sourced: '#96700A',
+  /** Fonte 3 · Originação — laranja. Branco sobre ela: 4,6:1. */
   originacao:   '#C0560A',
 } as const
 

@@ -797,18 +797,23 @@ nos dois lugares em que ela aparece: o título do card e a faixa do gráfico. É
 essa repetição que liga os dois blocos — se as definições morassem em arquivos
 diferentes, uma mudança em uma delas quebraria a leitura sem quebrar o build.
 
-| Fonte | Cor | Hex | Contraste sobre branco |
-|---|---|---|---|
-| 1 · Alocação | vermelho | `#C00000` | 6,5:1 |
-| 2 · Self-sourced | amarelo | `#A67C00` | 3,8:1 |
-| 3 · Originação | laranja | `#C0560A` | 4,6:1 |
+| Fonte | Cor | Hex | Branco sobre ela | Faixa no gráfico |
+|---|---|---|---|---|
+| 1 · Alocação | vermelho | `#C00000` | 6,5:1 | `#D34D4D` |
+| 2 · Self-sourced | amarelo | `#96700A` | 4,6:1 | `#B69B54` |
+| 3 · Originação | laranja | `#C0560A` | 4,6:1 | `#D38954` |
 
-Os tons são mais fechados que os puros porque o mesmo valor serve a dois usos de
-exigência oposta: área grande no gráfico, onde o `fillOpacity` de 0,7 clareia o
-tom e ele volta a ler como a cor nomeada, e texto pequeno em negrito no card,
-onde a versão vívida seria ilegível — um amarelo puro (`#EFC211`) fica em 1,7:1.
-O amarelo é o tom que mais cede: a 3,8:1 ele passa em negrito, mas não atinge os
-4,5:1 de texto normal. Nenhum amarelo atinge.
+No card o título é **selo**, não texto colorido: a cor vira fundo e o texto sai
+em branco, como os selos do termômetro. A inversão foi o que resolveu o amarelo.
+Colorir a letra sobre branco o deixava em 3,8:1 — abaixo de AA, e nenhum amarelo
+mais claro chega lá, porque contraste é simétrico e o problema não era a direção
+e sim a luminosidade da cor. Como fundo de texto branco a exigência inverte:
+basta escurecer, e a 3,8:1 do `#A67C00` virou 4,6:1 no `#96700A`.
+
+Escurecer não custou o gráfico. Lá a cor entra com `fillOpacity` de 0,7, que a
+clareia de volta — o amarelo do selo aparece na faixa como `#B69B54`. Os tons
+seguem mais fechados que os puros por isso: o mesmo valor serve a dois usos de
+exigência oposta.
 
 A linha da meta era âmbar (`#D4900A`) e passou a `#3D3D3D`: com a paleta nova
 ela seria lida como mais uma série.
@@ -1136,6 +1141,7 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 *SPEC v1.25 — Setembro/2026:*
 - *As três fontes ganham cor própria — vermelho, amarelo e laranja —, definida em `config/cores.ts` e compartilhada pelo título do card e pela faixa do gráfico*
 - *A linha da meta sai do âmbar para o cinza-escuro, que virou cor de série*
+- *O título do card vira selo — cor de fundo, texto branco —, o que leva o amarelo de 3,8:1 para 4,6:1 e fecha AA nas três fontes*
 
 *SPEC v1.24 — Setembro/2026:*
 - *Os cards das fontes ganham o título "Uma composição possível das três fontes", que enquadra o bloco como ilustrativo em vez de previsão de carteira*

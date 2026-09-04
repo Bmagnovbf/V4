@@ -17,9 +17,19 @@ function Card({
 }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #F2F2F2' }}>
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: cor }}>{titulo}</p>
-        <span className="text-xs font-bold" style={{ color: '#7A7A7A' }}>{split}</span>
+      {/*
+        Selo, e não texto colorido: a cor da fonte vira fundo e o texto sai em
+        branco, como os selos do termômetro. Colorir a letra sobre branco
+        derrubava o contraste do amarelo a 3,8:1; invertido, ele passa em AA.
+      */}
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className="px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide"
+          style={{ backgroundColor: cor, color: '#FFFFFF' }}
+        >
+          {titulo}
+        </span>
+        <span className="text-xs font-bold shrink-0" style={{ color: '#7A7A7A' }}>{split}</span>
       </div>
       <p className="text-xs mt-0.5" style={{ color: '#7A7A7A' }}>{subtitulo}</p>
       <p className="text-2xl font-bold mt-3" style={{ color: '#1A1A1A' }}>{fmt(receita)}</p>
