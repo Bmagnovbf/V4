@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.20 | Setembro/2026**
+**V4 Company | Versão 1.21 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -729,16 +729,28 @@ Ordem dos blocos:
 1. **Cabeçalho** — perfil, meta, retirada, rede, botão Refazer (a dedicação
    aparece como premissa fixa: integral)
 2. **Leitura da simulação** — os dois indicadores individualizados, com selo e leitura em reais
-3. **KPI cards** — remuneração total em regime, geração de caixa no período, horas no mês de pico (com a quebra entre as dele e as de freelancer), projetos no M12, payback, reserva necessária
+3. **KPI cards** — remuneração total em regime, geração de caixa no período, payback, reserva mínima necessária e horas no mês de pico (com a quebra entre as dele e as de freelancer)
 
-Os seis cards têm a mesma anatomia — rótulo, número, legenda colada na base —
-e altura uniforme, com a legenda empurrada por `mt-auto`. O card de horas é mais
-alto que os outros por causa da quebra; sem a altura uniforme, os vizinhos
-ficavam com um vão morto embaixo do número.
+São cinco, em duas faixas: quatro de tamanho padrão num bloco 2×2 à esquerda e o
+de horas — o único fora do padrão — ocupando as duas linhas da terceira coluna,
+de modo que sua base alinhe com a base da segunda linha. No mobile a grade cai
+para duas colunas e o de horas vai inteiro para o fim.
 
-Verde (`#1A5C38`) marca os dois cards de leitura positiva: remuneração em regime
-e geração de caixa. A geração vira vermelha (`#8B0000`) quando o ano fecha
-consumindo caixa, e é o mesmo vermelho que marca as horas a terceirizar.
+Todos têm a mesma anatomia: rótulo, número em `text-3xl`, legenda colada na base
+por `mt-auto`. *Projetos no M12* saiu — a contagem já aparece nos cards das três
+fontes e na tabela do DRE, e ocupava um card sem responder a nenhuma pergunta da
+call.
+
+Cor é sinal, não decoração. Verde (`#1A5C38`) e vermelho (`#8B0000`) pintam
+rótulo, número e borda de três cards: remuneração em regime (sempre verde),
+geração de caixa (vermelha quando o ano fecha consumindo caixa) e reserva mínima
+necessária. É o mesmo vermelho que marca as horas a terceirizar.
+
+**A reserva mínima é binária de propósito.** Verde quando a reserva declarada
+cobre o mínimo exigido, vermelho quando não cobre — a pergunta é só "dá ou não
+dá". O meio-termo (cobre, mas raspando) é justamente o que o eixo de reserva do
+termômetro marca em amarelo, na faixa de 1,0× a 1,5×, com o quanto falta ou
+sobra em reais. Os dois se complementam: o card decide, o termômetro qualifica.
 
 **A remuneração é a média dos meses 10 a 12, e o rótulo diz isso.** O M12
 isolado oscila de −17% a +16% contra a média conforme um contrato caia ou não
@@ -1073,6 +1085,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.21 — Setembro/2026:*
+- *A grade de KPIs vira 2×2 mais o card de horas ocupando as duas linhas da terceira coluna — o único fora do tamanho padrão, com a base alinhada à segunda linha*
+- *Sai o card "Projetos no M12": a contagem já está nos cards das fontes e no DRE*
+- *"Reserva necessária" vira "Reserva mínima necessária" e ganha cor binária contra a reserva declarada, complementando o amarelo do termômetro*
 
 *SPEC v1.20 — Setembro/2026:*
 - *`SimulacaoResult` ganha um selo de versão: o dashboard descarta resultado guardado por uma versão anterior do motor em vez de renderizar `NaN`*

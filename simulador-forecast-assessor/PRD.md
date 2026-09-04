@@ -204,8 +204,12 @@ pergunta.
   é KPI de apoio, não critério — com a entrada baixa ele fica entre M4 e M6 em
   qualquer cenário
 - KPIs: remuneração total em regime (média dos meses 10 a 12), geração de caixa
-  no período, horas no mês de pico, projetos no M12, payback da entrada,
-  reserva necessária, capital total
+  no período, payback da entrada, reserva mínima necessária e horas no mês de
+  pico — quatro cards padrão num bloco 2×2 e o de horas ocupando as duas linhas
+  ao lado
+- A reserva mínima necessária fica verde quando a reserva declarada a cobre e
+  vermelha quando não cobre; o amarelo do "cobre, mas sem margem" é do
+  termômetro
 - **Horas no mês de pico**: a carga total do projeto no mês mais cheio do ano,
   com a quebra entre as horas dele (teto de 190h) e as que sobram para
   freelancer — é o pico que dimensiona a contratação, não a média

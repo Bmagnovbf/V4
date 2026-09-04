@@ -1,6 +1,6 @@
 'use client'
 
-import type { KPIs } from '@/types'
+import type { KPIs, SimulacaoInput } from '@/types'
 import { fmt, fmtInt } from '@/lib/format'
 
 const VERDE   = '#1A5C38'
@@ -56,7 +56,7 @@ function Card({
 }) {
   const cor = tom === 'positivo' ? VERDE : tom === 'negativo' ? VERMELHO : undefined
   return (
-    <Moldura cor={tom === 'positivo' ? VERDE : undefined}>
+    <Moldura cor={cor}>
       <Rotulo cor={cor}>{label}</Rotulo>
       <Numero cor={cor}>{value}</Numero>
       {hint && <Legenda>{hint}</Legenda>}
@@ -107,12 +107,18 @@ function CardHoras({ kpis }: { kpis: KPIs }) {
   )
 }
 
-export function KPICards({ kpis }: { kpis: KPIs }) {
+export function KPICards({ kpis, input }: { kpis: KPIs; input: SimulacaoInput }) {
   const reservaHint = kpis.deficit_retirada_total === 0
     ? 'a renda cobre a retirada desde o M1'
     : kpis.mes_autossuficiencia
       ? `renda cobre a retirada a partir do M${kpis.mes_autossuficiencia}`
       : 'a renda não alcança a retirada em 12 meses'
+
+  // Verde quando a reserva declarada cobre o mínimo exigido, vermelho quando
+  // não cobre. É binário de propósito: o meio-termo — cobre, mas raspando — é
+  // o que o eixo de reserva do termômetro marca em amarelo, com o quanto falta
+  // ou sobra. Aqui a pergunta é só "dá ou não dá".
+  const reservaCobre = kpis.deficit_retirada_total <= input.reserva_capital
 
   // O card soma as duas fases da rampa: o que a operação consome antes de
   // bancar a retirada e o que gera depois. A legenda nomeia a virada, senão o
@@ -123,17 +129,23 @@ export function KPICards({ kpis }: { kpis: KPIs }) {
       ? `consome até o M${kpis.mes_autossuficiencia}, gera depois · já descontada sua retirada`
       : 'nos 12 meses, já descontada sua retirada'
 
+  // Quatro cards de tamanho padrão num bloco 2×2 à esquerda, e o de horas —
+  // o único fora do padrão — ocupando as duas linhas da terceira coluna, de
+  // modo que sua base alinhe com a base da segunda linha. No mobile a grade
+  // cai para duas colunas e o de horas vai inteiro para o fim.
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       <Card label="Remuneração total em regime" value={fmt(kpis.remuneracao_regime)} tom="positivo"
             hint="CSP + resultado · média dos meses 10 a 12" />
       <Card label="Geração de caixa no período" value={fmt(kpis.geracao_caixa_periodo)}
             tom={kpis.geracao_caixa_periodo < 0 ? 'negativo' : 'positivo'} hint={caixaHint} />
-      <CardHoras kpis={kpis} />
-      <Card label="Projetos no M12" value={fmtInt(kpis.projetos_ativos_m12)} hint="ativos simultâneos" />
       <Card label="Payback do investimento" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : 'após o M12'}
             hint="quando o retorno cobre o que você investiu" />
-      <Card label="Reserva necessária" value={fmt(kpis.deficit_retirada_total)} hint={reservaHint} />
+      <Card label="Reserva mínima necessária" value={fmt(kpis.deficit_retirada_total)}
+            tom={reservaCobre ? 'positivo' : 'negativo'} hint={reservaHint} />
+      <div className="col-span-2 lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:row-span-2">
+        <CardHoras kpis={kpis} />
+      </div>
     </div>
   )
 }

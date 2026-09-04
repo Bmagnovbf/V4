@@ -76,7 +76,7 @@ export default function DashboardPage() {
         </div>
 
         <TermometroViabilidade termometro={termometro} kpis={kpis} input={input} />
-        <KPICards kpis={kpis} />
+        <KPICards kpis={kpis} input={input} />
         <CardsFontes m12={m12} mix={mix_m12} />
         <GraficoReceita projecao={projecao} meta={input.meta_faturamento} />
         <GraficoRenda projecao={projecao} retirada={input.retirada_minima} />
