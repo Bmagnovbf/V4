@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import type { PLMensal } from '@/types'
 import { fmt } from '@/lib/format'
+import { COR_FONTE, AREA_OPACIDADE } from '@/config/cores'
 
 export function GraficoReceita({ projecao, meta }: { projecao: PLMensal[]; meta: number }) {
   const data = projecao.map(l => ({
@@ -27,11 +28,15 @@ export function GraficoReceita({ projecao, meta }: { projecao: PLMensal[]; meta:
             <YAxis tick={{ fontSize: 11, fill: '#7A7A7A' }} tickFormatter={(v: number) => `${v / 1000}K`} />
             <Tooltip formatter={(value: unknown) => fmt(Number(value))} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <ReferenceLine y={meta} stroke="#D4900A" strokeDasharray="4 4"
-              label={{ value: 'meta', position: 'insideTopRight', fill: '#D4900A', fontSize: 11 }} />
-            <Area type="monotone" dataKey="Fonte 1 · Alocação"     stackId="1" stroke="#7A7A7A" fill="#7A7A7A" />
-            <Area type="monotone" dataKey="Fonte 2 · Self-sourced" stackId="1" stroke="#8B0000" fill="#8B0000" />
-            <Area type="monotone" dataKey="Fonte 3 · Originação"   stackId="1" stroke="#D4900A" fill="#D4900A" />
+            {/* Neutra: o âmbar de antes virou cor de fonte e passaria por série. */}
+            <ReferenceLine y={meta} stroke="#3D3D3D" strokeDasharray="4 4"
+              label={{ value: 'meta', position: 'insideTopRight', fill: '#3D3D3D', fontSize: 11 }} />
+            <Area type="monotone" dataKey="Fonte 1 · Alocação"     stackId="1"
+                  stroke={COR_FONTE.alocacao}     fill={COR_FONTE.alocacao}     fillOpacity={AREA_OPACIDADE} />
+            <Area type="monotone" dataKey="Fonte 2 · Self-sourced" stackId="1"
+                  stroke={COR_FONTE.self_sourced} fill={COR_FONTE.self_sourced} fillOpacity={AREA_OPACIDADE} />
+            <Area type="monotone" dataKey="Fonte 3 · Originação"   stackId="1"
+                  stroke={COR_FONTE.originacao}   fill={COR_FONTE.originacao}   fillOpacity={AREA_OPACIDADE} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

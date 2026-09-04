@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.24 | Setembro/2026**
+**V4 Company | Versão 1.25 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -791,6 +791,27 @@ Fonte 1 e *"Você origina · rede opera"* na Fonte 3. Na Fonte 3 quem opera é
 outro Assessor credenciado, não a matriz — dizer "outro opera" deixava no ar
 quem era esse outro.
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
+
+Cada fonte tem uma cor, definida uma única vez em `src/config/cores.ts` e usada
+nos dois lugares em que ela aparece: o título do card e a faixa do gráfico. É
+essa repetição que liga os dois blocos — se as definições morassem em arquivos
+diferentes, uma mudança em uma delas quebraria a leitura sem quebrar o build.
+
+| Fonte | Cor | Hex | Contraste sobre branco |
+|---|---|---|---|
+| 1 · Alocação | vermelho | `#C00000` | 6,5:1 |
+| 2 · Self-sourced | amarelo | `#A67C00` | 3,8:1 |
+| 3 · Originação | laranja | `#C0560A` | 4,6:1 |
+
+Os tons são mais fechados que os puros porque o mesmo valor serve a dois usos de
+exigência oposta: área grande no gráfico, onde o `fillOpacity` de 0,7 clareia o
+tom e ele volta a ler como a cor nomeada, e texto pequeno em negrito no card,
+onde a versão vívida seria ilegível — um amarelo puro (`#EFC211`) fica em 1,7:1.
+O amarelo é o tom que mais cede: a 3,8:1 ele passa em negrito, mas não atinge os
+4,5:1 de texto normal. Nenhum amarelo atinge.
+
+A linha da meta era âmbar (`#D4900A`) e passou a `#3D3D3D`: com a paleta nova
+ela seria lida como mais uma série.
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
 7. **Tabela do DRE** — 12 linhas × 12 meses + coluna Ano, scroll horizontal
 
@@ -1111,6 +1132,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.25 — Setembro/2026:*
+- *As três fontes ganham cor própria — vermelho, amarelo e laranja —, definida em `config/cores.ts` e compartilhada pelo título do card e pela faixa do gráfico*
+- *A linha da meta sai do âmbar para o cinza-escuro, que virou cor de série*
 
 *SPEC v1.24 — Setembro/2026:*
 - *Os cards das fontes ganham o título "Uma composição possível das três fontes", que enquadra o bloco como ilustrativo em vez de previsão de carteira*
