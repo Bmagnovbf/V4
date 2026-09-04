@@ -7,6 +7,29 @@ import type { PLMensal } from '@/types'
 import { fmt } from '@/lib/format'
 import { COR_FONTE, AREA_OPACIDADE } from '@/config/cores'
 
+/**
+ * Rótulo da linha de meta, desenhado à mão sobre ela.
+ *
+ * A meta não entra na legenda — não é uma série —, então o valor precisa estar
+ * na própria linha, senão o tracejado é um traço sem significado. Fica acima
+ * dela e encostado à esquerda, onde a área ainda é baixa nos primeiros meses.
+ *
+ * O contorno branco atrás do texto (`paintOrder`) garante a leitura quando a
+ * meta é baixa e a linha cruza a área colorida já no começo do ano.
+ */
+function RotuloMeta({ viewBox, valor }: { viewBox?: { x?: number; y?: number }; valor: number }) {
+  const x = viewBox?.x ?? 0
+  const y = viewBox?.y ?? 0
+  return (
+    <text
+      x={x + 8} y={y - 7} fontSize={11} fontWeight="bold" fill="#3D3D3D"
+      stroke="#FFFFFF" strokeWidth={3} paintOrder="stroke"
+    >
+      meta {fmt(valor)}
+    </text>
+  )
+}
+
 export function GraficoReceita({ projecao, meta }: { projecao: PLMensal[]; meta: number }) {
   const data = projecao.map(l => ({
     mes: `M${l.mes}`,
@@ -30,7 +53,7 @@ export function GraficoReceita({ projecao, meta }: { projecao: PLMensal[]; meta:
             <Legend wrapperStyle={{ fontSize: 12 }} />
             {/* Neutra: o âmbar de antes virou cor de fonte e passaria por série. */}
             <ReferenceLine y={meta} stroke="#3D3D3D" strokeDasharray="4 4"
-              label={{ value: 'meta', position: 'insideTopRight', fill: '#3D3D3D', fontSize: 11 }} />
+              label={<RotuloMeta valor={meta} />} />
             <Area type="monotone" dataKey="Fonte 1 · Alocação"     stackId="1"
                   stroke={COR_FONTE.alocacao}     fill={COR_FONTE.alocacao}     fillOpacity={AREA_OPACIDADE} />
             <Area type="monotone" dataKey="Fonte 2 · Self-sourced" stackId="1"

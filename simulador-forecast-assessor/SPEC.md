@@ -817,6 +817,14 @@ exigência oposta.
 
 A linha da meta era âmbar (`#D4900A`) e passou a `#3D3D3D`: com a paleta nova
 ela seria lida como mais uma série.
+
+A meta **não aparece na legenda** — não é uma série —, então o valor vai escrito
+sobre a própria linha (`meta R$ 20.000`), acima dela e encostado à esquerda, onde
+a área ainda é baixa nos primeiros meses. Sem isso o tracejado é um traço sem
+significado. O rótulo é desenhado à mão a partir do `viewBox` que o recharts
+injeta no elemento, e leva um contorno branco por trás (`paintOrder="stroke"`)
+para seguir legível quando a meta é baixa e a linha cruza a área colorida logo
+no começo do ano.
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
 7. **Tabela do DRE** — 12 linhas × 12 meses + coluna Ano, scroll horizontal
 
@@ -1140,7 +1148,7 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 *SPEC v1.25 — Setembro/2026:*
 - *As três fontes ganham cor própria — vermelho, amarelo e laranja —, definida em `config/cores.ts` e compartilhada pelo título do card e pela faixa do gráfico*
-- *A linha da meta sai do âmbar para o cinza-escuro, que virou cor de série*
+- *A linha da meta sai do âmbar para o cinza-escuro, que virou cor de série, e passa a exibir o valor sobre ela — a meta não entra na legenda*
 - *O título do card vira selo — cor de fundo, texto branco —, o que leva o amarelo de 3,8:1 para 4,6:1 e fecha AA nas três fontes*
 
 *SPEC v1.24 — Setembro/2026:*
