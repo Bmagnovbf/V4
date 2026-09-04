@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.26 | Setembro/2026**
+**V4 Company | Versão 1.27 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -856,8 +856,13 @@ A **linha** é a `remuneracao_total` do mês: o resultado do negócio mais o CSP
 das horas que ele mesmo entrega. Não é a linha *Renda líquida* do DRE, que é só
 o resultado — os dois nomes convivem na tela e é preciso cuidado com eles. A
 linha aqui responde "quanto entra no meu bolso neste mês", que é o que a
-tracejada da retirada mínima quer comparar; a tracejada saiu do vermelho para o
-cinza, já que o vermelho passou a significar coluna negativa.
+tracejada da retirada mínima quer comparar. Ela é vermelha e grossa (3px):
+precisa se impor sobre colunas que chegam a R$ 110.000 sem competir com elas.
+
+A tracejada da retirada e a da meta usam o mesmo rótulo desenhado à mão
+(`RotuloLinha`): cinza-escuro com contorno branco, acima da linha e à esquerda.
+O `position` nomeado do recharts encostava o texto na direita, em cima das
+colunas cheias, num cinza claro — sumia.
 
 Até set/2026 os papéis eram os inversos — barras de resultado e linha de caixa —,
 e o caixa desenhado era o do payback, que ignora a retirada. O gráfico e o card
@@ -1181,6 +1186,9 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.27 — Setembro/2026:*
+- *A linha de remuneração fica vermelha e grossa; o rótulo das linhas de referência vira componente compartilhado (`RotuloLinha`) e passa a exibir o valor, legível sobre qualquer série*
 
 *SPEC v1.26 — Setembro/2026:*
 - *A projeção ganha `geracao_caixa_acumulada`, a série mensal por trás do KPI de geração de caixa — parte de zero e desconta a retirada, sem a entrada (`SIMULACAO_SCHEMA` vai a 3)*
