@@ -28,7 +28,7 @@ import type {
 const MESES = 12
 
 /** Ver `SimulacaoResult.schema`. Suba a cada KPI ou campo novo na projeção. */
-export const SIMULACAO_SCHEMA = 2
+export const SIMULACAO_SCHEMA = 3
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -242,6 +242,9 @@ function projetar(input: SimulacaoInput): PLMensal[] {
 
   const linhas: PLMensal[] = []
   let caixa = -PARAMS.entrada.a_vista
+  // Caixa do bolso dele: parte de zero (a entrada é investimento, não giro) e
+  // acumula o que sobra depois da retirada mínima, mês a mês.
+  let geracaoAcum = 0
 
   for (let i = 0; i < MESES; i++) {
     const mes = i + 1
@@ -305,6 +308,8 @@ function projetar(input: SimulacaoInput): PLMensal[] {
     const fluxo_caixa = remuneracao_total
     caixa += fluxo_caixa
 
+    geracaoAcum += remuneracao_total - input.retirada_minima
+
     linhas.push({
       mes, ...c,
       receita_saber_matriz, receita_saber_self,
@@ -315,6 +320,7 @@ function projetar(input: SimulacaoInput): PLMensal[] {
       overhead, freelas_total, horas_alocadas, horas_terceirizadas,
       renda_liquida, remuneracao_total, deficit_retirada,
       fluxo_caixa, caixa_acumulado: caixa,
+      geracao_caixa_acumulada: geracaoAcum,
     })
   }
 
@@ -351,9 +357,8 @@ function calculaKPIs(input: SimulacaoInput, projecao: PLMensal[]): KPIs {
   // Caixa do Assessor no período: cada mês entrega a remuneração total (o CSP
   // das horas dele mais o resultado) e consome a retirada mínima. Enquanto a
   // operação não alcança a retirada, a parcela é negativa e come a reserva;
-  // depois vira positiva. A soma dos 12 meses diz onde o ano fecha.
-  const geracao_caixa_periodo =
-    projecao.reduce((s, l) => s + l.remuneracao_total, 0) - input.retirada_minima * MESES
+  // depois vira positiva. O KPI é onde a série fecha, no M12.
+  const geracao_caixa_periodo = m12.geracao_caixa_acumulada
   const mes_autossuficiencia = projecao.find(l => l.deficit_retirada === 0)?.mes ?? null
 
   return {

@@ -103,6 +103,16 @@ export interface PLMensal extends Carteira {
   deficit_retirada: number
   fluxo_caixa: number
   caixa_acumulado: number
+  /**
+   * Caixa do Assessor acumulado até o mês, já descontada a retirada mínima:
+   * Σ (remuneração total − retirada mínima) do M1 até aqui.
+   *
+   * É a série mensal por trás do KPI `geracao_caixa_periodo`, que é o valor
+   * dela no M12. Não confundir com `caixa_acumulado`, que mede outra coisa:
+   * o retorno do investimento (parte da entrada, ignora a retirada) e serve
+   * ao payback. Este aqui parte de zero e responde ao bolso dele.
+   */
+  geracao_caixa_acumulada: number
 }
 
 export interface KPIs {

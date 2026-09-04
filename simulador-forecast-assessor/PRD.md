@@ -221,7 +221,9 @@ pergunta.
   título "Uma composição possível das três fontes" — o bloco é ilustrativo, não
   previsão de como a carteira vai se repartir
 - Área empilhada: receita por fonte, 12 meses
-- Barras + linha: renda mensal e caixa acumulado, com meta e retirada marcadas
+- Colunas + linha: caixa acumulado (mesma conta do card de geração de caixa —
+  desconta a retirada mínima, ignora a entrada; vermelho enquanto negativo) e a
+  remuneração total do mês, com a retirada mínima marcada
 - Tabela do DRE completo, linha a linha, com coluna de ano
 
 ---

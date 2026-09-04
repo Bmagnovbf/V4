@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.25 | Setembro/2026**
+**V4 Company | Versão 1.26 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -609,6 +609,25 @@ payback            = primeiro m com caixa_acumulado(m) ≥ 0
 O payback mede o **retorno do investimento**: a entrada de R$ 20.000 amortizada
 pelo que o negócio devolve ao Assessor.
 
+**São duas séries de caixa, e elas respondem a perguntas diferentes.** Além do
+`caixa_acumulado` acima, a projeção carrega `geracao_caixa_acumulada`:
+
+```
+geracao_caixa_acumulada(0) = 0                            (a entrada não entra)
+geracao_caixa_acumulada(m) = geracao_caixa_acumulada(m−1)
+                             + remuneracao_total(m) − retirada_minima
+```
+
+Uma parte da entrada e ignora a retirada, porque mede o investimento; a outra
+parte de zero e desconta a retirada, porque mede o bolso dele. É a segunda que o
+KPI `geracao_caixa_periodo` reporta (é o valor dela no M12) e que o gráfico
+desenha em colunas.
+
+O vale dessa série é, por construção, a **reserva mínima necessária**: o ponto
+mais fundo do que ele precisa atravessar antes da operação passar a somar. Num
+cenário de 35% comercial e rede média, a série toca −R$ 19.109 no M5 e o card de
+reserva pede R$ 19.110.
+
 **A retirada mínima não entra aqui.** Ela é fluxo de caixa pessoal dele, não
 custo do investimento — e já é medida pelo eixo de reserva do termômetro.
 Descontá-la também no payback misturaria duas perguntas diferentes e contaria o
@@ -825,7 +844,24 @@ significado. O rótulo é desenhado à mão a partir do `viewBox` que o recharts
 injeta no elemento, e leva um contorno branco por trás (`paintOrder="stroke"`)
 para seguir legível quando a meta é baixa e a linha cruza a área colorida logo
 no começo do ano.
-6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
+6. **Gráfico combinado** — colunas de caixa acumulado + linha de remuneração do mês, com a retirada mínima em linha tracejada
+
+As **colunas** são o caixa acumulado pelo racional do card de geração de caixa:
+partem de zero, descontam a retirada mínima mês a mês e ignoram a entrada. Saem
+vermelhas enquanto o acumulado é negativo e verdes depois — a virada é a única
+parte da rampa que um número sozinho não conta. Elas tocam o fundo exatamente no
+valor da *reserva mínima necessária*, o que amarra os dois blocos da tela.
+
+A **linha** é a `remuneracao_total` do mês: o resultado do negócio mais o CSP
+das horas que ele mesmo entrega. Não é a linha *Renda líquida* do DRE, que é só
+o resultado — os dois nomes convivem na tela e é preciso cuidado com eles. A
+linha aqui responde "quanto entra no meu bolso neste mês", que é o que a
+tracejada da retirada mínima quer comparar; a tracejada saiu do vermelho para o
+cinza, já que o vermelho passou a significar coluna negativa.
+
+Até set/2026 os papéis eram os inversos — barras de resultado e linha de caixa —,
+e o caixa desenhado era o do payback, que ignora a retirada. O gráfico e o card
+diziam coisas diferentes sobre a mesma palavra.
 7. **Tabela do DRE** — 12 linhas × 12 meses + coluna Ano, scroll horizontal
 
 A tabela do DRE é o que sustenta a conversa quando o candidato pergunta "de onde
@@ -1145,6 +1181,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.26 — Setembro/2026:*
+- *A projeção ganha `geracao_caixa_acumulada`, a série mensal por trás do KPI de geração de caixa — parte de zero e desconta a retirada, sem a entrada (`SIMULACAO_SCHEMA` vai a 3)*
+- *No gráfico combinado, caixa acumulado vira coluna (vermelha enquanto negativa, verde depois) e a remuneração total do mês vira linha; antes eram os papéis inversos, e o caixa desenhado era o do payback*
 
 *SPEC v1.25 — Setembro/2026:*
 - *As três fontes ganham cor própria — vermelho, amarelo e laranja —, definida em `config/cores.ts` e compartilhada pelo título do card e pela faixa do gráfico*

@@ -53,6 +53,14 @@ for (const meta of [5000,20000,40000]) for (const ret of [2000,8000,15000]) for 
   // O pico é o máximo real da série, a quebra fecha no total, e o que fica com
   // ele nunca passa do limite de horas próprias — acima disso é freelancer.
   const k = r.kpis
+  // A série mensal do caixa fecha no KPI, e cada passo é exatamente a
+  // remuneração do mês menos a retirada — é o que o gráfico desenha.
+  if (Math.abs(r.projecao[11].geracao_caixa_acumulada - k.geracao_caixa_periodo) > 0.5) identidade++
+  for (let i = 0; i < 12; i++) {
+    const ant = i === 0 ? 0 : r.projecao[i-1].geracao_caixa_acumulada
+    const passo = r.projecao[i].geracao_caixa_acumulada - ant
+    if (Math.abs(passo - (r.projecao[i].remuneracao_total - ret)) > 0.5) identidade++
+  }
   if (Math.abs(Math.max(...r.projecao.map(l => l.horas_alocadas)) - k.horas_pico) > 0.5) identidade++
   if (Math.abs((k.horas_pico_proprias + k.horas_pico_terceirizadas) - k.horas_pico) > 0.5) identidade++
   if (k.horas_pico_proprias > PARAMS.horas.limite_proprio + 0.5) picoEstouro++
