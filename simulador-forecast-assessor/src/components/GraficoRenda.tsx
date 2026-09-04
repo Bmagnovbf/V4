@@ -8,7 +8,18 @@ import type { PLMensal } from '@/types'
 import { fmt } from '@/lib/format'
 import { RotuloLinha } from './RotuloLinha'
 
+/** Caixa acumulado positivo: cor cheia, é o estado que a leitura procura. */
 const VERDE = '#1A5C38'
+/**
+ * Caixa acumulado negativo: vermelho puxado para o rosé, opaco.
+ *
+ * A fase de consumo é fase, não fracasso — o vermelho fechado a acusava como
+ * problema e brigava com a linha de remuneração, que usa o mesmo tom. Em
+ * pastel ela recua para o fundo e deixa a virada para o verde ainda mais
+ * evidente, que é o que a coluna tem para contar.
+ */
+const ROSA = '#E9AFAF'
+/** Linha de remuneração do mês. */
 const VERMELHO = '#8B0000'
 
 /**
@@ -55,9 +66,9 @@ export function GraficoRenda({
               O `fill` da barra não pinta nada — cada mês tem sua Cell —, mas é
               ele que dá cor ao quadradinho da legenda, que sem isso sai preto.
             */}
-            <Bar dataKey="Caixa acumulado" fill={VERDE} fillOpacity={0.85}>
+            <Bar dataKey="Caixa acumulado" fill={VERDE}>
               {data.map(d => (
-                <Cell key={d.mes} fill={d['Caixa acumulado'] < 0 ? VERMELHO : VERDE} />
+                <Cell key={d.mes} fill={d['Caixa acumulado'] < 0 ? ROSA : VERDE} />
               ))}
             </Bar>
             <Line type="monotone" dataKey="Remuneração total"

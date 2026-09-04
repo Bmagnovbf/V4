@@ -848,8 +848,11 @@ no começo do ano.
 
 As **colunas** são o caixa acumulado pelo racional do card de geração de caixa:
 partem de zero, descontam a retirada mínima mês a mês e ignoram a entrada. Saem
-vermelhas enquanto o acumulado é negativo e verdes depois — a virada é a única
-parte da rampa que um número sozinho não conta. Elas tocam o fundo exatamente no
+em rosé (`#E9AFAF`) enquanto o acumulado é negativo e em verde cheio
+(`#1A5C38`) depois — a virada é a única parte da rampa que um número sozinho não
+conta. O pastel é deliberado: a fase de consumo é fase, não fracasso, e no
+vermelho fechado ela era acusada como problema, além de brigar com a linha de
+remuneração, que usa esse tom. Elas tocam o fundo exatamente no
 valor da *reserva mínima necessária*, o que amarra os dois blocos da tela.
 
 A **linha** é a `remuneracao_total` do mês: o resultado do negócio mais o CSP
@@ -1189,6 +1192,7 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 *SPEC v1.27 — Setembro/2026:*
 - *A linha de remuneração fica vermelha e grossa; o rótulo das linhas de referência vira componente compartilhado (`RotuloLinha`) e passa a exibir o valor, legível sobre qualquer série*
+- *As colunas de caixa negativo passam do vermelho fechado ao rosé opaco; as positivas ficam em verde cheio*
 
 *SPEC v1.26 — Setembro/2026:*
 - *A projeção ganha `geracao_caixa_acumulada`, a série mensal por trás do KPI de geração de caixa — parte de zero e desconta a retirada, sem a entrada (`SIMULACAO_SCHEMA` vai a 3)*
