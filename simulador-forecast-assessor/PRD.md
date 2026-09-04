@@ -217,7 +217,9 @@ pergunta.
   12 meses. Soma as duas fases da rampa — o que a operação consome antes de
   bancar a retirada e o que gera depois. Não inclui a entrada, que é medida
   pelo payback
-- Cards das 3 fontes com contagem de contratos e share da receita
+- Cards das 3 fontes com a receita do 12º mês e o share de cada uma, sob o
+  título "Uma composição possível das três fontes" — o bloco é ilustrativo, não
+  previsão de como a carteira vai se repartir
 - Área empilhada: receita por fonte, 12 meses
 - Barras + linha: renda mensal e caixa acumulado, com meta e retirada marcadas
 - Tabela do DRE completo, linha a linha, com coluna de ano

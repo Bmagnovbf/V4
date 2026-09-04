@@ -1,13 +1,15 @@
 'use client'
 
 import type { PLMensal, MixFontesM12 } from '@/types'
-import { fmt, fmtPct, fmtInt } from '@/lib/format'
+import { fmt, fmtPct } from '@/lib/format'
 
 function Card({
-  titulo, subtitulo, split, receita, share, detalhe,
+  titulo, subtitulo, split, receita, share, rodape,
 }: {
   titulo: string; subtitulo: string; split: string
-  receita: number; share: number; detalhe: string
+  receita: number; share: number
+  /** Substitui o rodapé padrão quando a fonte não movimentou nada no M12. */
+  rodape?: string
 }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm" style={{ border: '1px solid #F2F2F2' }}>
@@ -17,37 +19,49 @@ function Card({
       </div>
       <p className="text-xs mt-0.5" style={{ color: '#7A7A7A' }}>{subtitulo}</p>
       <p className="text-2xl font-bold mt-3" style={{ color: '#1A1A1A' }}>{fmt(receita)}</p>
-      <div className="mt-2 flex justify-between text-xs" style={{ color: '#7A7A7A' }}>
-        <span>{detalhe}</span>
-        <span className="font-bold">{fmtPct(share * 100, 0)}</span>
+      <div className="mt-2 flex justify-between gap-2 text-xs" style={{ color: '#7A7A7A' }}>
+        <span>{rodape ?? 'receita do 12º mês'}</span>
+        <span className="font-bold shrink-0">{fmtPct(share * 100, 0)} do total</span>
       </div>
     </div>
   )
 }
 
 export function CardsFontes({ m12, mix }: { m12: PLMensal; mix: MixFontesM12 }) {
-  const n = fmtInt
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <Card
-        titulo="Fonte 1 — Alocação" subtitulo="Matriz origina · você opera" split="30 / 35%"
-        receita={m12.receita_saber_matriz + m12.receita_executar_matriz} share={mix.alocacao}
-        detalhe={`${n(m12.saber_novos_matriz)} Saber · ${n(m12.executar_ativos_matriz)} Executar`}
-      />
-      <Card
-        titulo="Fonte 2 — Self-sourced" subtitulo="Você origina e opera" split="80%"
-        receita={m12.receita_saber_self + m12.receita_executar_self} share={mix.self_sourced}
-        detalhe={`${n(m12.saber_novos_self)} Saber · ${n(m12.executar_ativos_self)} Executar`}
-      />
-      <Card
-        titulo="Fonte 3 — Originação" subtitulo="Você origina · outro opera" split="CAC"
-        receita={m12.receita_originacao} share={mix.originacao}
-        detalhe={
-          m12.receita_originacao > 0
-            ? `${n(m12.saber_originados + m12.executar_originados)} contrato(s) repassado(s)`
-            : 'sua originação cabe na carteira'
-        }
-      />
+    <div className="space-y-3">
+      {/*
+        O título existe para desarmar a leitura de previsão. O motor entrega UMA
+        combinação coerente com o perfil declarado, não a divisão que a carteira
+        dele vai ter — dois Assessores com o mesmo faturamento podem chegar lá
+        por caminhos bem diferentes entre as três fontes.
+      */}
+      <div>
+        <p className="text-sm font-bold uppercase tracking-wide" style={{ color: '#3D3D3D' }}>
+          Uma composição possível das três fontes
+        </p>
+        <p className="text-xs mt-1" style={{ color: '#7A7A7A' }}>
+          Ilustrativo: o mesmo faturamento pode se dividir de várias formas entre as fontes.
+          Esta é uma delas, coerente com o perfil que você declarou — não uma previsão de como
+          a sua carteira vai se repartir.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card
+          titulo="Fonte 1 — Alocação" subtitulo="Rede origina · você opera" split="30 / 35%"
+          receita={m12.receita_saber_matriz + m12.receita_executar_matriz} share={mix.alocacao}
+        />
+        <Card
+          titulo="Fonte 2 — Self-sourced" subtitulo="Você origina e opera" split="80%"
+          receita={m12.receita_saber_self + m12.receita_executar_self} share={mix.self_sourced}
+        />
+        <Card
+          titulo="Fonte 3 — Originação" subtitulo="Você origina · rede opera" split="CAC"
+          receita={m12.receita_originacao} share={mix.originacao}
+          rodape={m12.receita_originacao > 0 ? undefined : 'sua originação cabe na carteira'}
+        />
+      </div>
     </div>
   )
 }

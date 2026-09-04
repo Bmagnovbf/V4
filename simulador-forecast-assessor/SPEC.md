@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.23 | Setembro/2026**
+**V4 Company | Versão 1.24 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -737,9 +737,8 @@ de modo que sua base alinhe com a base da segunda linha. No mobile a grade cai
 para duas colunas e o de horas vai inteiro para o fim.
 
 Todos têm a mesma anatomia: rótulo, número em `text-3xl`, legenda colada na base
-por `mt-auto`. *Projetos no M12* saiu — a contagem já aparece nos cards das três
-fontes e na tabela do DRE, e ocupava um card sem responder a nenhuma pergunta da
-call.
+por `mt-auto`. *Projetos no M12* saiu — a contagem está na tabela do DRE, linha a
+linha, e ocupava um card sem responder a nenhuma pergunta da call.
 
 Cor é sinal, não decoração. Verde (`#1A5C38`) e vermelho (`#8B0000`) pintam
 rótulo, número e borda dos quatro cards padrão: remuneração em regime (sempre
@@ -772,7 +771,25 @@ nomeia o período em vez de prometer um mês que não entrega.
 leitura — um resultado guardado por uma versão anterior do motor é descartado e
 manda refazer a simulação. Sem o selo, um KPI novo saía como `NaN` na tela.
 Suba o `SIMULACAO_SCHEMA` a cada campo novo em `KPIs` ou `PLMensal`.
-4. **Cards das 3 fontes** — receita do M12, split aplicado, contagem, share
+4. **Cards das 3 fontes** — receita do M12, split aplicado, share
+
+Vêm sob o título *"Uma composição possível das três fontes"*, com uma linha que
+diz o que ele é: ilustrativo. O motor entrega **uma** combinação coerente com o
+perfil declarado, não a divisão que a carteira dele vai ter — dois Assessores
+que chegam ao mesmo faturamento podem repartir as fontes de formas bem
+diferentes. Sem esse enquadramento, os três cards são lidos como previsão de
+carteira, que é o que o modelo menos sabe dizer.
+
+A contagem de contratos (*"1 Saber · 9 Executar"*) saiu dos cards: colocava no
+mesmo bloco dois níveis de precisão diferentes — a receita, que o motor projeta
+com confiança, e o mix de produto, que é premissa de calibração. Cada card diz
+agora que o valor é a **receita do 12º mês** e quanto ela pesa no total. A
+contagem segue disponível na tabela do DRE.
+
+Os subtítulos nomeiam a rede, não a matriz: *"Rede origina · você opera"* na
+Fonte 1 e *"Você origina · rede opera"* na Fonte 3. Na Fonte 3 quem opera é
+outro Assessor credenciado, não a matriz — dizer "outro opera" deixava no ar
+quem era esse outro.
 5. **Gráfico de área** — receita por fonte, 12 meses, empilhada
 6. **Gráfico combinado** — barras de renda mensal + linha de caixa acumulado, com a meta em linha tracejada
 7. **Tabela do DRE** — 12 linhas × 12 meses + coluna Ano, scroll horizontal
@@ -1095,6 +1112,11 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 ---
 
+*SPEC v1.24 — Setembro/2026:*
+- *Os cards das fontes ganham o título "Uma composição possível das três fontes", que enquadra o bloco como ilustrativo em vez de previsão de carteira*
+- *Sai a contagem de contratos dos cards; cada um diz que o valor é a receita do 12º mês e quanto pesa no total*
+- *Subtítulos das Fontes 1 e 3 passam a nomear a rede: "Rede origina · você opera" e "Você origina · rede opera"*
+
 *SPEC v1.23 — Setembro/2026:*
 - *A quebra do card de horas vai para o mesmo corpo do total (`text-3xl`) e ganha o rótulo "Sugestão de distribuição" — é uma proposta de alocação, não um dado apurado*
 
@@ -1104,7 +1126,7 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 *SPEC v1.21 — Setembro/2026:*
 - *A grade de KPIs vira 2×2 mais o card de horas ocupando as duas linhas da terceira coluna — o único fora do tamanho padrão, com a base alinhada à segunda linha*
-- *Sai o card "Projetos no M12": a contagem já está nos cards das fontes e no DRE*
+- *Sai o card "Projetos no M12": a contagem já está na tabela do DRE*
 - *"Reserva necessária" vira "Reserva mínima necessária" e ganha cor binária contra a reserva declarada, complementando o amarelo do termômetro*
 
 *SPEC v1.20 — Setembro/2026:*
