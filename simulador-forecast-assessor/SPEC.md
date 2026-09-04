@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.21 | Setembro/2026**
+**V4 Company | Versão 1.22 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -742,9 +742,18 @@ fontes e na tabela do DRE, e ocupava um card sem responder a nenhuma pergunta da
 call.
 
 Cor é sinal, não decoração. Verde (`#1A5C38`) e vermelho (`#8B0000`) pintam
-rótulo, número e borda de três cards: remuneração em regime (sempre verde),
-geração de caixa (vermelha quando o ano fecha consumindo caixa) e reserva mínima
-necessária. É o mesmo vermelho que marca as horas a terceirizar.
+rótulo, número e borda dos quatro cards padrão: remuneração em regime (sempre
+verde), geração de caixa (vermelha quando o ano fecha consumindo caixa), reserva
+mínima necessária e payback. É o mesmo vermelho que marca as horas a
+terceirizar.
+
+**O payback é verde abaixo do M7.** Quase sempre verde, e é esse o ponto: com a
+entrada de R$ 20.000, 95% das 1.701 combinações do espaço de inputs pagam em M5
+ou M6, e o card confirma um traço do produto em vez de deixar a leitura solta. O
+limite não é decorativo — o vermelho aparece no perfil 100% comercial, que não
+opera nada e vive do CAC da Fonte 3: M7 com rede alta, M8 com média, M11 com
+baixa. É também o limite que passa a valer sozinho no dia em que a entrada
+subir.
 
 **A reserva mínima é binária de propósito.** Verde quando a reserva declarada
 cobre o mínimo exigido, vermelho quando não cobre — a pergunta é só "dá ou não
@@ -1085,6 +1094,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.22 — Setembro/2026:*
+- *O payback ganha cor: verde abaixo do M7, vermelho daí em diante — o que na prática só acontece no perfil 100% comercial*
+- *A quebra do card de horas sobe para `text-2xl` e some a linha "com freelancer": fica só "a terceirizar"*
 
 *SPEC v1.21 — Setembro/2026:*
 - *A grade de KPIs vira 2×2 mais o card de horas ocupando as duas linhas da terceira coluna — o único fora do tamanho padrão, com a base alinhada à segunda linha*

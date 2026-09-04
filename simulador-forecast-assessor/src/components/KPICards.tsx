@@ -85,22 +85,19 @@ function CardHoras({ kpis }: { kpis: KPIs }) {
 
       <div className="flex gap-8 mt-auto pt-3" style={{ borderTop: '1px solid #F2F2F2' }}>
         <div>
-          <p className="text-xl font-bold leading-tight" style={{ color: TINTA }}>
+          <p className="text-2xl font-bold leading-none" style={{ color: TINTA }}>
             {fmtInt(kpis.horas_pico_proprias)}h
           </p>
-          <p className="text-xs font-bold" style={{ color: CINZA }}>suas</p>
+          <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>suas</p>
           <p className="text-xs" style={{ color: CINZA }}>
             {fmtInt(kpis.horas_pico_proprias / 4.3)}h por semana
           </p>
         </div>
         <div>
-          <p className="text-xl font-bold leading-tight" style={{ color: terceiriza ? VERMELHO : CINZA }}>
+          <p className="text-2xl font-bold leading-none" style={{ color: terceiriza ? VERMELHO : CINZA }}>
             {fmtInt(kpis.horas_pico_terceirizadas)}h
           </p>
-          <p className="text-xs font-bold" style={{ color: CINZA }}>a terceirizar</p>
-          <p className="text-xs" style={{ color: CINZA }}>
-            {terceiriza ? 'com freelancer' : 'cabe na sua agenda'}
-          </p>
+          <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>a terceirizar</p>
         </div>
       </div>
     </Moldura>
@@ -119,6 +116,12 @@ export function KPICards({ kpis, input }: { kpis: KPIs; input: SimulacaoInput })
   // o que o eixo de reserva do termômetro marca em amarelo, com o quanto falta
   // ou sobra. Aqui a pergunta é só "dá ou não dá".
   const reservaCobre = kpis.deficit_retirada_total <= input.reserva_capital
+
+  // Na prática o card é monocromático: com a entrada baixa, todo o espaço de
+  // inputs paga entre o M4 e o M6. É verde por isso mesmo — o payback rápido é
+  // um traço do produto, e o card confirma em vez de deixar a leitura solta. O
+  // limite existe para o dia em que a entrada subir.
+  const paybackRapido = kpis.payback_mes !== null && kpis.payback_mes < 7
 
   // O card soma as duas fases da rampa: o que a operação consome antes de
   // bancar a retirada e o que gera depois. A legenda nomeia a virada, senão o
@@ -140,6 +143,7 @@ export function KPICards({ kpis, input }: { kpis: KPIs; input: SimulacaoInput })
       <Card label="Geração de caixa no período" value={fmt(kpis.geracao_caixa_periodo)}
             tom={kpis.geracao_caixa_periodo < 0 ? 'negativo' : 'positivo'} hint={caixaHint} />
       <Card label="Payback do investimento" value={kpis.payback_mes ? `Mês ${kpis.payback_mes}` : 'após o M12'}
+            tom={paybackRapido ? 'positivo' : 'negativo'}
             hint="quando o retorno cobre o que você investiu" />
       <Card label="Reserva mínima necessária" value={fmt(kpis.deficit_retirada_total)}
             tom={reservaCobre ? 'positivo' : 'negativo'} hint={reservaHint} />
