@@ -68,9 +68,10 @@ function Card({
  * Horas de entrega no mês de pico.
  *
  * O número grande é a carga do projeto naquele mês — o total que a operação
- * exige, não importa quem entrega. A quebra na base é o ponto do card: mostra,
- * em corpo maior que as legendas dos outros cards, quanto ele absorve e quanto
- * vai precisar terceirizar.
+ * exige, não importa quem entrega. A quebra na base é o ponto do card: no mesmo
+ * corpo do total, quanto ele absorve e quanto vai precisar terceirizar. Vem sob
+ * rótulo próprio porque é sugestão de distribuição, não um dado apurado: o
+ * modelo aloca tudo que cabe nas 190h dele e joga o resto para terceiros.
  */
 function CardHoras({ kpis }: { kpis: KPIs }) {
   const terceiriza = kpis.horas_pico_terceirizadas >= 0.5
@@ -83,21 +84,24 @@ function CardHoras({ kpis }: { kpis: KPIs }) {
         carga do projeto no M{kpis.mes_pico}, o mês mais cheio do ano
       </p>
 
-      <div className="flex gap-8 mt-auto pt-3" style={{ borderTop: '1px solid #F2F2F2' }}>
-        <div>
-          <p className="text-2xl font-bold leading-none" style={{ color: TINTA }}>
-            {fmtInt(kpis.horas_pico_proprias)}h
-          </p>
-          <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>suas</p>
-          <p className="text-xs" style={{ color: CINZA }}>
-            {fmtInt(kpis.horas_pico_proprias / 4.3)}h por semana
-          </p>
-        </div>
-        <div>
-          <p className="text-2xl font-bold leading-none" style={{ color: terceiriza ? VERMELHO : CINZA }}>
-            {fmtInt(kpis.horas_pico_terceirizadas)}h
-          </p>
-          <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>a terceirizar</p>
+      <div className="mt-auto pt-4" style={{ borderTop: '1px solid #F2F2F2' }}>
+        <Rotulo>Sugestão de distribuição</Rotulo>
+        <div className="grid grid-cols-2 gap-4 mt-2">
+          <div>
+            <p className="text-3xl font-bold leading-none" style={{ color: TINTA }}>
+              {fmtInt(kpis.horas_pico_proprias)}h
+            </p>
+            <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>suas</p>
+            <p className="text-xs" style={{ color: CINZA }}>
+              {fmtInt(kpis.horas_pico_proprias / 4.3)}h por semana
+            </p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold leading-none" style={{ color: terceiriza ? VERMELHO : CINZA }}>
+              {fmtInt(kpis.horas_pico_terceirizadas)}h
+            </p>
+            <p className="text-sm font-bold mt-1" style={{ color: CINZA }}>a terceirizar</p>
+          </div>
         </div>
       </div>
     </Moldura>
@@ -117,10 +121,11 @@ export function KPICards({ kpis, input }: { kpis: KPIs; input: SimulacaoInput })
   // ou sobra. Aqui a pergunta é só "dá ou não dá".
   const reservaCobre = kpis.deficit_retirada_total <= input.reserva_capital
 
-  // Na prática o card é monocromático: com a entrada baixa, todo o espaço de
-  // inputs paga entre o M4 e o M6. É verde por isso mesmo — o payback rápido é
-  // um traço do produto, e o card confirma em vez de deixar a leitura solta. O
-  // limite existe para o dia em que a entrada subir.
+  // Quase sempre verde: com a entrada de R$ 20.000, 95% do espaço de inputs
+  // paga em M5 ou M6, e o card confirma um traço do produto. O limite não é
+  // decorativo — o vermelho aparece no perfil 100% comercial, que não opera
+  // nada e vive do CAC da Fonte 3: M7 com rede alta, M8 com média, M11 com
+  // baixa. É também o limite que passa a valer sozinho se a entrada subir.
   const paybackRapido = kpis.payback_mes !== null && kpis.payback_mes < 7
 
   // O card soma as duas fases da rampa: o que a operação consome antes de

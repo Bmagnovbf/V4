@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.22 | Setembro/2026**
+**V4 Company | Versão 1.23 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -1095,9 +1095,12 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 
 ---
 
+*SPEC v1.23 — Setembro/2026:*
+- *A quebra do card de horas vai para o mesmo corpo do total (`text-3xl`) e ganha o rótulo "Sugestão de distribuição" — é uma proposta de alocação, não um dado apurado*
+
 *SPEC v1.22 — Setembro/2026:*
 - *O payback ganha cor: verde abaixo do M7, vermelho daí em diante — o que na prática só acontece no perfil 100% comercial*
-- *A quebra do card de horas sobe para `text-2xl` e some a linha "com freelancer": fica só "a terceirizar"*
+- *Some a linha "com freelancer" da quebra do card de horas: fica só "a terceirizar"*
 
 *SPEC v1.21 — Setembro/2026:*
 - *A grade de KPIs vira 2×2 mais o card de horas ocupando as duas linhas da terceira coluna — o único fora do tamanho padrão, com a base alinhada à segunda linha*
