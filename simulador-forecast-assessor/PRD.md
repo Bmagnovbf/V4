@@ -224,7 +224,10 @@ pergunta.
 - Colunas + linha: caixa acumulado (mesma conta do card de geração de caixa —
   desconta a retirada mínima, ignora a entrada; vermelho enquanto negativo) e a
   remuneração total do mês, com a retirada mínima marcada
-- Tabela do DRE completo, linha a linha, com coluna de ano
+- Tabela do DRE completo, com coluna de ano. A cascata fecha linha a linha:
+  receita − impostos − CSP Assessor − softwares/ferramentas/terceirizados =
+  resultado do negócio. Abaixo, remuneração total, as horas previstas (total,
+  dele e terceirizadas) e o caixa acumulado
 
 ---
 

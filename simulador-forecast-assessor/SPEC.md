@@ -1,5 +1,5 @@
 # SPEC.md — Simulador de Forecast para Assessor V4
-**V4 Company | Versão 1.27 | Setembro/2026**
+**V4 Company | Versão 1.28 | Setembro/2026**
 **Status: no ar em https://simulador-assessor.vercel.app — Base da planilha reproduzido em −0,1%**
 
 ---
@@ -870,7 +870,38 @@ colunas cheias, num cinza claro — sumia.
 Até set/2026 os papéis eram os inversos — barras de resultado e linha de caixa —,
 e o caixa desenhado era o do payback, que ignora a retirada. O gráfico e o card
 diziam coisas diferentes sobre a mesma palavra.
-7. **Tabela do DRE** — 12 linhas × 12 meses + coluna Ano, scroll horizontal
+7. **Tabela do DRE** — 11 linhas × 12 meses + coluna Ano, scroll horizontal
+
+A cascata **fecha linha a linha**:
+
+```
+(=) Receita recebida
+(−) Impostos
+(−) CSP Assessor                              ← csp_proprio, só o que fica com ele
+(−) Softwares, ferramentas e Terceirizados    ← overhead + csp_terceirizado
+(=) Resultado do negócio
+    Remuneração Total (CSP + resultado)
+    Horas Alocadas Previstas
+      Horas Previstas Assessor                ← teto de 190h
+      Horas Terceirizadas
+    Caixa acumulado
+```
+
+Até set/2026 o CSP vinha em três linhas — o próprio, mais *CSP · Saber* e
+*CSP · Executar* indentados — e as duas filhas somavam `csp_total`, não a mãe.
+No M8 do cenário de referência a mãe dizia 12.108 e as filhas somavam 13.000: a
+diferença era o CSP terceirizado, que aparecia mais abaixo, em *dos quais
+terceirizado*. Cada número estava certo, mas a coluna não fechava para quem
+somava com o dedo na tela. Uma linha só de CSP resolve, e o excedente das horas
+fica onde de fato é desembolso.
+
+*Receita recebida* e *Remuneração Total* sobem um passo de corpo (`text-sm`
+contra `text-xs` do resto): são as duas linhas que o closer aponta, e o olho
+precisa achá-las sem ler a tabela inteira.
+
+As horas passam a vir sempre nas três linhas, mesmo sem terceirização — antes a
+quebra só aparecia quando havia estouro, e a tabela mudava de forma entre um
+cenário e outro.
 
 A tabela do DRE é o que sustenta a conversa quando o candidato pergunta "de onde
 sai esse número". Ela repete exatamente as linhas de § 4.5.
@@ -1189,6 +1220,10 @@ Pergunta: o termômetro acusa vermelho onde deve, e nada quebra?
 3. O termômetro concorda com o seu julgamento?
 
 ---
+
+*SPEC v1.28 — Setembro/2026:*
+- *O DRE passa a fechar linha a linha: o CSP vira uma linha só ("CSP Assessor", o próprio), e o excedente das horas fica na linha de softwares, ferramentas e terceirizados, onde é desembolso de fato*
+- *Receita recebida e Remuneração Total sobem um passo de corpo; as horas ganham quebra fixa entre as dele e as terceirizadas*
 
 *SPEC v1.27 — Setembro/2026:*
 - *A linha de remuneração fica vermelha e grossa; o rótulo das linhas de referência vira componente compartilhado (`RotuloLinha`) e passa a exibir o valor, legível sobre qualquer série*
